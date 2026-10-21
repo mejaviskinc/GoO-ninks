@@ -11,28 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Check domain DNS and HTTPS
+      - name: Check production DNS, TLS, HTML, and static assets
         shell: bash
         run: |
-          set +e
-          echo "=== DNS A records (default resolver) ==="
-          dig +time=4 +tries=1 +short gooninks.co.id A
-          echo "=== DNS A records (Cloudflare resolver) ==="
-          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id A
-          echo "=== DNS www CNAME ==="
+          set -euo pipefail
+          echo "=== DNS A records ==="
+          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id A | sort | tee /tmp/addresses
+          for ip in 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153; do grep -Fxq "$ip" /tmp/addresses; done
+          echo "=== DNS www ==="
           dig @1.1.1.1 +time=4 +tries=1 +short www.gooninks.co.id CNAME
-          echo "=== DNS nameservers ==="
-          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id NS
-          echo "=== Website HTTPS check ==="
-          for url in "https://gooninks.co.id/" "https://www.gooninks.co.id/" "https://mejaviskinc.github.io/GoO-ninks/"; do
-            echo "--- $url"
-            curl --max-time 20 --connect-timeout 8 --location --silent --show-error \
-              --output /tmp/gooninks_response --write-out 'http_code=%{http_code}\nfinal_url=%{url_effective}\nssl_verify=%{ssl_verify_result}\n' "$url"
-            echo "curl_exit=$?"
-            if grep -qi 'GoO Ninks' /tmp/gooninks_response; then echo "GoO Ninks content found"; else echo "GoO Ninks content not found"; fi
-          done
-          echo "=== Verify expected website files ==="
+          echo "=== HTTPS production homepage ==="
+          curl --fail --show-error --silent --location --max-time 30 \
+            --output /tmp/home --write-out 'HTTP %{http_code} final=%{url_effective} TLS_verify=%{ssl_verify_result}\n' \
+            https://gooninks.co.id/
+          grep -qi "GoO Ninks" /tmp/home
+          echo "Homepage contains GoO Ninks"
+          echo "=== HTTPS static files ==="
           for path in styles.css app.js robots.txt sitemap.xml; do
-            echo "--- $path"
-            curl --max-time 15 --connect-timeout 8 --location --silent --show-error --output /dev/null --write-out "status=%{http_code}\n" "https://gooninks.co.id/$path"
+            echo "Checking $path"
+            curl --fail --show-error --silent --location --max-time 20 \
+              --output /dev/null --write-out 'HTTP %{http_code}\n' \
+              "https://gooninks.co.id/$path"
           done
+          echo "=== HTTPS www redirect ==="
+          curl --fail --show-error --silent --location --max-time 30 \
+            --output /dev/null --write-out 'HTTP %{http_code} final=%{url_effective}\n' \
+            https://www.gooninks.co.id/
+          echo "Production health checks PASSED."
