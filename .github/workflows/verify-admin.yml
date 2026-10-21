@@ -72,3 +72,24 @@ jobs:
           grep -q 'auth.signUp' /tmp/live-admin.js
           grep -q 'loadTeam' /tmp/live-admin.js
           echo "Production self-registration and account approval UI PASSED"
+
+      - name: Verify live logo and favicon deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          for asset in favicon.svg logo-gooninks.svg brand-loader.css brand-loader.js; do
+            curl --fail --silent --show-error --location --max-time 18 \
+              "https://gooninks.co.id/$asset" -o "/tmp/$(basename "$asset")"
+            test -s "/tmp/$(basename "$asset")"
+            echo "LIVE ASSET OK: $asset"
+          done
+          grep -q 'GoO Ninks GN favicon' /tmp/favicon.svg
+          grep -q 'GoO Ninks logo' /tmp/logo-gooninks.svg
+          grep -q 'gn-boot-hidden' /tmp/brand-loader.js
+          for page in '' admin.html article.html; do
+            curl --fail --silent --show-error --location --max-time 18 \
+              "https://gooninks.co.id/$page" -o /tmp/brand-page.html
+            grep -q 'id="gnBootLoader"' /tmp/brand-page.html
+            grep -q 'href="/favicon.svg?v=2"' /tmp/brand-page.html
+            echo "LIVE PAGE OK: /$page"
+          done
