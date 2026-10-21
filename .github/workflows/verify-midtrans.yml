@@ -1,0 +1,65 @@
+name: Verify GoO Ninks Midtrans Safety
+on:
+  push:
+    paths:
+      - .github/workflows/verify-midtrans.yml
+      - index.html
+      - styles.css
+      - app.js
+      - gn-midtrans.js
+      - gn-payment-status.js
+      - payment-status.html
+      - admin.html
+      - admin.js
+      - supabase/functions/gn-midtrans-checkout/index.ts
+      - supabase/functions/gn-midtrans-webhook/index.ts
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  midtrans:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source and frontend checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check gn-midtrans.js
+          node --check gn-payment-status.js
+          node --check admin.js
+          grep -q 'id="midtransForm"' index.html
+          grep -q 'id="midtransBtn"' index.html
+          grep -q 'gn-midtrans.js' index.html
+          grep -q 'data-view="orders"' admin.html
+          grep -q 'gn_orders' admin.js
+          grep -q 'MIDTRANS_SERVER_KEY' supabase/functions/gn-midtrans-checkout/index.ts
+          grep -q 'gn_payment_reserve_v1' supabase/functions/gn-midtrans-checkout/index.ts
+          grep -q 'gn_payment_update_v1' supabase/functions/gn-midtrans-webhook/index.ts
+          if grep -Eo 'SB-Mid-server-[A-Za-z0-9_-]+' gn-midtrans.js index.html; then echo 'MIDTRANS SERVER KEY LEAK!' >&2; exit 1; fi
+          echo 'Static Midtrans checks PASSED'
+      - name: Production endpoint safety smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint='https://etahuzvozoomklsqepyt.supabase.co/functions/v1/gn-midtrans-checkout'
+          curl --fail --silent --show-error --location --max-time 30 "$endpoint" -o /tmp/gn-midtrans-config.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/gn-midtrans-config.json'))
+          assert isinstance(d.get('enabled'),bool),d
+          assert d.get('mode') in ('sandbox','production'),d
+          print('Midtrans endpoint responds:', 'enabled' if d['enabled'] else 'disabled', 'mode:',d['mode'])
+          PY
+          curl --silent --show-error --max-time 30 --header 'Content-Type: application/json' \
+            --data '{"action":"checkout","items":[]}' \
+            --write-out '%{http_code}' \
+            --output /tmp/gn-midtrans-invalid.json "$endpoint" >/tmp/gn-http-code
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/gn-midtrans-invalid.json'))
+          assert d.get('error'), d
+          assert open('/tmp/gn-http-code').read().strip() in ('403','400','503'), d
+          print('Untrusted anonymous checkout blocked correctly')
+          PY

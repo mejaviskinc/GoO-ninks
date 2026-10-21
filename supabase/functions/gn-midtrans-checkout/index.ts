@@ -148,8 +148,14 @@ Deno.serve(async (req) => {
       mode: config.isProduction ? "production" : "sandbox" });
   } catch (e) {
     if (reserved) {
-      await client.rpc("gn_payment_update_v1", { p_order_id: orderId, p_status: "failed",
-        p_midtrans_status: "checkout_error" }).catch(() => {});
+      try {
+        const { error: releaseError } = await client.rpc("gn_payment_update_v1", {
+          p_order_id: orderId, p_status: "failed", p_midtrans_status: "checkout_error"
+        });
+        if (releaseError) console.error("Reservation release failed:", releaseError.message);
+      } catch (releaseFailure) {
+        console.error("Reservation release failed unexpectedly", releaseFailure instanceof Error ? releaseFailure.message : "Unknown");
+      }
     }
     console.error("Midtrans checkout:", e instanceof Error ? e.message : "Unknown");
     return respond(req, { error: "Gagal memulai pembayaran. Silakan coba kembali atau hubungi admin." }, 502);
