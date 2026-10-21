@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="gn-public.css">
   <script src="app.js" defer></script>
+  <script src="gn-midtrans.js" defer></script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3"><link rel="stylesheet" href="/brand-loader.css"><link rel="preload" href="/logo-gooninks.svg" as="image" type="image/svg+xml"><script src="/brand-loader.js" defer></script></head>
 <body>
 <div id="gnBootLoader" class="gn-boot-loader" role="status" aria-label="Memuat GoO Ninks"><div class="gn-boot-content"><img class="gn-boot-logo" src="/logo-gooninks.svg" width="330" height="214" alt="" decoding="async"><div class="gn-boot-caption">CRAFTED IN YOGYAKARTA</div><div class="gn-boot-progress" aria-hidden="true"><span></span></div></div></div>
@@ -74,7 +75,19 @@
   </main>
   <footer><div><div class="footer-brand gn-official-footer"><img src="/gooninks-horizontal-logo.svg?v=1" alt="GoO Ninks" width="236" height="38" loading="lazy" decoding="async"></div><p data-i18n="footerQuote">For every generation. For every story.</p></div><div class="footer-links"><a href="#collection" data-i18n="navCollection">Koleksi</a><a href="#story" data-i18n="navStory">Cerita Kami</a><a href="https://www.instagram.com/goo_ninks/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://wa.me/6285740393953" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a></div><small>© <span id="year">2026</span> GoO Ninks. Yogyakarta, Indonesia.</small></footer>
   <div class="overlay" id="overlay" hidden></div>
-  <aside class="cart-panel" id="cartPanel" aria-modal="true" role="dialog" aria-labelledby="cartTitle" aria-hidden="true" tabindex="-1"><div class="panel-head"><h2 id="cartTitle" data-i18n="bagTitle">Tas Belanja</h2><button type="button" id="closeCart" class="close-btn" aria-label="Tutup">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Harga final, ukuran, ongkos kirim, dan stok dikonfirmasi lewat WhatsApp.</p><button type="button" class="primary-btn checkout-btn" id="checkoutBtn" data-i18n="checkout">Lanjutkan ke WhatsApp ↗</button></div></aside>
+  <aside class="cart-panel" id="cartPanel" aria-modal="true" role="dialog" aria-labelledby="cartTitle" aria-hidden="true" tabindex="-1"><div class="panel-head"><h2 id="cartTitle" data-i18n="bagTitle">Tas Belanja</h2><button type="button" id="closeCart" class="close-btn" aria-label="Tutup">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Harga final, ukuran, ongkos kirim, dan stok dikonfirmasi lewat WhatsApp.</p><button type="button" class="primary-btn checkout-btn" id="checkoutBtn" data-i18n="checkout">Lanjutkan ke WhatsApp ↗</button><section id="midtransArea" class="gn-midtrans-section" aria-label="Pembayaran Midtrans">
+  <div class="gn-midtrans-head"><strong>Bayar online · Midtrans</strong><small id="midtransMode">Menunggu aktivasi</small></div>
+  <p class="gn-midtrans-explain">Harga produk dapat dibayar melalui Midtrans. <strong>Ongkos kirim belum termasuk</strong> dan akan dikonfirmasi terpisah oleh admin.</p>
+  <form id="midtransForm" hidden>
+    <label>Nama lengkap<input name="name" autocomplete="name" minlength="2" maxlength="100" required></label>
+    <label>Email<input type="email" name="email" autocomplete="email" maxlength="180" required></label>
+    <label>WhatsApp<input type="tel" name="phone" autocomplete="tel" minlength="9" maxlength="25" required></label>
+    <label>Alamat lengkap pengiriman<textarea name="address" autocomplete="street-address" minlength="10" maxlength="450" rows="3" required></textarea></label>
+    <label class="gn-payment-confirm"><input type="checkbox" name="shipping_ack" required>Saya paham ongkos kirim akan ditagihkan terpisah.</label>
+    <button type="submit" class="gn-midtrans-pay" id="midtransBtn" disabled>Bayar via Midtrans ↗</button>
+  </form>
+  <p id="midtransInfo" class="gn-midtrans-info" role="status">Midtrans belum diaktifkan. Gunakan WhatsApp untuk pemesanan.</p>
+</section></div></aside>
   <div class="detail-modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle" aria-hidden="true" tabindex="-1"><div class="detail-dialog"><button type="button" class="close-btn detail-close" id="detailClose" aria-label="Tutup">×</button><div id="detailImage" class="detail-image"></div><div class="detail-content"><p class="kicker">GOO NINKS · 2026</p><h2 id="detailTitle"></h2><p class="detail-price" id="detailPrice"></p><p data-i18n="detailDesc">Koleksi eksklusif yang terinspirasi wastra Nusantara. Foto asli, ukuran, stok, dan detail bahan dapat dikonfirmasi langsung melalui admin.</p><label for="sizeInput" data-i18n="sizeLabel">Ukuran / catatan (opsional)</label><input id="sizeInput" maxlength="120" placeholder="Contoh: M, L, custom" data-placeholder="sizePlaceholder"><button type="button" class="primary-btn" id="addToCartBtn" data-i18n="addBag">Tambah ke tas +</button><a href="https://www.canva.com/d/49tPKYXczCxY3Ui" target="_blank" rel="noopener noreferrer" class="detail-catalog-link" data-i18n="verifyCatalog">Lihat foto di katalog resmi ↗</a></div></div></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
