@@ -1,0 +1,50 @@
+name: Verify GoO Ninks Admin & CMS
+on:
+  push:
+    paths:
+      - .github/workflows/verify-admin.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate scripts and deployment package
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check admin.js
+          node --check gn-public.js
+          node --check gn-config.js
+          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html; do
+            test -s "$file"
+          done
+          echo "Static files and JavaScript syntax PASSED"
+      - name: Check pinned Supabase browser library
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 25 \
+            -o /tmp/supabase-lib.js \
+            https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js
+          test $(wc -c </tmp/supabase-lib.js) -gt 10000
+          echo "Supabase JS UMD dependency PASSED"
+      - name: Confirm live Admin & CMS files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 12); do
+            code=$(curl --silent --location --output /tmp/admin-check --write-out "%{http_code}" --max-time 12 https://gooninks.co.id/admin.html || true)
+            if [ "$code" = 200 ] && grep -q 'GoO Ninks Studio' /tmp/admin-check; then break; fi
+            sleep 8
+          done
+          test "$code" = 200
+          grep -q 'GoO Ninks Studio' /tmp/admin-check
+          for file in admin.css admin.js gn-public.js gn-public.css gn-config.js article.html; do
+            curl --fail --silent --show-error --location --max-time 15 \
+              -o /dev/null --write-out "$file HTTP %{http_code}\n" "https://gooninks.co.id/$file"
+          done
+          echo "Production admin and CMS files PASSED"
