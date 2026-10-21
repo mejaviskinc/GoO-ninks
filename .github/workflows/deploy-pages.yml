@@ -12,6 +12,7 @@ on:
       - brand-loader.css
       - brand-loader.js
       - logo-gooninks.svg
+      - gooninks-admin-logo.png
       - favicon.svg
       - gn-config.js
       - gn-public.js
@@ -43,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html styles.css app.js admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html styles.css app.js admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg favicon.svg gooninks-admin-logo.png CNAME robots.txt sitemap.xml _site/
           touch _site/.nojekyll
           test "$(cat _site/CNAME)" = "gooninks.co.id"
           test -s _site/index.html

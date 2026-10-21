@@ -12,6 +12,7 @@ on:
       - brand-loader.js
       - favicon.svg
       - logo-gooninks.svg
+      - gooninks-admin-logo.png
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,7 +30,7 @@ jobs:
           node --check brand-loader.js
           node --check gn-public.js
           node --check gn-config.js
-          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg favicon.svg brand-loader.css brand-loader.js; do
+          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg favicon.svg gooninks-admin-logo.png brand-loader.css brand-loader.js; do
             test -s "$file"
           done
           grep -q 'id="signupForm"' admin.html
@@ -46,9 +47,12 @@ jobs:
           grep -q 'TRANSPARENT_GOO_NINKS_BRANDING' admin.css
           ! grep -q 'background:#0b0b0b' admin.css
           ! grep -q 'background:#0c0c0c' admin.css
+          grep -q '/gooninks-admin-logo.png?v=20261021' admin.html
+          test "$(file -b --mime-type gooninks-admin-logo.png)" = image/png
+          echo "Owner's official transparent PNG logo installed"
           echo "Transparent admin logo containers and favicon PASS"
           grep -q 'class="brand gn-brand-auth"' admin.html
-          grep -q 'class="auth-mark gn-admin-monogram"' admin.html
+          grep -q 'class="auth-mark gn-admin-monogram gn-admin-form-logo"' admin.html
           grep -q 'class="sidebar-brand gn-sidebar-brand"' admin.html
           grep -q 'class="gn-topbar-logo"' admin.html
           grep -q 'gn-sidebar-brand' admin.css
@@ -124,6 +128,8 @@ jobs:
           ! grep -q '<rect' /tmp/favicon.svg
           curl --fail --silent --show-error --location --max-time 18 https://gooninks.co.id/admin.css -o /tmp/live-admin.css
           grep -q 'TRANSPARENT_GOO_NINKS_BRANDING' /tmp/live-admin.css
+          curl --fail --silent --show-error --location --max-time 20 "https://gooninks.co.id/gooninks-admin-logo.png?v=20261021" -o /tmp/gooninks-admin-logo.png
+          test "$(file -b --mime-type /tmp/gooninks-admin-logo.png)" = image/png
           grep -q 'GoO Ninks logo' /tmp/logo-gooninks.svg
           grep -q 'gn-boot-hidden' /tmp/brand-loader.js
           for page in '' admin.html article.html; do
@@ -133,7 +139,8 @@ jobs:
             if [ "$page" = "admin.html" ]; then
               grep -q 'class="sidebar-brand gn-sidebar-brand"' /tmp/brand-page.html
               grep -q 'class="brand gn-brand-auth"' /tmp/brand-page.html
-              grep -q 'class="auth-mark gn-admin-monogram"' /tmp/brand-page.html
+              grep -q 'class="auth-mark gn-admin-monogram gn-admin-form-logo"' /tmp/brand-page.html
+              grep -q '/gooninks-admin-logo.png?v=20261021' /tmp/brand-page.html
             fi
             grep -q 'href="/favicon.svg?v=3"' /tmp/brand-page.html
             grep -q 'Keep GoO Ninks URLs clean' /tmp/brand-page.html
