@@ -1,0 +1,11 @@
+/* GoO Ninks brand loader - same golden GN logo as favicon */
+.gn-boot-loader{position:fixed;inset:0;z-index:2147483000;background:#080808;color:#fbc62e;display:grid;place-items:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;pointer-events:auto}
+.gn-boot-loader.gn-boot-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.gn-boot-content{width:min(82vw,400px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px}
+.gn-boot-logo{display:block;width:min(82vw,360px);max-width:100%;height:auto;object-fit:contain;animation:gn-logo-glow 1.7s ease-in-out infinite}
+.gn-boot-caption{font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:.27em;font-weight:600;color:#d6b76b;opacity:.87}
+.gn-boot-progress{width:90px;height:1px;background:#5a4a22;overflow:hidden;margin-top:10px}
+.gn-boot-progress span{display:block;width:42%;height:100%;background:#fbc62e;animation:gn-loading-line 1.55s ease-in-out infinite}
+@keyframes gn-logo-glow{0%,100%{opacity:.72;transform:scale(.97)}50%{opacity:1;transform:scale(1)}}
+@keyframes gn-loading-line{0%{transform:translateX(-115%)}100%{transform:translateX(345%)}}
+@media(prefers-reduced-motion:reduce){.gn-boot-logo,.gn-boot-progress span{animation:none!important}.gn-boot-loader{transition:none!important}}

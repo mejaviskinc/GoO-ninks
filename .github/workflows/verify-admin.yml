@@ -6,6 +6,12 @@ on:
       - admin.html
       - admin.js
       - admin.css
+      - index.html
+      - article.html
+      - brand-loader.css
+      - brand-loader.js
+      - favicon.svg
+      - logo-gooninks.svg
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,16 +26,23 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check admin.js
+          node --check brand-loader.js
           node --check gn-public.js
           node --check gn-config.js
-          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html; do
+          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg favicon.svg brand-loader.css brand-loader.js; do
             test -s "$file"
           done
           grep -q 'id="signupForm"' admin.html
           grep -q 'id="teamNav"' admin.html
           grep -q 'auth.signUp' admin.js
           grep -q 'changeTeam' admin.js
-          echo "Static files, registration controls and JavaScript syntax PASSED"
+          for page in index.html admin.html article.html; do
+            grep -q 'href="/favicon.svg?v=2"' "$page"
+            grep -q 'id="gnBootLoader"' "$page"
+          done
+          grep -q 'GoO Ninks logo' logo-gooninks.svg
+          grep -q 'GoO Ninks GN favicon' favicon.svg
+          echo "Logo loader, favicon, registration controls and JS syntax PASSED"
       - name: Check pinned Supabase browser library
         shell: bash
         run: |
