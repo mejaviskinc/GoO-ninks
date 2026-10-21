@@ -6,3 +6,7 @@
 .gn-official-footer img{display:block;width:min(236px,100%);height:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 @media(max-width:800px){.wordmark.gn-official-wordmark{width:clamp(144px,30vw,181px)}.wordmark.gn-official-wordmark img{max-height:45px}}
 @media(max-width:380px){.wordmark.gn-official-wordmark{width:136px}}
+
+/* Second supplied editorial photo: hero crop keeps face and garment visible. */
+.hero-visual>img[src*="gooninks-photo2.webp"]{object-position:center 27%;filter:none}
+@media(max-width:600px){.hero-visual>img[src*="gooninks-photo2.webp"]{object-position:center 20%}}

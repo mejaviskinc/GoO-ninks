@@ -7,6 +7,8 @@ on:
       - admin.js
       - admin.css
       - index.html
+      - styles.css
+      - 'assets/gooninks-photo2-part-*.b64'
       - article.html
       - brand-loader.css
       - brand-loader.js
@@ -31,6 +33,13 @@ jobs:
           node --check brand-loader.js
           node --check gn-public.js
           node --check gn-config.js
+          cat assets/gooninks-photo2-part-*.b64 | base64 --decode > /tmp/gooninks-photo2.webp
+          test "$(file -b --mime-type /tmp/gooninks-photo2.webp)" = image/webp
+          echo '4bba6073501c50621cca493f98a2993acb43150fe22302cffef7f98e293cdde0  /tmp/gooninks-photo2.webp' | sha256sum --check
+          grep -q '/assets/gooninks-photo2.webp?v=20261021' index.html
+          ! grep -q 'assets/images/product-8.webp' index.html
+          grep -q 'gooninks-photo2.webp' styles.css
+          echo 'Only supplied photo number two configured as new hero'
           for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png brand-loader.css brand-loader.js; do
             test -s "$file"
           done
@@ -167,3 +176,19 @@ jobs:
           grep -q 'GoO Ninks — logo emas resmi' /tmp/header-logo.svg
           test "$(wc -c </tmp/header-logo.svg)" -gt 2500
           echo "GoO Ninks gold header logo reachable and valid"
+
+      - name: Verify second user photo on live hero
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 18); do
+            curl --silent --show-error --location --max-time 20 https://gooninks.co.id/assets/gooninks-photo2.webp -o /tmp/live-photo2.webp || true
+            if echo '4bba6073501c50621cca493f98a2993acb43150fe22302cffef7f98e293cdde0  /tmp/live-photo2.webp' | sha256sum --check --status 2>/dev/null; then
+              break
+            fi
+            sleep 8
+          done
+          echo '4bba6073501c50621cca493f98a2993acb43150fe22302cffef7f98e293cdde0  /tmp/live-photo2.webp' | sha256sum --check
+          curl --fail --silent --show-error --location --max-time 20 https://gooninks.co.id/ -o /tmp/gooninks-live-home.html
+          grep -q '/assets/gooninks-photo2.webp?v=20261021' /tmp/gooninks-live-home.html
+          echo 'Live GoO Ninks hero displays photo two only'
