@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="gn-public.css">
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -74,5 +75,8 @@
   <aside class="cart-panel" id="cartPanel" aria-modal="true" role="dialog" aria-labelledby="cartTitle" aria-hidden="true" tabindex="-1"><div class="panel-head"><h2 id="cartTitle" data-i18n="bagTitle">Tas Belanja</h2><button type="button" id="closeCart" class="close-btn" aria-label="Tutup">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Harga final, ukuran, ongkos kirim, dan stok dikonfirmasi lewat WhatsApp.</p><button type="button" class="primary-btn checkout-btn" id="checkoutBtn" data-i18n="checkout">Lanjutkan ke WhatsApp ↗</button></div></aside>
   <div class="detail-modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle" aria-hidden="true" tabindex="-1"><div class="detail-dialog"><button type="button" class="close-btn detail-close" id="detailClose" aria-label="Tutup">×</button><div id="detailImage" class="detail-image"></div><div class="detail-content"><p class="kicker">GOO NINKS · 2026</p><h2 id="detailTitle"></h2><p class="detail-price" id="detailPrice"></p><p data-i18n="detailDesc">Koleksi eksklusif yang terinspirasi wastra Nusantara. Foto asli, ukuran, stok, dan detail bahan dapat dikonfirmasi langsung melalui admin.</p><label for="sizeInput" data-i18n="sizeLabel">Ukuran / catatan (opsional)</label><input id="sizeInput" maxlength="120" placeholder="Contoh: M, L, custom" data-placeholder="sizePlaceholder"><button type="button" class="primary-btn" id="addToCartBtn" data-i18n="addBag">Tambah ke tas +</button><a href="https://www.canva.com/d/49tPKYXczCxY3Ui" target="_blank" rel="noopener noreferrer" class="detail-catalog-link" data-i18n="verifyCatalog">Lihat foto di katalog resmi ↗</a></div></div></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+  <script defer src="gn-config.js"></script>
+  <script defer src="gn-public.js"></script>
 </body>
 </html>

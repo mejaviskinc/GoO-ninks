@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f5f3ef"><title>GoO Ninks Studio — Dashboard Admin</title><link rel="stylesheet" href="admin.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script><script src="gn-config.js" defer></script><script src="admin.js" defer></script></head>
+<body>
+<section id="authScreen" class="auth-layout">
+ <div class="auth-art"><div class="brand">GoO <i>Ninks</i><small>STUDIO / 2026</small></div><div class="auth-message"><span class="eyebrow">CRAFTED IN YOGYAKARTA</span><h1>Where culture<br>meets <em>control.</em></h1><p>Kelola koleksi, cerita, dan hubungan pelanggan dari satu ruang kerja.</p></div><div class="vertical-note">GOO NINKS — ADMIN PORTAL</div></div>
+ <div class="auth-content"><div class="auth-card"><div class="auth-mark">G<span>○</span>N</div><span class="eyebrow">PRIVATE WORKSPACE</span><h2>Selamat datang.</h2><p>Masuk menggunakan akun admin GoO Ninks yang telah diotorisasi.</p><form id="loginForm"><label>Email admin<input name="email" type="email" placeholder="admin@gooninks.co.id" required autocomplete="username"></label><label>Kata sandi<input name="password" type="password" placeholder="••••••••" required minlength="6" autocomplete="current-password"></label><button class="primary" type="submit" id="loginButton">Masuk ke dashboard <span>↗</span></button></form><p id="loginError" class="alert" role="alert" hidden></p><p class="auth-foot">Dashboard khusus pengelola. <a href="/">Kembali ke website ↗</a></p></div></div>
+</section>
+<section id="appShell" class="shell" hidden>
+ <aside class="sidebar" id="sidebar"><a href="/" class="sidebar-brand">GoO <i>Ninks</i><small>ADMIN STUDIO</small></a><div class="sidebar-label">WORKSPACE</div><nav id="sidebarNav" aria-label="Menu admin">
+ <button data-view="overview" class="nav-link selected"><span>◫</span> Overview</button>
+ <button data-view="articles" class="nav-link"><span>▤</span> Artikel</button>
+ <button data-view="ads" class="nav-link"><span>▧</span> Iklan</button>
+ <button data-view="promotions" class="nav-link"><span>✳</span> Promosi</button>
+ <button data-view="leads" class="nav-link"><span>♙</span> Leads</button>
+ <button data-view="inventory" class="nav-link"><span>▦</span> Inventori</button></nav>
+ <div class="sidebar-bottom"><a href="/" target="_blank" rel="noopener">↗ Lihat website</a><button type="button" id="logoutButton">⇥ Keluar akun</button><small id="accountEmail"></small></div></aside>
+ <div class="workspace"><header class="topbar"><button type="button" id="mobileNav" class="mobile-nav" aria-label="Buka menu">☰</button><div class="breadcrumbs">GoO Ninks Studio <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="live-pill"><b></b> Website terhubung</span><a href="/" target="_blank" rel="noopener" class="icon-link" aria-label="Lihat website">↗</a></div></header>
+ <main class="content"><div class="page-head"><div><p class="eyebrow">MANAGEMENT DASHBOARD</p><h1 id="pageTitle">Overview</h1><p id="pageDesc">Ringkasan operasional dan konten website GoO Ninks.</p></div><button id="newButton" class="primary small" type="button" hidden>+ Tambah baru</button></div>
+ <div id="systemNotice" class="notice" hidden></div>
+ <section id="overviewScreen"><div id="metrics" class="metrics"></div><div class="panel-grid"><section class="panel"><div class="panel-heading"><h2>Aktivitas & status</h2><span>Overview</span></div><div id="activity" class="activity-list"></div></section><section class="panel"><div class="panel-heading"><h2>Stok & koleksi</h2><span>Perhatian</span></div><div id="stockAlert"></div></section></div></section>
+ <section id="moduleScreen" hidden><div class="panel"><div class="toolbar"><label class="search-control"><span>⌕</span><input id="searchBox" placeholder="Cari data..." aria-label="Cari data"></label><span id="rowCounter" class="counter"></span></div><div id="records" class="records"></div></div></section>
+ </main></div>
+</section>
+<dialog id="editorDialog" class="editor"><div class="editor-head"><div><span class="eyebrow">GOO NINKS / CONTENT STUDIO</span><h2 id="editorTitle">Tambah data</h2></div><button id="closeEditor" type="button" class="close" aria-label="Tutup">×</button></div><form id="editorForm"><div class="editor-body" id="formFields"></div><div class="editor-footer"><button type="button" class="ghost" id="cancelEditor">Batal</button><button type="submit" class="primary small" id="saveButton">Simpan perubahan</button></div></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body></html>

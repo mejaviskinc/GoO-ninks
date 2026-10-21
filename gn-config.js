@@ -1,0 +1,1 @@
+/* Public publishable key only. Supabase RLS protects private data and admin operations. */window.GN_CONFIG=Object.freeze({url:'https://kdlrobdzlxpjlkxbvzsd.supabase.co',publishableKey:'sb_publishable_Xy3TI3nbOGglkk5xy6uAsA_ytlPYhv-'});
