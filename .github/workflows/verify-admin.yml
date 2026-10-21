@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - .github/workflows/verify-admin.yml
+      - admin.html
+      - admin.js
+      - admin.css
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,7 +25,11 @@ jobs:
           for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html; do
             test -s "$file"
           done
-          echo "Static files and JavaScript syntax PASSED"
+          grep -q 'id="signupForm"' admin.html
+          grep -q 'id="teamNav"' admin.html
+          grep -q 'auth.signUp' admin.js
+          grep -q 'changeTeam' admin.js
+          echo "Static files, registration controls and JavaScript syntax PASSED"
       - name: Check pinned Supabase browser library
         shell: bash
         run: |
@@ -38,13 +45,17 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 12); do
             code=$(curl --silent --location --output /tmp/admin-check --write-out "%{http_code}" --max-time 12 https://gooninks.co.id/admin.html || true)
-            if [ "$code" = 200 ] && grep -q 'GoO Ninks Studio' /tmp/admin-check; then break; fi
+            if [ "$code" = 200 ] && grep -q 'id="signupForm"' /tmp/admin-check; then break; fi
             sleep 8
           done
           test "$code" = 200
-          grep -q 'GoO Ninks Studio' /tmp/admin-check
+          grep -q 'id="signupForm"' /tmp/admin-check
+          grep -q 'id="teamNav"' /tmp/admin-check
           for file in admin.css admin.js gn-public.js gn-public.css gn-config.js article.html; do
             curl --fail --silent --show-error --location --max-time 15 \
               -o /dev/null --write-out "$file HTTP %{http_code}\n" "https://gooninks.co.id/$file"
           done
-          echo "Production admin and CMS files PASSED"
+          curl --fail --silent --show-error --location --max-time 15 https://gooninks.co.id/admin.js -o /tmp/live-admin.js
+          grep -q 'auth.signUp' /tmp/live-admin.js
+          grep -q 'loadTeam' /tmp/live-admin.js
+          echo "Production self-registration and account approval UI PASSED"

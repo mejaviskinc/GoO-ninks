@@ -6,6 +6,13 @@ on:
       - index.html
       - styles.css
       - app.js
+      - admin.html
+      - admin.css
+      - admin.js
+      - gn-config.js
+      - gn-public.js
+      - gn-public.css
+      - article.html
       - CNAME
       - robots.txt
       - sitemap.xml
