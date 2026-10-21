@@ -1,0 +1,5 @@
+[functions.gn-midtrans-checkout]
+verify_jwt = false
+
+[functions.gn-midtrans-webhook]
+verify_jwt = false
