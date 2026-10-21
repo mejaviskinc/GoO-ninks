@@ -47,6 +47,32 @@ jobs:
           grep -q 'class="sidebar-brand gn-sidebar-brand"' admin.html
           grep -q 'class="gn-topbar-logo"' admin.html
           grep -q 'gn-sidebar-brand' admin.css
+          for page in index.html admin.html article.html; do
+            grep -q "Keep GoO Ninks URLs clean" "$page"
+            grep -q "history.replaceState" "$page"
+          done
+          node <<'NODE'
+          const clean = (href) => {
+            const u = new URL(href);
+            if (u.searchParams.get('utm_source') === 'chatgpt.com') {
+              u.searchParams.delete('utm_source');
+              const q = u.searchParams.toString();
+              return u.pathname + (q ? '?' + q : '') + u.hash;
+            }
+            return u.pathname + u.search + u.hash;
+          };
+          const tests = [
+            ['https://gooninks.co.id/?utm_source=chatgpt.com','/'],
+            ['https://gooninks.co.id/admin.html?utm_source=chatgpt.com','/admin.html'],
+            ['https://gooninks.co.id/article.html?slug=contoh&utm_source=chatgpt.com#bagian','/article.html?slug=contoh#bagian'],
+            ['https://gooninks.co.id/?utm_source=newsletter','/?utm_source=newsletter'],
+            ['https://gooninks.co.id/admin.html?token=abc&utm_source=chatgpt.com','/admin.html?token=abc']
+          ];
+          for(const [url,expected] of tests) {
+            if(clean(url)!==expected) throw new Error('URL cleanup failed for '+url);
+          }
+          console.log('Referral cleanup and preservation tests passed');
+          NODE
           echo "Admin uses official GN logo in login, sidebar, and topbar"
           echo "Logo loader, favicon, registration controls and JS syntax PASSED"
       - name: Check pinned Supabase browser library
@@ -102,5 +128,6 @@ jobs:
               grep -q 'class="auth-mark gn-admin-monogram"' /tmp/brand-page.html
             fi
             grep -q 'href="/favicon.svg?v=2"' /tmp/brand-page.html
+            grep -q 'Keep GoO Ninks URLs clean' /tmp/brand-page.html
             echo "LIVE PAGE OK: /$page"
           done
