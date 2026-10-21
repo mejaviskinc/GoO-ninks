@@ -1,0 +1,57 @@
+name: Install GoO Ninks 2026 source
+on:
+  push:
+    branches: [main]
+    paths:
+      - site-source.b64
+      - .github/workflows/unpack.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Verify and extract site files
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "54d562c1f9a05451eb19bc10f75aae3dfca382474baa0fc751fc65339107dc85  site-source.b64" | sha256sum --check -
+          python -m pip install --quiet --disable-pip-version-check brotli
+          python - <<'PY'
+          import base64
+          import brotli
+          import io
+          from pathlib import Path
+          import tarfile
+          archive = brotli.decompress(base64.b64decode(Path("site-source.b64").read_text()))
+          expected = {".nojekyll", "CNAME", "README.md", "index.html", "styles.css", "app.js", "robots.txt", "sitemap.xml"}
+          with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as tf:
+              found = {m.name for m in tf.getmembers()}
+              if found != expected or any(not m.isfile() for m in tf.getmembers()):
+                  raise RuntimeError("Unexpected website archive contents")
+              for m in tf.getmembers():
+                  Path(m.name).write_bytes(tf.extractfile(m).read())
+          PY
+          rm -rf site-source.b64 transfer
+          test -s index.html
+          test -s app.js
+          test -s styles.css
+          grep -Fx 'gooninks.co.id' CNAME
+      - name: Commit website source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Publish GoO Ninks Collection 2026 website for gooninks.co.id"
+            git push origin HEAD:main
+          fi
