@@ -10,6 +10,19 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
+      - name: Diagnose Supabase project DNS
+        shell: bash
+        run: |
+          echo "Legacy Supabase project DNS:"
+          (getent ahostsv4 kdlrobdzlxpjlkxbvzsd.supabase.co || true)
+          echo "New Supabase project DNS:"
+          (getent ahostsv4 zmivxyipghujezpxjzny.supabase.co || true)
+          echo "Google DNS-over-HTTPS responses for new project:"
+          (curl --silent --show-error --max-time 15 "https://dns.google/resolve?name=zmivxyipghujezpxjzny.supabase.co&type=A" || true)
+          echo
+          echo "Cloudflare DNS-over-HTTPS responses for new project:"
+          (curl --silent --show-error --max-time 15 -H 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=zmivxyipghujezpxjzny.supabase.co&type=A" || true)
+          echo
       - name: Check public inventory and Supabase key
         shell: bash
         env:
