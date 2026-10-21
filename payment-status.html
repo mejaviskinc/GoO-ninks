@@ -1,0 +1,25 @@
+<!doctype html><html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f6f4ee">
+<title>Status pembayaran | GoO Ninks</title>
+<link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css"><script src="/gn-config.js" defer></script>
+<script src="/gn-payment-status.js" defer></script></head><body>
+<main class="gn-status-page"><section class="gn-status-card">
+<img src="/logo-gooninks.svg" alt="GoO Ninks" width="230" height="150">
+<p class="gn-status-kicker">MIDTRANS · STATUS PESANAN</p><h1>Status pembayaran</h1>
+<p id="paymentStatusText" role="status">Memeriksa pembayaran...</p>
+<p id="paymentOrderId" class="gn-status-order"></p><p id="paymentAmount" class="gn-status-amount"></p>
+<p>Status pembayaran hanya dapat dikonfirmasi oleh server melalui Midtrans.</p>
+<button id="checkPaymentAgain" type="button" class="outline-btn">Periksa kembali</button>
+<a class="primary-btn" href="https://wa.me/6285740393953" target="_blank" rel="noopener noreferrer">Bantuan WhatsApp ↗</a>
+<a href="/" class="gn-status-home">← Kembali ke GoO Ninks</a></section></main>
+<style>
+.gn-status-page{min-height:100vh;display:grid;place-items:center;padding:30px 16px;background:#f7f6f2}
+.gn-status-card{max-width:560px;width:100%;border:1px solid #e3decd;background:white;border-radius:16px;padding:35px;text-align:center;display:grid;justify-items:center;gap:15px;box-shadow:0 20px 60px #151d1210}
+.gn-status-card>img{max-width:72%;height:auto;max-height:150px}.gn-status-card h1{font:500 clamp(25px,5vw,42px) Georgia,serif;margin:0}
+.gn-status-card p{line-height:1.55;margin:0;color:#686a62}.gn-status-kicker{font-size:10px;letter-spacing:.24em;font-weight:700;color:#b18d37!important}
+.gn-status-order{font-weight:700;overflow-wrap:anywhere;color:#323c34!important}.gn-status-amount{font-size:20px;color:#242b21!important}
+.gn-status-card .outline-btn,.gn-status-card .primary-btn{display:inline-flex;justify-content:center;width:min(280px,100%);border:1px solid #d1c6a4;border-radius:7px;cursor:pointer;padding:12px 18px;font-size:13px;text-decoration:none}
+.gn-status-card .primary-btn{background:#3d4c3b;color:white}.gn-status-home{font-size:12px}
+</style></body></html>

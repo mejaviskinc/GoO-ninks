@@ -7,6 +7,9 @@ on:
       - 'assets/gooninks-photo2-part-*.b64'
       - styles.css
       - app.js
+      - gn-midtrans.js
+      - gn-payment-status.js
+      - payment-status.html
       - admin.html
       - admin.css
       - admin.js
@@ -46,7 +49,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html styles.css app.js admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png CNAME robots.txt sitemap.xml _site/
+          cp index.html styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cat assets/gooninks-photo2-part-*.b64 | base64 --decode > _site/assets/gooninks-photo2.webp
           test "$(file -b --mime-type _site/assets/gooninks-photo2.webp)" = 'image/webp'

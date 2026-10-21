@@ -5,6 +5,9 @@ on:
       - .github/workflows/verify-admin.yml
       - admin.html
       - admin.js
+      - gn-midtrans.js
+      - gn-payment-status.js
+      - payment-status.html
       - admin.css
       - index.html
       - styles.css
@@ -30,6 +33,8 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check admin.js
+          node --check gn-midtrans.js
+          node --check gn-payment-status.js
           node --check brand-loader.js
           node --check gn-public.js
           node --check gn-config.js
@@ -40,11 +45,17 @@ jobs:
           ! grep -q 'assets/images/product-8.webp' index.html
           grep -q 'gooninks-photo2.webp' styles.css
           echo 'Only supplied photo number two configured as new hero'
-          for file in index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png brand-loader.css brand-loader.js; do
+          for file in gn-midtrans.js gn-payment-status.js payment-status.html index.html admin.html admin.css admin.js gn-public.js gn-public.css gn-config.js article.html logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png brand-loader.css brand-loader.js; do
             test -s "$file"
           done
           grep -q 'id="signupForm"' admin.html
           grep -q 'id="teamNav"' admin.html
+          grep -q 'id="midtransForm"' index.html
+          grep -q 'src="gn-midtrans.js"' index.html
+          grep -q 'data-view="orders"' admin.html
+          grep -q 'gn_payment_reserve_v1' supabase/functions/gn-midtrans-checkout/index.ts
+          grep -q 'SHA-512' supabase/functions/gn-midtrans-webhook/index.ts
+          echo "Midtrans frontend and private orders UI ready"
           grep -q 'auth.signUp' admin.js
           grep -q 'changeTeam' admin.js
           for page in index.html admin.html article.html; do
