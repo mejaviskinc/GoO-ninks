@@ -1,0 +1,57 @@
+name: Verify New GoO Ninks Supabase Database
+on:
+  push:
+    paths:
+      - .github/workflows/verify-supabase-target.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check public inventory and Supabase key
+        shell: bash
+        env:
+          SUPABASE_URL: https://zmivxyipghujezpxjzny.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_wl_vmdXOUh7crs07JDBVOg_OR1grC7u
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --retry 3 --retry-delay 2 --silent --show-error --location --max-time 30 \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Prefer: count=exact" \
+            "${SUPABASE_URL}/rest/v1/gn_inventory?select=sku,product_name,price,visible&limit=100" -o /tmp/gn-inventory.json
+          python3 - <<'PY'
+          import json
+          items=json.load(open('/tmp/gn-inventory.json'))
+          assert isinstance(items,list), 'Inventory was not a list'
+          assert len(items)==20,f'Expected 20 inventory items, got {len(items)}'
+          assert all(x.get('sku') and x.get('product_name') for x in items)
+          print('PASS: exactly 20 products visible from new GoO Ninks database.')
+          PY
+      - name: Check published content API
+        shell: bash
+        env:
+          SUPABASE_URL: https://zmivxyipghujezpxjzny.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_wl_vmdXOUh7crs07JDBVOg_OR1grC7u
+        run: |
+          set -euo pipefail
+          for resource in gn_articles gn_ads gn_promotions; do
+            curl --fail-with-body --silent --show-error --max-time 25 \
+              -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+              "${SUPABASE_URL}/rest/v1/${resource}?select=id&limit=1" -o "/tmp/${resource}.json"
+            python3 -c 'import json,sys;assert isinstance(json.load(open(sys.argv[1])),list)' "/tmp/${resource}.json"
+            echo "PASS: public ${resource} API reachable"
+          done
+      - name: Check authentication endpoint
+        shell: bash
+        env:
+          SUPABASE_URL: https://zmivxyipghujezpxjzny.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_wl_vmdXOUh7crs07JDBVOg_OR1grC7u
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --max-time 25 \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            "${SUPABASE_URL}/auth/v1/settings" -o /tmp/gn-auth.json
+          python3 -c "import json;obj=json.load(open('/tmp/gn-auth.json'));assert isinstance(obj,dict)"
+          echo 'PASS: Supabase Auth API reachable'
