@@ -66,6 +66,9 @@ jobs:
           grep -q 'GoO Ninks GN favicon' favicon.svg
           ! grep -q '<rect' favicon.svg
           grep -q 'TRANSPARENT_GOO_NINKS_BRANDING' admin.css
+          grep -q 'GOONINKS_ADMIN_LOGO_COMPACT_V2' admin.css
+          grep -q 'gn-sidebar-brand img{width:120px' admin.css
+          grep -q 'gn-admin-form-logo{width:148px' admin.css
           ! grep -q 'background:#0b0b0b' admin.css
           ! grep -q 'background:#0c0c0c' admin.css
           grep -q '/gooninks-admin-logo.png?v=20261021' admin.html
@@ -156,6 +159,7 @@ jobs:
           ! grep -q '<rect' /tmp/favicon.svg
           curl --fail --silent --show-error --location --max-time 18 https://gooninks.co.id/admin.css -o /tmp/live-admin.css
           grep -q 'TRANSPARENT_GOO_NINKS_BRANDING' /tmp/live-admin.css
+          grep -q 'GOONINKS_ADMIN_LOGO_COMPACT_V2' /tmp/live-admin.css
           curl --fail --silent --show-error --location --max-time 20 "https://gooninks.co.id/gooninks-admin-logo.png?v=20261021" -o /tmp/gooninks-admin-logo.png
           test "$(file -b --mime-type /tmp/gooninks-admin-logo.png)" = image/png
           grep -q 'GoO Ninks logo' /tmp/logo-gooninks.svg

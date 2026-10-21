@@ -31,3 +31,22 @@
 .gn-topbar-full-logo{display:block;width:86px;height:54px;flex:0 0 86px;border:0;margin-right:2px;filter:none}
 .gn-sidebar-brand img{width:184px;max-width:100%;height:auto}
 @media(max-width:800px){.gn-topbar-full-logo{width:62px;height:40px;flex-basis:62px}.gn-admin-form-logo{width:155px;min-height:97px}}
+
+/* GOONINKS_ADMIN_LOGO_COMPACT_V2 — keep the owner's transparent gold artwork, reduce footprint. */
+.gn-brand-auth{width:min(190px,100%);padding:4px 0;gap:1px}
+.gn-brand-auth img{width:158px;max-width:100%;height:auto}
+.gn-brand-auth small{font-size:8px;letter-spacing:.16em;margin-top:1px}
+.gn-admin-form-logo{width:148px;min-height:0;margin-bottom:14px}
+.gn-admin-form-logo img{width:100%;height:auto}
+.gn-sidebar-brand{min-height:0;padding:8px 10px 12px;margin:0 0 16px;gap:0}
+.gn-sidebar-brand img{width:120px;max-width:100%;height:auto}
+.gn-sidebar-brand small{font-size:8px;letter-spacing:.16em;margin-top:1px}
+.gn-topbar-full-logo{width:60px;height:38px;flex:0 0 60px;margin-right:2px}
+@media(max-width:800px){
+ .gn-brand-auth{width:165px;padding:4px 0}
+ .gn-brand-auth img{width:140px}
+ .gn-admin-form-logo{width:128px;min-height:0}
+ .gn-sidebar-brand{min-height:0;padding:7px 8px 11px}
+ .gn-sidebar-brand img{width:108px}
+ .gn-topbar-full-logo{width:50px;height:32px;flex-basis:50px}
+}
