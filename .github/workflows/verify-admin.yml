@@ -54,7 +54,7 @@ jobs:
           grep -q 'class="brand gn-brand-auth"' admin.html
           grep -q 'class="auth-mark gn-admin-monogram gn-admin-form-logo"' admin.html
           grep -q 'class="sidebar-brand gn-sidebar-brand"' admin.html
-          grep -q 'class="gn-topbar-logo"' admin.html
+          grep -q 'class="gn-topbar-logo gn-topbar-full-logo"' admin.html
           grep -q 'gn-sidebar-brand' admin.css
           for page in index.html admin.html article.html; do
             grep -q "Keep GoO Ninks URLs clean" "$page"
