@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261022-midtrans-primary1">
+  <link rel="stylesheet" href="styles.css?v=20261022-shipping-checkout1">
   <link rel="stylesheet" href="gn-public.css?v=20261022-special-price1">
   <script defer src="gn-config.js"></script>
-  <script src="app.js?v=20261022-midtrans-primary1" defer></script>
-  <script src="gn-midtrans.js?v=20261022-midtrans-primary1" defer></script>
+  <script src="app.js?v=20261022-shipping-checkout1" defer></script>
+  <script src="gn-midtrans.js?v=20261022-shipping-checkout1" defer></script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3"><link rel="stylesheet" href="/brand-loader.css"><link rel="preload" href="/logo-gooninks.svg" as="image" type="image/svg+xml"><script src="/brand-loader.js" defer></script></head>
 <body>
 <div id="gnBootLoader" class="gn-boot-loader" role="status" aria-label="Memuat GoO Ninks"><div class="gn-boot-content"><img class="gn-boot-logo" src="/logo-gooninks.svg" width="330" height="214" alt="" decoding="async"><div class="gn-boot-caption">CRAFTED IN YOGYAKARTA</div><div class="gn-boot-progress" aria-hidden="true"><span></span></div></div></div>
@@ -106,15 +106,20 @@
   </main>
   <footer><div><div class="footer-brand gn-official-footer"><img src="/gooninks-horizontal-logo.svg?v=1" alt="GoO Ninks" width="236" height="38" loading="lazy" decoding="async"></div><p data-i18n="footerQuote">For every generation. For every story.</p></div><div class="footer-links"><a href="#collection" data-i18n="navCollection">Koleksi</a><a href="#story" data-i18n="navStory">Cerita Kami</a><a href="https://www.instagram.com/goo_ninks/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://wa.me/6285740393953" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a></div><small>© <span id="year">2026</span> GoO Ninks. Yogyakarta, Indonesia.</small></footer>
   <div class="overlay" id="overlay" hidden></div>
-  <aside class="cart-panel" id="cartPanel" aria-modal="true" role="dialog" aria-labelledby="cartTitle" aria-hidden="true" tabindex="-1"><div class="panel-head"><h2 id="cartTitle" data-i18n="bagTitle">Tas Belanja</h2><button type="button" id="closeCart" class="close-btn" aria-label="Tutup">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Harga final, ukuran, ongkos kirim, dan stok dikonfirmasi lewat WhatsApp.</p><button type="button" class="primary-btn checkout-btn" id="checkoutBtn" data-i18n="checkout">Lanjutkan ke WhatsApp ↗</button><section id="midtransArea" class="gn-midtrans-section" aria-label="Pembayaran Midtrans">
+  <aside class="cart-panel" id="cartPanel" aria-modal="true" role="dialog" aria-labelledby="cartTitle" aria-hidden="true" tabindex="-1"><div class="panel-head"><h2 id="cartTitle" data-i18n="bagTitle">Tas Belanja</h2><button type="button" id="closeCart" class="close-btn" aria-label="Tutup">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Isi data penerima lengkap sebelum pembayaran. Ongkos kirim dikonfirmasi terpisah oleh admin.</p><button type="button" class="primary-btn checkout-btn" id="checkoutBtn" data-i18n="checkout">Lanjutkan ke WhatsApp ↗</button><section id="midtransArea" class="gn-midtrans-section" aria-label="Pembayaran Midtrans">
   <div class="gn-midtrans-head"><strong data-i18n="payOnline">Bayar online · Midtrans</strong><small id="midtransMode">Menunggu aktivasi</small></div>
   <p class="gn-midtrans-explain" data-i18n="payExplain">Harga produk dapat dibayar melalui Midtrans. <strong>Ongkos kirim belum termasuk</strong> dan akan dikonfirmasi terpisah oleh admin.</p>
   <form id="midtransForm" hidden>
     <label><span data-i18n="payName">Nama lengkap</span><input name="name" autocomplete="name" minlength="2" maxlength="100" required></label>
     <label><span data-i18n="payEmail">Email</span><input type="email" name="email" autocomplete="email" maxlength="180" required></label>
     <label><span data-i18n="payPhone">WhatsApp</span><input type="tel" name="phone" autocomplete="tel" minlength="9" maxlength="25" required></label>
-    <label><span data-i18n="payAddress">Alamat lengkap pengiriman</span><textarea name="address" autocomplete="street-address" minlength="10" maxlength="450" rows="3" required></textarea></label>
-    <label class="gn-payment-confirm"><input type="checkbox" name="shipping_ack" required><span data-i18n="payShippingAck">Saya paham ongkos kirim akan ditagihkan terpisah.</span></label>
+    <label><span data-i18n="payProvince">Provinsi</span><input name="province" autocomplete="address-level1" minlength="3" maxlength="80" required placeholder="Contoh: DI Yogyakarta"></label>
+    <label><span data-i18n="payCity">Kabupaten / Kota</span><input name="city" autocomplete="address-level2" minlength="3" maxlength="80" required placeholder="Contoh: Sleman"></label>
+    <label><span data-i18n="payDistrict">Kecamatan / Kelurahan</span><input name="district" minlength="3" maxlength="100" required placeholder="Contoh: Depok, Condongcatur"></label>
+    <label><span data-i18n="payPostal">Kode pos</span><input name="postal_code" type="text" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{5}" minlength="5" maxlength="5" required placeholder="55281"></label>
+    <label><span data-i18n="payAddress">Alamat jalan lengkap dan nomor rumah</span><textarea name="address" autocomplete="street-address" minlength="10" maxlength="260" rows="3" required placeholder="Nama jalan, nomor rumah, RT/RW, patokan"></textarea></label>
+    <label class="gn-payment-confirm"><input type="checkbox" name="order_consent" required><span data-i18n="payConsent">Saya setuju data pesanan dan alamat digunakan untuk konfirmasi transaksi serta pengiriman, bukan otomatis untuk promosi.</span></label>
+    <label class="gn-payment-confirm"><input type="checkbox" name="shipping_ack" required><span data-i18n="payShippingAck">Saya paham ongkos kirim belum termasuk dan akan dikonfirmasi admin sebelum pengiriman.</span></label>
     <button type="submit" class="gn-midtrans-pay" id="midtransBtn" data-i18n="payNow" disabled>Bayar via Midtrans ↗</button>
   </form>
   <a id="gnCheckoutWhatsAppBackup" class="gn-whatsapp-alternative" href="https://wa.me/6285740393953" target="_blank" rel="noopener noreferrer" hidden>Butuh bantuan? Pesan via WhatsApp ↗</a>
