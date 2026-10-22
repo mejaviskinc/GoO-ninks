@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: headersFor(req) });
   const config = env();
   const active = config.enabled && !!config.serverKey && !!SERVICE_KEY && !!PROJECT_URL;
-  if (req.method === "GET") return respond(req, { enabled: active, mode: config.isProduction ? "production" : "sandbox" });
+  if (req.method === "GET") return respond(req, { enabled: active, mode: config.isProduction ? "production" : "sandbox", configuration: { payments_enabled: config.enabled, server_key_configured: !!config.serverKey } });
   if (req.method !== "POST") return respond(req, { error: "Metode tidak tersedia" }, 405);
   if (!validOrigins.has(req.headers.get("origin") ?? "")) return respond(req, { error: "Origin tidak diizinkan" }, 403);
   if (!active) return respond(req, { error: "Midtrans belum diaktifkan oleh pengelola toko." }, 503);
@@ -141,6 +141,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: {
         Authorization: basicAuth(config.serverKey), "Content-Type": "application/json", Accept: "application/json",
+        "X-Append-Notification": PROJECT_URL + "/functions/v1/gn-midtrans-webhook",
       },
       signal: AbortSignal.timeout(15000),
       body: JSON.stringify({

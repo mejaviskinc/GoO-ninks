@@ -38,7 +38,7 @@ function switchAuth(mode){
  setAlert('');setInfo('');
 }
 async function getStaff(user){if(!user)return null;const {data,error}=await db.from('gn_admins').select('role').eq('user_id',user.id).maybeSingle();if(error)throw error;return data}
-async function activate(user){const staff=await getStaff(user);if(!staff){await db.auth.signOut();throw Error('Akun telah terdaftar tetapi belum disetujui sebagai admin. Pastikan email sudah diverifikasi, lalu minta persetujuan pemilik GoO Ninks.')}currentUser=user;currentRole=staff.role;$('#teamNav').hidden=currentRole!=='owner';$('#accountEmail').textContent=user.email||'';$('#authScreen').hidden=true;$('#appShell').hidden=false;setAlert('');setInfo('');await loadView('overview')}
+async function activate(user){const staff=await getStaff(user);if(!staff){await db.auth.signOut();throw Error('Akun telah terdaftar tetapi belum disetujui sebagai admin. Pastikan email sudah diverifikasi, lalu minta persetujuan pemilik GoO Ninks.')}currentUser=user;currentRole=staff.role;$('#teamNav').hidden=currentRole!=='owner';$('#accountEmail').textContent=user.email||'';$('#authScreen').hidden=true;$('#appShell').hidden=false;setAlert('');setInfo('');await loadView('overview');startOrderRealtime()}
 async function boot(){
  if(!cfg||!window.supabase?.createClient){setAlert('Koneksi aplikasi belum siap. Muat ulang halaman, atau periksa akses ke CDN Supabase.');return}
  recovering=/(?:[?#&])type=recovery(?:[&#]|$)/.test(window.location.href);
@@ -144,7 +144,7 @@ async function changeTeam(userId,approve){
  }catch(err){notify('Gagal memperbarui akses: '+err.message,true)}
 }
 
-async function logout(){if(db)await db.auth.signOut();currentUser=null;currentRole=null;rows=[];teamRows=[];$('#appShell').hidden=true;$('#authScreen').hidden=false;setMobileMenu(false);switchAuth('login')}
+async function logout(){stopOrderRealtime();if(db)await db.auth.signOut();currentUser=null;currentRole=null;rows=[];teamRows=[];$('#appShell').hidden=true;$('#authScreen').hidden=false;setMobileMenu(false);switchAuth('login')}
 async function fetchRows(view){
  if(view==='shipping'){
   const [ship,orders]=await Promise.all([
@@ -200,6 +200,7 @@ async function refreshPaymentReadiness(inventory){
   const data=await response.json();
   if(typeof data.enabled!=='boolean'||!['sandbox','production'].includes(data.mode))throw Error('Respons gateway tidak valid');
   mode.textContent='Midtrans: '+(data.enabled?(data.mode==='production'?'mode LIVE aktif':'SANDBOX untuk pengujian'):'belum diaktifkan')+'.';
+  if(data.configuration&&!data.enabled)mode.textContent+=' '+(!data.configuration.server_key_configured?'MIDTRANS_SERVER_KEY belum tersedia. ':'')+(!data.configuration.payments_enabled?'MIDTRANS_PAYMENTS_ENABLED belum true.':'');
   if(data.mode==='production'&&data.enabled&&unknown.length)mode.textContent+=' Periksa stok yang belum dikonfirmasi sebelum menerima pesanan.';
  }catch(error){
   mode.textContent='Status gateway belum dapat dicek dari dashboard: '+(error instanceof Error?error.message:'Koneksi tidak tersedia')+'.';
@@ -326,4 +327,46 @@ function events(){
  $('#cancelEditor').addEventListener('click',()=>$('#editorDialog').close());
  $('#editorForm').addEventListener('submit',saveRow);
 }
+
+
+// Postgres Changes is authorized by existing admin RLS; never expose orders to anon.
+let orderChannel=null,orderRefreshTimer=null,orderFallbackTimer=null,orderRefreshBusy=false;
+async function refreshOrderView(){
+ if(!currentUser||document.hidden)return;
+ if(loading||orderRefreshBusy){queueOrderRefresh();return}
+ if(!['orders','shipping','leads','overview'].includes(currentView))return;
+ // Avoid replacing a shipping form while an administrator is editing it.
+ if($('#editorDialog')?.open||document.activeElement?.closest('[data-shipping-form]'))return;
+ orderRefreshBusy=true;const view=currentView;
+ try{
+  if(view==='overview')await overview();
+  else{
+   const fresh=await fetchRows(view);
+   if(currentView!==view||!currentUser)return;
+   const opened=new Set([...document.querySelectorAll('.gn-order-card[open]')].map(x=>x.querySelector('.gn-order-number')?.textContent));
+   rows=fresh;renderTable();
+   document.querySelectorAll('.gn-order-card').forEach(x=>{x.open=opened.has(x.querySelector('.gn-order-number')?.textContent)});
+  }
+ }catch(error){console.warn('Automatic order refresh unavailable');}
+ finally{orderRefreshBusy=false}
+}
+function queueOrderRefresh(){clearTimeout(orderRefreshTimer);orderRefreshTimer=setTimeout(()=>void refreshOrderView(),400)}
+function stopOrderRealtime(){
+ clearTimeout(orderRefreshTimer);clearInterval(orderFallbackTimer);
+ if(orderChannel&&db)void db.removeChannel(orderChannel);
+ orderChannel=null;
+}
+function startOrderRealtime(){
+ stopOrderRealtime();
+ orderChannel=db.channel('gn-admin-orders-'+currentUser.id);
+ for(const table of ['gn_orders','gn_shipments','gn_leads']){
+  orderChannel.on('postgres_changes',{event:'*',schema:'public',table},queueOrderRefresh);
+ }
+ orderChannel.subscribe(status=>{if(status==='SUBSCRIBED')queueOrderRefresh()});
+ // Recover missed events after a connection interruption.
+ orderFallbackTimer=setInterval(()=>void refreshOrderView(),30000);
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueOrderRefresh()});
+window.addEventListener('online',queueOrderRefresh);
+
 events();boot();
