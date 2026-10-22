@@ -5,6 +5,7 @@ on:
     paths:
       - index.html
       - 'assets/gooninks-photo2-part-*.b64'
+      - assets/gooninks-story-photo2.webp
       - styles.css
       - app.js
       - gn-midtrans.js
@@ -51,6 +52,7 @@ jobs:
           mkdir -p _site
           cp index.html styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
+          cp assets/gooninks-story-photo2.webp _site/assets/
           cat assets/gooninks-photo2-part-*.b64 | base64 --decode > _site/assets/gooninks-photo2.webp
           test "$(file -b --mime-type _site/assets/gooninks-photo2.webp)" = 'image/webp'
           echo '4bba6073501c50621cca493f98a2993acb43150fe22302cffef7f98e293cdde0  _site/assets/gooninks-photo2.webp' | sha256sum --check
