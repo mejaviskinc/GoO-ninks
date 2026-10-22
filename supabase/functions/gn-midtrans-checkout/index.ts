@@ -81,7 +81,17 @@ Deno.serve(async (req) => {
     const { data: fresh } = await client.from("gn_orders")
       .select("order_id,status,amount,created_at,payment_type")
       .eq("order_id", id).eq("access_hash", access_hash).maybeSingle();
-    return respond(req, { order: fresh ?? row });
+    const verified = fresh ?? row;
+    // This endpoint already verified the private order access token.
+    // Return shipping progress, not the buyer's private address.
+    const { data: shipment } = await client.from("gn_shipments")
+      .select("status,carrier,tracking_number").eq("order_id",id).maybeSingle();
+    const shipping = shipment ? {
+      status: shipment.status,
+      carrier: verified.status === "paid" ? shipment.carrier : "",
+      tracking_number: verified.status === "paid" ? shipment.tracking_number : "",
+    } : null;
+    return respond(req, { order: verified, shipping });
   }
   if (input.action !== "checkout") return respond(req, { error: "Aksi tidak tersedia" }, 400);
   const rawItems = input.items;
