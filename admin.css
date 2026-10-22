@@ -9,44 +9,65 @@
 .auth-card #signupForm .primary{margin-top:10px}
 .nav-link[hidden]{display:none}
 
-/* GoO Ninks original gold logo — admin login, mobile header and sidebar */
-.gn-brand-auth{position:relative;z-index:2;width:min(276px,100%);max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;padding:8px 0;border:0;border-radius:0;box-shadow:none;letter-spacing:normal}
-.gn-brand-auth img{display:block;width:220px;max-width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 2px 2px #0003)}
-.gn-brand-auth small{color:#e2c470;text-align:center;margin-top:2px;letter-spacing:.23em}
-.gn-admin-monogram{width:72px;height:72px;border:0;background:transparent;border-radius:0;display:grid;place-items:center;overflow:visible;margin-bottom:31px}
-.gn-admin-monogram img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 1px 1px #31220b70)}
-.gn-sidebar-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;margin:0 0 27px;padding:7px 12px 15px;background:transparent;border:0;border-radius:0;min-height:126px;letter-spacing:normal}
-.gn-sidebar-brand img{display:block;width:178px;max-width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 1px 1px #32240950)}
-.gn-sidebar-brand small{color:#8c691c;text-align:center;margin-top:1px;letter-spacing:.21em;font-size:9px}
-.breadcrumbs{display:flex;align-items:center;gap:5px}
-.gn-topbar-logo{display:block;flex:0 0 29px;width:29px;height:29px;object-fit:contain;margin-right:5px;border-radius:7px;filter:drop-shadow(0 1px 1px #31220b70)}
-@media(max-width:800px){.gn-brand-auth{width:202px;padding:9px 14px}.gn-brand-auth img{width:172px}.gn-brand-auth small{font-size:8px}.gn-sidebar-brand{min-height:138px}}
-
-/* TRANSPARENT_GOO_NINKS_BRANDING: logo containers and original monogram have no black background. */
-
-/* GoO Ninks official transparent logo uploaded by owner (2026-10-21) */
-.gn-brand-auth img,.gn-sidebar-brand img,.gn-admin-form-logo img,.gn-topbar-full-logo{object-fit:contain}
-.gn-admin-form-logo{display:block;width:196px;height:auto;min-height:124px;border:0;background:transparent;border-radius:0;margin-bottom:19px;overflow:visible}
-.gn-admin-form-logo img{display:block;width:100%;height:auto;max-height:none}
-.gn-topbar-full-logo{display:block;width:86px;height:54px;flex:0 0 86px;border:0;margin-right:2px;filter:none}
-.gn-sidebar-brand img{width:184px;max-width:100%;height:auto}
-@media(max-width:800px){.gn-topbar-full-logo{width:62px;height:40px;flex-basis:62px}.gn-admin-form-logo{width:155px;min-height:97px}}
-
-/* GOONINKS_ADMIN_LOGO_COMPACT_V2 — keep the owner's transparent gold artwork, reduce footprint. */
-.gn-brand-auth{width:min(190px,100%);padding:4px 0;gap:1px}
-.gn-brand-auth img{width:158px;max-width:100%;height:auto}
-.gn-brand-auth small{font-size:8px;letter-spacing:.16em;margin-top:1px}
-.gn-admin-form-logo{width:148px;min-height:0;margin-bottom:14px}
-.gn-admin-form-logo img{width:100%;height:auto}
-.gn-sidebar-brand{min-height:0;padding:8px 10px 12px;margin:0 0 16px;gap:0}
-.gn-sidebar-brand img{width:120px;max-width:100%;height:auto}
-.gn-sidebar-brand small{font-size:8px;letter-spacing:.16em;margin-top:1px}
-.gn-topbar-full-logo{width:60px;height:38px;flex:0 0 60px;margin-right:2px}
+/* GoO Ninks branding and responsive studio layout — 2026-10-22. */
+.gn-brand-auth,.gn-sidebar-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;letter-spacing:normal;background:transparent;border:0;box-shadow:none}
+.gn-brand-auth{position:relative;z-index:2;width:158px;padding:0;gap:6px}
+.gn-brand-auth img{display:block;width:158px;max-width:100%;height:auto;object-fit:contain}
+.gn-brand-auth small{color:#e2c470;font-size:8px;letter-spacing:.16em;margin:0}
+.gn-admin-form-logo{display:block;width:128px;height:auto;border:0;border-radius:0;background:transparent;margin:0 0 20px;letter-spacing:normal}
+.gn-admin-form-logo img{display:block;width:100%;height:auto;object-fit:contain}
+.gn-sidebar-brand{padding:0 10px 20px;margin:0 0 20px;gap:6px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.gn-sidebar-brand img{display:block;width:120px;max-width:100%;height:auto;object-fit:contain}
+.gn-sidebar-brand small{color:#8c691c;font-size:8px;letter-spacing:.16em;margin:0}
+.breadcrumbs{display:flex;align-items:center;gap:5px;min-width:0;flex-wrap:wrap}
+.gn-topbar-full-logo{display:block;width:50px;height:32px;flex:0 0 50px;object-fit:contain;margin-right:8px}
+.auth-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.auth-art{padding:48px clamp(32px,5vw,72px)}
+.auth-message{padding:48px 0}
+.auth-message h1{font-size:clamp(48px,5.4vw,80px);text-wrap:balance}
+.auth-content{padding:48px clamp(24px,4vw,64px)}
+.auth-card{width:min(400px,100%)}
+.auth-card h2{font-size:clamp(32px,3.2vw,43px);line-height:1.15;margin:12px 0 16px}
+.auth-card>p{margin-bottom:24px}
+.auth-tabs{margin:24px 0}
+.auth-card .primary{margin:8px 0 16px;min-height:48px}
+.auth-foot{line-height:1.8}
+.sidebar{padding-top:26px;overflow-y:auto;overscroll-behavior:contain}
+.sidebar nav{flex-shrink:0}.sidebar-bottom{margin-top:auto;padding-top:16px}
+.topbar{gap:16px;min-height:78px;height:auto;padding-top:14px;padding-bottom:14px}
+.top-actions{flex-shrink:0}.content{padding-top:36px}
+.page-head>div,.panel-grid>*,.row-item>div,.stock-item>div{min-width:0}
+.page-head h1{line-height:1.15;margin-bottom:12px}
+.page-head p,.row-item strong,.stock-item strong{overflow-wrap:anywhere}
+.panel-heading{gap:12px}.toolbar{flex-wrap:wrap}.counter{white-space:nowrap}
+.editor{max-height:calc(100dvh - 32px)}
+.toast{max-width:calc(100vw - 32px);overflow-wrap:anywhere}
 @media(max-width:800px){
- .gn-brand-auth{width:165px;padding:4px 0}
- .gn-brand-auth img{width:140px}
- .gn-admin-form-logo{width:128px;min-height:0}
- .gn-sidebar-brand{min-height:0;padding:7px 8px 11px}
+ .auth-layout{grid-template-columns:minmax(0,1fr)}
+ .auth-art{min-height:0;padding:24px;display:grid;grid-template-columns:112px minmax(0,1fr);gap:24px;align-items:center}
+ .gn-brand-auth{width:112px}.gn-brand-auth img{width:112px}
+ .auth-message{margin:0;padding:0}.auth-message .eyebrow{font-size:8px;letter-spacing:.16em}
+ .auth-message h1{font-size:clamp(28px,5vw,40px);margin:10px 0 0}
+ .auth-content{padding:32px 24px 40px}
+ .gn-admin-form-logo{width:108px;margin-bottom:16px}
+ .sidebar{height:100dvh;max-width:calc(100vw - 56px)}
  .gn-sidebar-brand img{width:108px}
- .gn-topbar-full-logo{width:50px;height:32px;flex-basis:50px}
+ .topbar{gap:10px;padding:12px 16px;min-height:64px}
+ .mobile-nav{min-width:44px;min-height:44px;padding:8px;flex-shrink:0}
+ .breadcrumbs{font-size:11px;gap:3px;line-height:1.5}
+ .breadcrumbs span{padding:0 4px}.gn-topbar-full-logo{display:none}
+ .icon-link{display:grid;place-items:center;width:36px;height:40px}
+ .page-head{flex-wrap:wrap;align-items:flex-start;gap:16px}
+ .page-head h1{font-size:34px}.page-head .small{min-height:44px}
+ .metric-label{margin-bottom:18px}.metric-value{font-size:clamp(24px,6vw,30px);overflow-wrap:anywhere}
+ .editor-head,.editor-footer{padding:18px}.editor-body{padding:20px 18px}
+ .editor-footer{flex-wrap:wrap}.editor-footer button{min-height:44px}
+ .auth-card input,.field input,.field select,.field textarea,.search-control input{font-size:16px}
 }
+@media(max-width:380px){
+ .auth-art{grid-template-columns:88px minmax(0,1fr);gap:16px;padding:20px}
+ .gn-brand-auth,.gn-brand-auth img{width:88px}.gn-brand-auth small{font-size:7px}
+ .auth-message h1{font-size:27px}.auth-message .eyebrow{font-size:7px}
+ .auth-content{padding:28px 20px}.metric{padding:15px}.panel-heading{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.sidebar,.toast,.primary{transition:none}}
