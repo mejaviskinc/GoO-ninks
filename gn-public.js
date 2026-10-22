@@ -22,7 +22,54 @@
   grid.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(!b)return;const item=products.find(p=>p.sku===b.dataset.open),src=item&&validUrl(item.image_url);if(!src)return;requestAnimationFrame(()=>{const d=document.querySelector('#detailImage');if(d){const img=el('img','gn-detail-photo');img.src=src;img.alt=item.product_name;d.replaceChildren(img)}})});
  }
  const section=(title,klass)=>{const s=el('section',klass),wrap=put(s,'div','gn-inner');put(wrap,'h2','gn-title',title);return [s,wrap]};
- async function promos(){const {data,error}=await api.from('gn_promotions').select('title,description,code,discount_percent').eq('active',true).limit(3);if(error||!data?.length)return;const [s,w]=section(t[0],'gn-promos');const grid=put(w,'div','gn-grid');data.forEach(p=>{const card=put(grid,'article','gn-offer');put(card,'b','',p.discount_percent?'-'+p.discount_percent+'%':'✳');put(card,'h3','',p.title);put(card,'p','',p.description);if(p.code)put(card,'code','',p.code)});const hero=document.querySelector('.hero');hero?.insertAdjacentElement('afterend',s)}
+
+ const specialLabels={
+  id:{code:'Kode promo',confirm:'Konfirmasi penawaran ↗',message:'Halo GoO Ninks, saya ingin menanyakan promo',footer:'Mohon konfirmasi ketentuan dan harga akhirnya.'},
+  en:{code:'Promo code',confirm:'Ask about this offer ↗',message:'Hello GoO Ninks, I would like to ask about the offer',footer:'Please confirm terms and the final price.'},
+  nl:{code:'Promocode',confirm:'Vraag naar aanbieding ↗',message:'Hallo GoO Ninks, ik heb een vraag over aanbieding',footer:'Graag voorwaarden en de eindprijs bevestigen.'},
+  ko:{code:'프로모션 코드',confirm:'혜택 문의 ↗',message:'안녕하세요 GoO Ninks, 프로모션 문의드립니다',footer:'이용 조건과 최종 가격을 확인해 주세요.'}
+ };
+ let liveOffers=[];
+ const offerLang=()=>specialLabels[loc()]||specialLabels.id;
+ function renderSpecialOffers(){
+  const box=document.querySelector('#gnSpecialOffers'),empty=document.querySelector('#gnSpecialEmpty');
+  if(!box||!empty)return;
+  box.replaceChildren();
+  const eligible=liveOffers.filter(p=>p&&typeof p.title==='string'&&p.title.trim().length>0);
+  empty.hidden=eligible.length>0;box.hidden=eligible.length===0;
+  const words=offerLang();
+  eligible.forEach(p=>{
+   const card=put(box,'article','gn-special-offer');
+   const percentage=Number(p.discount_percent);
+   const validDiscount=Number.isInteger(percentage)&&percentage>0&&percentage<=100;
+   put(card,'div','gn-special-offer-discount'+(validDiscount?'':' gn-special-symbol'),validDiscount?'-'+percentage+'%':'✳');
+   const body=put(card,'div','gn-special-offer-body');
+   put(body,'h3','',p.title);
+   if(p.description)put(body,'p','',p.description);
+   if(p.code){const code=put(body,'span','gn-special-offer-code');code.textContent=words.code+': '+p.code;}
+   const msg=words.message+' "'+p.title+'".'+(p.code?' '+words.code+': '+p.code+'.':'')+' '+words.footer;
+   const link=put(body,'a','gn-special-offer-link',words.confirm);
+   link.href='https://wa.me/6285740393953?text='+encodeURIComponent(msg);
+   link.target='_blank';link.rel='noopener noreferrer';
+  });
+ }
+ async function promos(){
+  try{
+   const {data,error}=await api.from('gn_promotions')
+    .select('title,description,code,discount_percent,start_at,end_at')
+    .eq('active',true)
+    .order('created_at',{ascending:false})
+    .limit(6);
+   if(error)throw error;
+   const now=Date.now();
+   liveOffers=(data||[]).filter(p=>
+     (!p.start_at||Date.parse(p.start_at)<=now)&&
+     (!p.end_at||Date.parse(p.end_at)>=now)
+   ).slice(0,3);
+   renderSpecialOffers();
+  }catch(error){console.warn('Special Price:',error.message)}
+ }
+ document.querySelector('#langSelect')?.addEventListener('change',renderSpecialOffers);
  async function ads(){const {data,error}=await api.from('gn_ads').select('title,image_url,link_url').eq('active',true).limit(6);if(error||!data?.length)return;const [s,w]=section('GoO Ninks — Featured','gn-ads');const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),u=validUrl(a.link_url),img=validUrl(a.image_url);const target=u?put(card,'a'):card;if(u){target.href=u;target.rel='noopener noreferrer sponsored';target.target='_blank'}if(img){const image=put(target,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(target,'h3','',a.title)});document.querySelector('#collection')?.insertAdjacentElement('beforebegin',s)}
  async function articles(){const {data,error}=await api.from('gn_articles').select('title,slug,excerpt,image_url').eq('status','published').order('created_at',{ascending:false}).limit(3);if(error||!data?.length)return;const [s,w]=section(t[1],'gn-articles');s.id='journal';const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),link=put(card,'a'),img=validUrl(a.image_url);link.href='article.html?slug='+encodeURIComponent(a.slug);if(img){const image=put(link,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(link,'h3','',a.title);put(link,'p','',a.excerpt);put(link,'strong','', 'Baca selengkapnya ↗')});document.querySelector('footer')?.insertAdjacentElement('beforebegin',s)}
  function leads(){const contact=document.querySelector('#contact');if(!contact)return;const div=put(contact,'div','gn-lead-box');put(div,'h3','','Custom, seragam, atau kolaborasi?');const form=put(div,'form','gn-lead-form');const name=put(form,'input');name.placeholder=t[5];name.maxLength=120;name.required=true;name.minLength=2;const address=put(form,'input');address.placeholder=t[6];address.maxLength=254;address.required=true;const interest=put(form,'input');interest.placeholder=t[7];interest.maxLength=160;const honey=put(form,'input','gn-honey');honey.autocomplete='off';honey.tabIndex=-1;const label=put(form,'label','gn-consent');const agree=put(label,'input');agree.type='checkbox';agree.required=true;put(label,'span','',t[3]);const submit=put(form,'button','gn-send',t[2]);submit.type='submit';const note=put(form,'p','gn-message');note.setAttribute('role','status');
