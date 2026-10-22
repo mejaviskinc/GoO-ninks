@@ -91,10 +91,20 @@ Deno.serve(async (req) => {
   const name = String(customer.name ?? "").trim().slice(0, 101);
   const email = String(customer.email ?? "").trim().toLowerCase().slice(0, 181);
   const phone = String(customer.phone ?? "").trim().slice(0, 26);
-  const address = String(customer.address ?? "").trim().slice(0, 451);
-  if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      || !/^[+0-9\-\s()]{9,25}$/.test(phone) || address.length < 10)
-    return respond(req, { error: "Nama, email, WhatsApp, atau alamat pengiriman belum lengkap" }, 400);
+  const street = String(customer.address ?? "").trim();
+  const province = String(customer.province ?? "").trim();
+  const city = String(customer.city ?? "").trim();
+  const district = String(customer.district ?? "").trim();
+  const postal = String(customer.postal_code ?? "").trim();
+  const address = [street,district,city,province,postal].join(", ");
+  const validPart = (v: string, low: number, high: number) =>
+    v.length >= low && v.length <= high && !/[<>\u0000-\u001f]/.test(v);
+  if (!validPart(name,2,100) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      || !/^[+0-9\-\s()]{9,25}$/.test(phone)
+      || !validPart(street,10,260) || !validPart(province,3,80)
+      || !validPart(city,3,80) || !validPart(district,3,100)
+      || !/^[0-9]{5}$/.test(postal) || address.length>450)
+    return respond(req, { error: "Lengkapi nama, email, WhatsApp, alamat, kecamatan, kota, provinsi, dan kode pos (5 digit)." }, 400);
   const items = rawItems.map((p: any) => ({
     sku: String(p?.sku ?? "").slice(0, 101),
     qty: p?.qty, note: String(p?.note ?? "").slice(0, 120),
