@@ -1,0 +1,63 @@
+name: Install new GoO Ninks heritage photo
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-story-photo.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pillow
+        run: python -m pip install --quiet Pillow
+      - name: Retrieve Canva image and preserve full model composition
+        env:
+          CANVA_IMAGE_URL: "https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Fd98c4a95-10e6-4f2a-b876-13f0b4d66bfc/watermark:F/width:141?csig=AAAAAAAAAAAAAAAAAAAAAFOil3FraMxPMPhD0rssuP47w5ZKM8yyQFCTMJ7X_Z4v&exp=1792661474&osig=AAAAAAAAAAAAAAAAAAAAAPkJ4np_fAmwZehjsS-wLa9w3qzbuexWonxvj3WvyO3l&signer=media-rpc&token=AAIAAU0AJGQ5OGM0YTk1LTEwZTYtNGYyYS1iODc2LTEzZjBiNGQ2NmJmYwAAAAABoWLzStBf6iwmGvD7oOJvfkYxdOrCe9LZRJJX3NG7ROTKZvcrTg&x-canva-quality=thumbnail"
+        run: |
+          python - <<'PY'
+          import io, os, urllib.request, urllib.parse
+          from PIL import Image
+          from pathlib import Path
+          src=os.environ['CANVA_IMAGE_URL']
+          candidate_paths=[
+            src.replace('/height:200/','/height:1600/').replace('/width:141','/width:1131'),
+            src.replace('/height:200/','/height:1200/').replace('/width:141','/width:848'),
+            src.replace('/height:200/','/height:1000/').replace('/width:141','/width:707'),
+            src.replace('/height:200/','/height:900/').replace('/width:141','/width:636'),
+            src.replace('/height:200/','/height:800/').replace('/width:141','/width:566'),
+            src.replace('/height:200/','/height:800/').replace('/width:141','/width:565'),
+            src
+          ]
+          for idx,url in enumerate(candidate_paths):
+            try:
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; GoONinksSitePublisher/1.0)'})
+              with urllib.request.urlopen(req,timeout=25) as resp:
+                content=resp.read(8_000_000)
+              photo=Image.open(io.BytesIO(content))
+              print(f'Trial {idx+1}: {photo.format}, {photo.size}, {len(content)} bytes',flush=True)
+              if photo.width < 600 or photo.height < 800:
+                continue
+              Path('assets').mkdir(exist_ok=True)
+              photo.convert('RGB').save('assets/gooninks-story-photo2.webp','WEBP',quality=86,method=6)
+              print('Full-size story photograph captured successfully',flush=True)
+              break
+            except Exception as exc:
+              print(f'Trial {idx+1} failed: {type(exc).__name__}: {str(exc)[:180]}',flush=True)
+          else:
+            raise RuntimeError('No suitably large resolution was available; left website untouched.')
+          PY
+      - name: Commit static image
+        run: |
+          set -euo pipefail
+          test -s assets/gooninks-story-photo2.webp
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/gooninks-story-photo2.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: add GoO Ninks front-and-back heritage outfit photo"
+            git push origin HEAD:main
+          fi
