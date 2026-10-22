@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=20261022-hero-framing2">
-  <link rel="stylesheet" href="gn-public.css?v=20261022-centered">
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="gn-public.css?v=20261022-special-price1">
+  <script src="app.js?v=20261022-special-price1" defer></script>
   <script src="gn-midtrans.js" defer></script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3"><link rel="stylesheet" href="/brand-loader.css"><link rel="preload" href="/logo-gooninks.svg" as="image" type="image/svg+xml"><script src="/brand-loader.js" defer></script></head>
 <body>
@@ -34,6 +34,7 @@
       <nav class="nav" id="nav" aria-label="Navigasi utama">
         <a href="#home" data-i18n="navHome">Beranda</a>
         <a href="#collection" data-i18n="navCollection">Koleksi</a>
+        <a href="#special-price" data-i18n="navSpecial">Special Price</a>
         <a href="#story" data-i18n="navStory">Cerita Kami</a>
         <a href="#wastra" data-i18n="navWastra">Wastra</a>
         <a href="#contact" data-i18n="navContact">Kontak</a>
@@ -57,6 +58,35 @@
       </div>
     </section>
     <div class="marquee" aria-hidden="true"><div>HANDCRAFTED &nbsp; ✦ &nbsp; ROOTED IN CULTURE &nbsp; ✦ &nbsp; FOR EVERY GENERATION &nbsp; ✦ &nbsp; WHERE CULTURE MEETS COUTURE &nbsp; ✦ &nbsp; HANDCRAFTED &nbsp; ✦ &nbsp; ROOTED IN CULTURE &nbsp; ✦ &nbsp;</div></div>
+    <section id="special-price" class="gn-special-section section-anchor" aria-labelledby="gnSpecialTitle">
+      <div class="gn-special-inner">
+        <div class="gn-special-topline"><span>GOO NINKS / THE PRIVATE EDIT</span><span aria-hidden="true">✳</span><span>EST. 2010 · YOGYAKARTA</span></div>
+        <div class="gn-special-layout">
+          <div class="gn-special-copy">
+            <p class="gn-special-kicker" data-i18n="specialEyebrow">PENAWARAN PILIHAN</p>
+            <h2 id="gnSpecialTitle" data-i18n="specialTitle">Special <i>Price.</i></h2>
+            <p class="gn-special-desc" data-i18n="specialDesc">Temukan penawaran istimewa untuk koleksi wastra pilihan. Lihat promo yang sedang aktif atau tanyakan penawaran terbaru langsung kepada tim kami.</p>
+            <div class="gn-special-actions">
+              <a class="gn-special-main-cta" href="https://wa.me/6285740393953?text=Halo%20GoO%20Ninks%2C%20saya%20ingin%20menanyakan%20Special%20Price%20dan%20promo%20yang%20tersedia." target="_blank" rel="noopener noreferrer" data-i18n="specialAsk">Tanya Special Price <span aria-hidden="true">↗</span></a>
+              <a class="gn-special-minor-cta" href="#collection" data-i18n="specialExplore">Lihat koleksi <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+          <div class="gn-special-display">
+            <div class="gn-special-display-head">
+              <span class="gn-special-display-label" data-i18n="specialCurated">GOO NINKS · PRIVATE OFFERS</span>
+              <span aria-hidden="true" class="gn-special-star">✳</span>
+            </div>
+            <div class="gn-special-empty" id="gnSpecialEmpty">
+              <span class="gn-special-empty-index">01 / 01</span>
+              <h3 data-i18n="specialEmptyTitle">Something <i>special awaits.</i></h3>
+              <p data-i18n="specialEmptyDesc">Penawaran khusus akan tampil di sini ketika diaktifkan oleh tim GoO Ninks. Untuk informasi harga saat ini, hubungi admin.</p>
+            </div>
+            <div class="gn-special-offers" id="gnSpecialOffers" aria-live="polite" hidden></div>
+            <p class="gn-special-footnote" data-i18n="specialNote">Promo mengikuti ketentuan yang berlaku. Harga akhir dan penggunaan kode dikonfirmasi admin; diskon tidak otomatis diterapkan saat checkout.</p>
+          </div>
+        </div>
+      </div>
+    </section>
     <section id="collection" class="collection-section section-anchor">
       <div class="section-top"><div><p class="kicker" data-i18n="collectionKicker">THE EDIT / 2026</p><h2 class="section-heading" data-i18n="collectionTitle">New <i>Collection</i></h2><p class="section-summary" data-i18n="collectionDesc">Eksplorasi siluet modern dengan sentuhan tekstil tradisional Indonesia.</p></div><div class="collection-counter"><span id="visibleCount">20</span> <span data-i18n="looks">Looks</span></div></div>
       <div class="catalog-controls">
@@ -92,6 +122,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
   <script defer src="gn-config.js"></script>
-  <script defer src="gn-public.js"></script>
+  <script defer src="gn-public.js?v=20261022-special-price1"></script>
 </body>
 </html>
