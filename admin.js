@@ -6,7 +6,8 @@ const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(Number(n)||0);
 const dateText=s=>s?new Date(s).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'—';
 const schemas={
- orders:{title:'Pesanan',desc:'Lihat status pembayaran dan detail pesanan Midtrans. Hanya admin yang dapat melihat data ini.',table:'gn_orders',key:'order_id',headline:'order_id',fields:[]},
+ orders:{title:'Pesanan',desc:'Data pembeli, rincian belanja, dan status pembayaran Midtrans. Hanya admin yang dapat melihat data ini.',table:'gn_orders',key:'order_id',headline:'order_id',fields:[]},
+ shipping:{title:'Pengiriman',desc:'Proses pesanan lunas: kemas, siap kirim, masukkan kurir dan resi, hingga selesai.',table:'gn_shipments',key:'order_id',headline:'order_id',fields:[]},
  articles:{title:'Artikel',desc:'Tulis, edit, dan publikasikan cerita wastra untuk website.',table:'gn_articles',key:'id',headline:'title',fields:[
   ['title','Judul artikel','text',true],['slug','Slug URL','slug',true],['excerpt','Ringkasan artikel','textarea',false],['body','Isi artikel','textarea',false],['image_url','URL gambar sampul','image',false],['status','Status publikasi','select:draft|published',true]]},
  ads:{title:'Iklan',desc:'Atur banner dan materi iklan yang muncul di halaman publik.',table:'gn_ads',key:'id',headline:'title',fields:[
@@ -144,8 +145,19 @@ async function changeTeam(userId,approve){
 }
 
 async function logout(){if(db)await db.auth.signOut();currentUser=null;currentRole=null;rows=[];teamRows=[];$('#appShell').hidden=true;$('#authScreen').hidden=false;setMobileMenu(false);switchAuth('login')}
-async function fetchRows(view){const schema=schemas[view];const {data,error}=await db.from(schema.table).select('*').order('created_at',{ascending:false}).limit(500);if(error)throw error;return data||[]}
-async function loadView(view){if(loading)return;loading=true;currentView=view;setMobileMenu(false);document.querySelectorAll('.nav-link').forEach(el=>el.classList.toggle('selected',el.dataset.view===view));const meta=schemas[view]||(view==='team'&&currentRole==='owner'?{title:'Akun Tim',desc:'Setujui atau cabut akses staf yang sudah memverifikasi email.'}:null);if(view==='team'&&currentRole!=='owner')return notify('Menu khusus pemilik',true);const title=meta?.title||'Overview';$('#pageTitle').textContent=title;$('#breadcrumb').textContent=title;$('#pageDesc').textContent=meta?.desc||'Ringkasan operasional dan konten website GoO Ninks.';$('#newButton').hidden=!schemas[view]||view==='orders';$('#overviewScreen').hidden=view!=='overview';$('#moduleScreen').hidden=view==='overview';$('#systemNotice').hidden=true;
+async function fetchRows(view){
+ if(view==='shipping'){
+  const [ship,orders]=await Promise.all([
+   db.from('gn_shipments').select('*').order('updated_at',{ascending:false}).limit(500),
+   db.from('gn_orders').select('order_id,customer_name,customer_email,customer_phone,customer_address,amount,items,status,paid_at,created_at').order('created_at',{ascending:false}).limit(500)
+  ]);
+  if(ship.error)throw ship.error;if(orders.error)throw orders.error;
+  const mapping=new Map((orders.data||[]).map(x=>[x.order_id,x]));
+  return (ship.data||[]).map(row=>({...row,_order:mapping.get(row.order_id)||null}));
+ }
+ const schema=schemas[view];const {data,error}=await db.from(schema.table).select('*').order('created_at',{ascending:false}).limit(500);if(error)throw error;return data||[]
+}
+async function loadView(view){if(loading)return;loading=true;currentView=view;setMobileMenu(false);document.querySelectorAll('.nav-link').forEach(el=>el.classList.toggle('selected',el.dataset.view===view));const meta=schemas[view]||(view==='team'&&currentRole==='owner'?{title:'Akun Tim',desc:'Setujui atau cabut akses staf yang sudah memverifikasi email.'}:null);if(view==='team'&&currentRole!=='owner')return notify('Menu khusus pemilik',true);const title=meta?.title||'Overview';$('#pageTitle').textContent=title;$('#breadcrumb').textContent=title;$('#pageDesc').textContent=meta?.desc||'Ringkasan operasional dan konten website GoO Ninks.';$('#newButton').hidden=!schemas[view]||view==='orders'||view==='shipping';$('#overviewScreen').hidden=view!=='overview';$('#moduleScreen').hidden=view==='overview';$('#systemNotice').hidden=true;
  try{if(view==='team'){await loadTeam()}else if(!schemas[view])await overview();else {rows=await fetchRows(view);$('#searchBox').value='';renderTable()}}catch(e){$('#systemNotice').hidden=false;$('#systemNotice').textContent='Gagal memuat data: '+e.message;notify('Gagal memuat data',true)}finally{loading=false}}
 async function overview(){const result=await Promise.all(Object.keys(schemas).map(async name=>{const data=await fetchRows(name);return [name,data]}));const x=Object.fromEntries(result);const totalArticles=x.articles.filter(a=>a.status==='published').length,liveAds=x.ads.filter(a=>a.active).length,pending=x.leads.filter(a=>a.stage==='new').length,low=x.inventory.filter(a=>a.stock!==null&&a.stock<=a.low_stock_threshold);const metrics=[['Artikel terbit',totalArticles,'dari '+x.articles.length+' artikel'],['Iklan aktif',liveAds,'dari '+x.ads.length+' iklan'],['Leads baru',pending,'perlu tindak lanjut'],['Produk katalog',x.inventory.length,low.length+' stok rendah']];$('#metrics').innerHTML=metrics.map(m=>'<div class="metric"><div class="metric-label">'+safe(m[0])+'</div><div class="metric-value">'+safe(m[1])+'</div><div class="metric-note">'+safe(m[2])+'</div></div>').join('');
  const all=[...x.articles.map(a=>({what:'Artikel · '+a.title,when:a.created_at,state:a.status})),...x.leads.map(a=>({what:'Lead · '+a.name,when:a.created_at,state:a.stage})),...x.promotions.map(a=>({what:'Promosi · '+a.title,when:a.created_at,state:a.active?'aktif':'nonaktif'}))].sort((a,b)=>new Date(b.when)-new Date(a.when)).slice(0,7);
@@ -195,10 +207,82 @@ async function refreshPaymentReadiness(inventory){
 }
 function pill(label,on){return '<span class="pill '+(on?'on':'off')+'">'+safe(label)+'</span>'}
 function rowDetails(r){switch(currentView){case 'orders':return [safe(r.customer_name),rupiah(r.amount),pill(r.status,r.status==='paid')];case 'articles':return [safe(r.slug),pill(r.status,r.status==='published'),dateText(r.created_at)];case 'ads':return [safe(r.placement),pill(r.active?'Tayang':'Nonaktif',r.active),dateText(r.created_at)];case 'promotions':return [safe(r.code||'—'),safe((r.discount_percent||0)+'%'),pill(r.active?'Aktif':'Nonaktif',r.active)];case 'leads':return [safe(r.phone||r.email||'—'),safe(r.interest||'—'),pill(r.stage,r.stage==='won')];case 'inventory':return [safe(r.sku),rupiah(r.price),r.stock===null?'Belum diketahui':pill(String(r.stock),r.stock>r.low_stock_threshold)];default:return []}}
-function renderTable(){const search=$('#searchBox').value.trim().toLowerCase();const subset=rows.filter(o=>JSON.stringify(o).toLowerCase().includes(search));$('#rowCounter').textContent=subset.length+' data';const root=$('#records');if(!subset.length){root.innerHTML='<div class="empty"><strong>Belum ada data</strong>Gunakan tombol Tambah baru untuk mulai mengelola '+safe(schemas[currentView].title.toLowerCase())+'.</div>';return}
+function renderTable(){const search=$('#searchBox').value.trim().toLowerCase();const subset=rows.filter(o=>JSON.stringify(o).toLowerCase().includes(search));$('#rowCounter').textContent=subset.length+' data';const root=$('#records');if(currentView==='orders'){renderOrderQueue(subset);return}if(currentView==='shipping'){renderShippingQueue(subset);return}if(!subset.length){root.innerHTML='<div class="empty"><strong>Belum ada data</strong>Gunakan tombol Tambah baru untuk mulai mengelola '+safe(schemas[currentView].title.toLowerCase())+'.</div>';return}
  const headings={orders:['ID Pesanan','Pelanggan','Total','Status'],articles:['Artikel','Slug','Status','Dibuat'],ads:['Iklan','Posisi','Status','Dibuat'],promotions:['Promosi','Kode','Diskon','Status'],leads:['Nama','Kontak','Minat','Status'],inventory:['Produk','SKU','Harga','Stok']}[currentView];
  root.innerHTML='<table class="record-table"><thead><tr>'+headings.map(t=>'<th>'+safe(t)+'</th>').join('')+(currentView==='orders'?'':'<th class="actions">Aksi</th>')+'</tr></thead><tbody>'+subset.map(r=>{const key=String(r[schemas[currentView].key]);const details=rowDetails(r);return '<tr><td><strong>'+safe(r[schemas[currentView].headline])+'</strong><small>'+dateText(r.updated_at||r.created_at)+'</small></td>'+details.map(x=>'<td>'+x+'</td>').join('')+(currentView==='orders'?'':'<td class="actions"><button type="button" data-edit="'+safe(key)+'">Edit</button><button type="button" class="danger" data-delete="'+safe(key)+'">Hapus</button></td>')+'</tr>'}).join('')+'</tbody></table>';
 }
+
+const SHIP_LABELS={
+ awaiting_payment:'Menunggu pembayaran',ready_to_pack:'Siap dikemas',packing:'Sedang dikemas',
+ ready_to_ship:'Siap dikirim',shipped:'Dalam pengiriman',delivered:'Terkirim',
+ cancelled:'Dibatalkan',review:'Perlu pemeriksaan'
+};
+const SHIP_NEXT={ready_to_pack:'packing',packing:'ready_to_ship',ready_to_ship:'shipped',shipped:'delivered'};
+function checkoutItems(items){
+ if(!Array.isArray(items))return '';
+ return items.map(x=>safe(x.name||x.sku||'Produk')+' × '+safe(x.qty)+' · '+rupiah(x.price)).join('<div class="gn-shipping-line-gap"></div>');
+}
+function orderContact(o){
+ if(!o)return '<span class="inventory-warning">Data pesanan belum tersedia</span>';
+ return '<strong>'+safe(o.customer_name)+'</strong><div>'+safe(o.customer_email)+'</div><div>'+safe(o.customer_phone)+'</div>';
+}
+function renderOrderQueue(data){
+ const root=$('#records');
+ if(!data.length){root.innerHTML='<div class="empty"><strong>Belum ada pesanan pembayaran</strong>Pesanan online akan muncul setelah pelanggan mengirim formulir checkout.</div>';return}
+ root.innerHTML='<div class="gn-orders-queue">'+data.map(o=>
+  '<details class="gn-order-card"><summary><span class="gn-order-number">'+safe(o.order_id)+'</span><span>'+safe(o.customer_name)+'</span><span>'+rupiah(o.amount)+'</span>'+pill(o.status,o.status==='paid')+'<span class="gn-order-more">Detail ▾</span></summary>'+
+  '<div class="gn-order-body"><div><h4>Data penerima</h4>'+orderContact(o)+'<p><b>Alamat lengkap</b><span>'+safe(o.customer_address)+'</span></p></div>'+
+  '<div><h4>Rincian produk</h4><p>'+checkoutItems(o.items)+'</p><p>Dibuat: '+dateText(o.created_at)+'</p><p>Status pembayaran: '+safe(o.status)+'</p>'+
+  '<button type="button" data-go-shipping="'+safe(o.order_id)+'">Buka proses pengiriman ↗</button></div></div></details>'
+ ).join('')+'</div>';
+}
+function renderShippingQueue(data){
+ const root=$('#records');
+ if(!data.length){root.innerHTML='<div class="empty"><strong>Belum ada antrean pengiriman</strong>Antrean otomatis dibuat ketika pelanggan berhasil mengirim checkout Midtrans.</div>';return}
+ const counts={};for(const x of data)counts[x.status]=(counts[x.status]||0)+1;
+ const summary=['awaiting_payment','ready_to_pack','packing','ready_to_ship','shipped','delivered','cancelled','review']
+ .filter(x=>counts[x]).map(x=>'<span class="gn-ship-summary">'+safe(SHIP_LABELS[x])+' <b>'+counts[x]+'</b></span>').join('');
+ root.innerHTML='<div class="gn-ship-summary-row">'+summary+'</div><div class="gn-orders-queue">'+data.map(x=>{
+  const o=x._order,next=SHIP_NEXT[x.status],canUpdate=o?.status==='paid'&&!!next;
+  const stepLabel=SHIP_LABELS[x.status]||x.status;
+  const btnText={packing:'Mulai pengemasan',ready_to_ship:'Selesai dikemas',shipped:'Tandai sudah dikirim',delivered:'Tandai telah diterima'}[next]||'Simpan';
+  const delivery=(x.status==='shipped'||x.status==='delivered')&&x.tracking_number?
+   '<p><b>Pengiriman:</b> '+safe(x.carrier)+' · Resi '+safe(x.tracking_number)+'</p>':'';
+  return '<details class="gn-order-card"><summary><span class="gn-order-number">'+safe(x.order_id)+'</span><span>'+safe(o?.customer_name||'Pelanggan')+'</span>'+
+    pill(stepLabel,x.status==='delivered')+'<span>'+rupiah(o?.amount||0)+'</span><span class="gn-order-more">Detail ▾</span></summary>'+
+    '<div class="gn-order-body"><div><h4>Penerima & alamat kirim</h4>'+orderContact(o)+
+    '<p><b>Alamat:</b><span>'+safe(o?.customer_address||'Belum tersedia')+'</span></p>'+
+    '<h4>Produk yang dipesan</h4><p>'+checkoutItems(o?.items)+'</p></div>'+
+    '<div><h4>Pembayaran & pengiriman</h4><p>Midtrans: '+safe(o?.status||'Belum tersedia')+'</p>'+
+    '<p>Tahap: <b>'+safe(stepLabel)+'</b></p>'+delivery+
+    (!canUpdate?'<p class="gn-ship-warning">'+(o?.status==='paid'?'Tahap ini tidak dapat dilanjutkan.':'Jangan dikemas atau dikirim sebelum pembayaran terverifikasi lunas.')+'</p>':
+    '<form data-shipping-form="'+safe(x.order_id)+'" class="gn-shipment-editor">'+
+    '<input type="hidden" name="status" value="'+safe(next)+'">'+
+    '<label>Kurir / ekspedisi<input name="carrier" maxlength="100" value="'+safe(x.carrier||'')+'" placeholder="Contoh: JNE, J&T, SiCepat" '+(next==='shipped'||next==='delivered'?'required':'')+'></label>'+
+    '<label>Nomor resi<input name="tracking_number" maxlength="120" value="'+safe(x.tracking_number||'')+'" placeholder="Nomor pelacakan paket" '+(next==='shipped'||next==='delivered'?'required minlength="5"':'')+'></label>'+
+    '<label>Catatan admin<textarea name="notes" maxlength="500" rows="2" placeholder="Informasi paket dan ongkir">'+safe(x.fulfillment_notes||'')+'</textarea></label>'+
+    '<p class="gn-shipping-notice">Konfirmasi ongkos kirim kepada pembeli secara terpisah sebelum menyerahkan paket ke ekspedisi.</p>'+
+    '<button type="submit" class="primary small">'+safe(btnText)+' →</button></form>')+
+    '</div></div></details>'
+ }).join('')+'</div>';
+}
+async function updateShipping(form){
+ const button=form.querySelector('button[type="submit"]');const fd=new FormData(form);
+ button.disabled=true;
+ try{
+  const {error}=await db.rpc('gn_set_shipping_progress_v1',{
+   p_order_id:form.dataset.shippingForm,p_status:String(fd.get('status')),
+   p_carrier:String(fd.get('carrier')||'').trim(),
+   p_tracking_number:String(fd.get('tracking_number')||'').trim(),
+   p_notes:String(fd.get('notes')||'').trim()
+  });
+  if(error)throw error;
+  notify('Status pengiriman berhasil diperbarui');
+  await loadView('shipping');
+ }catch(e){notify('Pengiriman: '+(e.message||'Gagal memperbarui'),true)}
+ finally{button.disabled=false}
+}
+
 function inputFor(f,row){const [name,label,kind,required]=f;const value=row?.[name];const req=required?'required':'';const id='field_'+name;const v=value===null||value===undefined?'':String(value);let field;
  if(kind==='checkbox')return '<label class="toggle"><input id="'+id+'" name="'+name+'" type="checkbox" '+(value===true?'checked':'')+'><span>'+safe(label)+'</span></label>';
  if(kind==='textarea')field='<textarea id="'+id+'" name="'+name+'" '+req+' rows="'+(name==='body'?8:4)+'">'+safe(v)+'</textarea>';
@@ -236,7 +320,8 @@ function events(){
  $('#sidebarNav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)loadView(b.dataset.view)});
  $('#newButton').addEventListener('click',()=>openEditor());
  $('#searchBox').addEventListener('input',()=>currentView==='team'?renderTeam():renderTable());
- $('#records').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');if(currentView==='team'){const approve=e.target.closest('[data-approve]');const revoke=e.target.closest('[data-revoke]');if(approve)changeTeam(approve.dataset.approve,true);if(revoke)changeTeam(revoke.dataset.revoke,false);return}const schema=schemas[currentView];if(edit){const r=rows.find(x=>String(x[schema.key])===edit.dataset.edit);if(r)openEditor(r)}else if(del)eraseRow(del.dataset.delete)});
+ $('#records').addEventListener('submit',e=>{const form=e.target.closest('[data-shipping-form]');if(form){e.preventDefault();void updateShipping(form)}});
+ $('#records').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');if(currentView==='team'){const approve=e.target.closest('[data-approve]');const revoke=e.target.closest('[data-revoke]');if(approve)changeTeam(approve.dataset.approve,true);if(revoke)changeTeam(revoke.dataset.revoke,false);return}const jump=e.target.closest('[data-go-shipping]');if(jump){void loadView('shipping');return}if(currentView==='shipping'||currentView==='orders')return;const schema=schemas[currentView];if(edit){const r=rows.find(x=>String(x[schema.key])===edit.dataset.edit);if(r)openEditor(r)}else if(del)eraseRow(del.dataset.delete)});
  $('#closeEditor').addEventListener('click',()=>$('#editorDialog').close());
  $('#cancelEditor').addEventListener('click',()=>$('#editorDialog').close());
  $('#editorForm').addEventListener('submit',saveRow);
