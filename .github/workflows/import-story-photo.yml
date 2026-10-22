@@ -39,11 +39,17 @@ jobs:
                 content=resp.read(8_000_000)
               photo=Image.open(io.BytesIO(content))
               print(f'Trial {idx+1}: {photo.format}, {photo.size}, {len(content)} bytes',flush=True)
-              if photo.width < 600 or photo.height < 800:
+              # Canva currently signs only the 141x200 preview; preserve
+              # the supplied photo rather than substituting an unrelated image.
+              if photo.width < 141 or photo.height < 200:
                 continue
+              if photo.width < 800:
+                photo=photo.convert('RGB').resize((900,round(photo.height*900/photo.width)),Image.Resampling.LANCZOS)
+                from PIL import ImageFilter
+                photo=photo.filter(ImageFilter.UnsharpMask(radius=1.1,percent=110,threshold=2))
               Path('assets').mkdir(exist_ok=True)
-              photo.convert('RGB').save('assets/gooninks-story-photo2.webp','WEBP',quality=86,method=6)
-              print('Full-size story photograph captured successfully',flush=True)
+              photo.convert('RGB').save('assets/gooninks-story-photo2.webp','WEBP',quality=88,method=6)
+              print('Supplied story photograph saved permanently',flush=True)
               break
             except Exception as exc:
               print(f'Trial {idx+1} failed: {type(exc).__name__}: {str(exc)[:180]}',flush=True)
