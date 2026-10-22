@@ -202,27 +202,63 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
  .story-photo{min-height:clamp(410px,125vw,585px)}
  .story-photo span{left:16px;bottom:16px}
 }
-/* Tradition, reimagined — user-supplied black and gold editorial photo. */
-.hero-visual.gn-hero-editorial{background:#25221e;isolation:isolate}
-.hero-visual.gn-hero-editorial::before{
-  content:"";position:absolute;inset:-12%;z-index:0;pointer-events:none;
-  background:url("/assets/gooninks-hero-editorial-1086.webp?v=20261022") center/cover no-repeat;
-  opacity:.75;filter:blur(38px) brightness(.42);mix-blend-mode:normal;
+/* Tradition, reimagined — polished framing of the original user-supplied editorial photograph.
+   Desktop: a crisp, edge-to-edge fashion crop; mobile: the complete portrait and its lettering. */
+.hero-inner:has(.gn-hero-editorial){
+  grid-template-columns:minmax(0,45%) minmax(0,55%);
+  min-height:clamp(610px,55vw,760px);
 }
+.hero-inner:has(.gn-hero-editorial) .hero-copy{
+  min-width:0;
+  justify-content:center;
+  padding-block:clamp(42px,6vw,90px);
+}
+.hero-visual.gn-hero-editorial{
+  min-width:0;
+  min-height:clamp(610px,55vw,760px);
+  overflow:hidden;
+  background:#272521;
+}
+.hero-visual.gn-hero-editorial::before{display:none}
 .hero-visual.gn-hero-editorial::after{display:none}
 .hero-visual.gn-hero-editorial>img{
-  position:absolute;inset:0;width:100%;height:100%;z-index:1;
-  object-fit:contain;object-position:center center;filter:none;
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 28%;
+  filter:none;
 }
 .hero-visual.gn-hero-editorial .hero-image-label{display:none}
-@media(min-width:801px){
-  .hero-inner:has(.gn-hero-editorial){min-height:620px}
+@media(min-width:801px) and (max-width:1100px){
+  .hero-inner:has(.gn-hero-editorial){grid-template-columns:minmax(0,44%) minmax(0,56%);min-height:620px}
   .hero-visual.gn-hero-editorial{min-height:620px}
+  .hero-inner:has(.gn-hero-editorial) .hero-copy{padding:40px 30px}
+}
+@media(min-width:601px) and (max-width:800px){
+  .hero-inner:has(.gn-hero-editorial){grid-template-columns:minmax(0,47%) minmax(0,53%);min-height:550px}
+  .hero-visual.gn-hero-editorial{min-height:550px}
+  .hero-visual.gn-hero-editorial>img{object-position:center 30%}
+  .hero-inner:has(.gn-hero-editorial) .hero-copy{padding:35px 20px 30px 28px}
 }
 @media(max-width:600px){
+  .hero-inner:has(.gn-hero-editorial){grid-template-columns:minmax(0,1fr);min-height:0}
+  .hero-inner:has(.gn-hero-editorial) .hero-copy{padding:47px 22px 38px}
   .hero-visual.gn-hero-editorial{
-    min-height:0;height:clamp(455px,130vw,690px);max-height:none;
+    width:100%;
+    min-height:0;
+    height:auto;
+    max-height:none;
+    aspect-ratio:1086 / 1536;
   }
-  .hero-visual.gn-hero-editorial::before{filter:blur(26px) brightness(.42)}
+  .hero-visual.gn-hero-editorial>img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    object-position:center;
+  }
 }
 @media(prefers-reduced-motion:reduce){.hero-visual.gn-hero-editorial>img{transition:none}}
