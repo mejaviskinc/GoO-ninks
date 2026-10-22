@@ -27,6 +27,27 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check gn-midtrans.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('index.html','utf8');
+          const app = fs.readFileSync('app.js','utf8');
+          const mid = fs.readFileSync('gn-midtrans.js','utf8');
+          const includes = (s,x) => { if(!s.includes(x))throw Error('Missing checkout safety condition: '+x); };
+          const config = html.indexOf('src="gn-config.js"');
+          const storefront = html.indexOf('src="app.js?');
+          const gateway = html.indexOf('src="gn-midtrans.js?');
+          if(!(config>=0&&storefront>config&&gateway>storefront))throw Error('Midtrans must load after Supabase config and storefront');
+          includes(app,"GN_MIDTRANS_OPEN()");
+          includes(app,"document.dispatchEvent(new CustomEvent('gn-cart-changed'");
+          includes(app,String.fromCharCode(36,36)+"('[data-i18n]').forEach");
+          includes(mid,'window.GN_MIDTRANS_READY=available');
+          includes(mid,'primary.textContent=words.continue');
+          includes(mid,'window.location.assign(url.href)');
+          includes(mid,"['app.sandbox.midtrans.com','app.midtrans.com']");
+          includes(html,'id="gnCheckoutWhatsAppBackup"');
+          includes(html,'id="midtransForm"');
+          console.log('Midtrans primary payment flow and script order PASSED');
+          NODE
           node --check gn-payment-status.js
           node --check admin.js
           grep -q 'id="midtransForm"' index.html
