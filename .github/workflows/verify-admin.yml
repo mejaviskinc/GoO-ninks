@@ -58,7 +58,7 @@ jobs:
           grep -q 'id="signupForm"' admin.html
           grep -q 'id="teamNav"' admin.html
           grep -q 'id="midtransForm"' index.html
-          grep -q 'src="gn-midtrans.js"' index.html
+          grep -q 'src="gn-midtrans.js' index.html
           grep -q 'data-view="orders"' admin.html
           grep -q 'gn_payment_reserve_v1' supabase/functions/gn-midtrans-checkout/index.ts
           grep -q 'SHA-512' supabase/functions/gn-midtrans-webhook/index.ts
