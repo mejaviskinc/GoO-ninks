@@ -78,9 +78,9 @@ async function changeTeam(userId,approve){
  }catch(err){notify('Gagal memperbarui akses: '+err.message,true)}
 }
 
-async function logout(){if(db)await db.auth.signOut();currentUser=null;currentRole=null;rows=[];teamRows=[];$('#appShell').hidden=true;$('#authScreen').hidden=false;$('#sidebar').classList.remove('open');switchAuth('login')}
+async function logout(){if(db)await db.auth.signOut();currentUser=null;currentRole=null;rows=[];teamRows=[];$('#appShell').hidden=true;$('#authScreen').hidden=false;setMobileMenu(false);switchAuth('login')}
 async function fetchRows(view){const schema=schemas[view];const {data,error}=await db.from(schema.table).select('*').order('created_at',{ascending:false}).limit(500);if(error)throw error;return data||[]}
-async function loadView(view){if(loading)return;loading=true;currentView=view;$('#sidebar').classList.remove('open');document.querySelectorAll('.nav-link').forEach(el=>el.classList.toggle('selected',el.dataset.view===view));const meta=schemas[view]||(view==='team'&&currentRole==='owner'?{title:'Akun Tim',desc:'Setujui atau cabut akses staf yang sudah memverifikasi email.'}:null);if(view==='team'&&currentRole!=='owner')return notify('Menu khusus pemilik',true);const title=meta?.title||'Overview';$('#pageTitle').textContent=title;$('#breadcrumb').textContent=title;$('#pageDesc').textContent=meta?.desc||'Ringkasan operasional dan konten website GoO Ninks.';$('#newButton').hidden=!schemas[view]||view==='orders';$('#overviewScreen').hidden=view!=='overview';$('#moduleScreen').hidden=view==='overview';$('#systemNotice').hidden=true;
+async function loadView(view){if(loading)return;loading=true;currentView=view;setMobileMenu(false);document.querySelectorAll('.nav-link').forEach(el=>el.classList.toggle('selected',el.dataset.view===view));const meta=schemas[view]||(view==='team'&&currentRole==='owner'?{title:'Akun Tim',desc:'Setujui atau cabut akses staf yang sudah memverifikasi email.'}:null);if(view==='team'&&currentRole!=='owner')return notify('Menu khusus pemilik',true);const title=meta?.title||'Overview';$('#pageTitle').textContent=title;$('#breadcrumb').textContent=title;$('#pageDesc').textContent=meta?.desc||'Ringkasan operasional dan konten website GoO Ninks.';$('#newButton').hidden=!schemas[view]||view==='orders';$('#overviewScreen').hidden=view!=='overview';$('#moduleScreen').hidden=view==='overview';$('#systemNotice').hidden=true;
  try{if(view==='team'){await loadTeam()}else if(!schemas[view])await overview();else {rows=await fetchRows(view);$('#searchBox').value='';renderTable()}}catch(e){$('#systemNotice').hidden=false;$('#systemNotice').textContent='Gagal memuat data: '+e.message;notify('Gagal memuat data',true)}finally{loading=false}}
 async function overview(){const result=await Promise.all(Object.keys(schemas).map(async name=>{const data=await fetchRows(name);return [name,data]}));const x=Object.fromEntries(result);const totalArticles=x.articles.filter(a=>a.status==='published').length,liveAds=x.ads.filter(a=>a.active).length,pending=x.leads.filter(a=>a.stage==='new').length,low=x.inventory.filter(a=>a.stock!==null&&a.stock<=a.low_stock_threshold);const metrics=[['Artikel terbit',totalArticles,'dari '+x.articles.length+' artikel'],['Iklan aktif',liveAds,'dari '+x.ads.length+' iklan'],['Leads baru',pending,'perlu tindak lanjut'],['Produk katalog',x.inventory.length,low.length+' stok rendah']];$('#metrics').innerHTML=metrics.map(m=>'<div class="metric"><div class="metric-label">'+safe(m[0])+'</div><div class="metric-value">'+safe(m[1])+'</div><div class="metric-note">'+safe(m[2])+'</div></div>').join('');
  const all=[...x.articles.map(a=>({what:'Artikel · '+a.title,when:a.created_at,state:a.status})),...x.leads.map(a=>({what:'Lead · '+a.name,when:a.created_at,state:a.stage})),...x.promotions.map(a=>({what:'Promosi · '+a.title,when:a.created_at,state:a.active?'aktif':'nonaktif'}))].sort((a,b)=>new Date(b.when)-new Date(a.when)).slice(0,7);
@@ -112,13 +112,17 @@ async function saveRow(e){e.preventDefault();const schema=schemas[currentView];c
  }catch(err){notify(err.message||'Gagal menyimpan',true)}finally{save.disabled=false;save.textContent='Simpan perubahan'}
 }
 async function eraseRow(key){const schema=schemas[currentView];const record=rows.find(r=>String(r[schema.key])===key);if(!record)return;if(!confirm('Hapus '+record[schema.headline]+'? Tindakan ini tidak bisa dibatalkan.'))return;try{const {error}=await db.from(schema.table).delete().eq(schema.key,key);if(error)throw error;notify('Data berhasil dihapus');await loadView(currentView)}catch(e){notify(e.message,true)}}
+function setMobileMenu(open){const sidebar=$('#sidebar');const trigger=$('#mobileNav');if(!sidebar||!trigger)return;sidebar.classList.toggle('open',open);trigger.setAttribute('aria-expanded',String(open));document.body.classList.toggle('gn-admin-menu-open',open)}
 function events(){
  $('#loginForm').addEventListener('submit',login);
  $('#signupForm').addEventListener('submit',signup);
  $('#showSignup').addEventListener('click',()=>switchAuth('signup'));
  $('#showLogin').addEventListener('click',()=>switchAuth('login'));
  $('#logoutButton').addEventListener('click',logout);
- $('#mobileNav').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
+ $('#mobileNav').addEventListener('click',()=>setMobileMenu(!$('#sidebar').classList.contains('open')));
+ document.addEventListener('click',e=>{if(window.innerWidth<=800&&$('#sidebar').classList.contains('open')&&!e.target.closest('#sidebar,#mobileNav'))setMobileMenu(false)});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')setMobileMenu(false)});
+ window.addEventListener('resize',()=>{if(window.innerWidth>800)setMobileMenu(false)});
  $('#sidebarNav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)loadView(b.dataset.view)});
  $('#newButton').addEventListener('click',()=>openEditor());
  $('#searchBox').addEventListener('input',()=>currentView==='team'?renderTeam():renderTable());
