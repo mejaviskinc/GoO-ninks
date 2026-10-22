@@ -18,18 +18,83 @@ const schemas={
  inventory:{title:'Inventori',desc:'Atur harga, stok, foto, dan visibilitas 20 look katalog 2026.',table:'gn_inventory',key:'sku',headline:'product_name',fields:[
   ['sku','Kode produk (SKU)','text',true],['product_name','Nama koleksi','text',true],['price','Harga (Rp)','number',true],['stock','Stok (kosongkan bila belum diketahui)','number',false],['low_stock_threshold','Peringatan stok minimum','number',false],['image_url','Foto produk','image',false],['visible','Tampilkan di website','checkbox',false]]}
 };
-let db=null,currentUser=null,currentRole=null,currentView='overview',rows=[],teamRows=[],editing=null,toastTimer=null,loading=false;
+let db=null,currentUser=null,currentRole=null,currentView='overview',rows=[],teamRows=[],editing=null,toastTimer=null,loading=false,recovering=false;
 function notify(s,isError=false){const t=$('#toast');t.textContent=s;t.style.background=isError?'#9f4e45':'#28372b';t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500)}
 function setAlert(message){const a=$('#loginError');a.hidden=!message;a.textContent=message||''}
 function setInfo(message){const a=$('#authInfo');a.hidden=!message;a.textContent=message||''}
-function switchAuth(mode){const signing=mode==='signup';$('#signupForm').hidden=!signing;$('#loginForm').hidden=signing;$('#showSignup').classList.toggle('active',signing);$('#showLogin').classList.toggle('active',!signing);$('#showSignup').setAttribute('aria-selected',String(signing));$('#showLogin').setAttribute('aria-selected',String(!signing));setAlert('');setInfo('')}
+function switchAuth(mode){
+ const signing=mode==='signup',logging=mode==='login';
+ const other=mode==='forgot'||mode==='recovery';
+ $('#authTabs').hidden=other;
+ $('#signupForm').hidden=!signing;
+ $('#loginForm').hidden=!logging;
+ $('#forgotForm').hidden=mode!=='forgot';
+ $('#recoveryForm').hidden=mode!=='recovery';
+ $('#showSignup').classList.toggle('active',signing);
+ $('#showLogin').classList.toggle('active',logging);
+ $('#showSignup').setAttribute('aria-selected',String(signing));
+ $('#showLogin').setAttribute('aria-selected',String(logging));
+ setAlert('');setInfo('');
+}
 async function getStaff(user){if(!user)return null;const {data,error}=await db.from('gn_admins').select('role').eq('user_id',user.id).maybeSingle();if(error)throw error;return data}
 async function activate(user){const staff=await getStaff(user);if(!staff){await db.auth.signOut();throw Error('Akun telah terdaftar tetapi belum disetujui sebagai admin. Pastikan email sudah diverifikasi, lalu minta persetujuan pemilik GoO Ninks.')}currentUser=user;currentRole=staff.role;$('#teamNav').hidden=currentRole!=='owner';$('#accountEmail').textContent=user.email||'';$('#authScreen').hidden=true;$('#appShell').hidden=false;setAlert('');setInfo('');await loadView('overview')}
-async function boot(){if(!cfg||!window.supabase?.createClient){setAlert('Koneksi aplikasi belum siap. Muat ulang halaman, atau periksa akses ke CDN Supabase.');return}
+async function boot(){
+ if(!cfg||!window.supabase?.createClient){setAlert('Koneksi aplikasi belum siap. Muat ulang halaman, atau periksa akses ke CDN Supabase.');return}
+ recovering=/(?:[?#&])type=recovery(?:[&#]|$)/.test(window.location.href);
  db=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- try{const {data,error}=await db.auth.getUser();if(error&&!/session missing/i.test(error.message))console.warn('Session check:',error.message);if(data?.user)await activate(data.user)}catch(e){setAlert(e.message);$('#authScreen').hidden=false;$('#appShell').hidden=true}
+ db.auth.onAuthStateChange((event)=>{
+  if(event==='PASSWORD_RECOVERY'){
+   recovering=true;
+   $('#authScreen').hidden=false;$('#appShell').hidden=true;
+   switchAuth('recovery');
+   setInfo('Silakan buat kata sandi baru. Tautan pemulihan hanya dapat digunakan sesuai masa berlakunya.');
+  }
+ });
+ try{
+  const {data,error}=await db.auth.getUser();
+  if(error&&!/session missing/i.test(error.message))console.warn('Session check:',error.message);
+  if(data?.user&&!recovering)await activate(data.user);
+  else if(recovering&&!data?.user){
+   switchAuth('login');
+   setAlert('Tautan pemulihan tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru melalui Lupa kata sandi.');
+  }
+ }catch(e){setAlert(e.message);$('#authScreen').hidden=false;$('#appShell').hidden=true}
 }
-async function login(e){e.preventDefault();const b=$('#loginButton');b.disabled=true;setAlert('');try{if(!db)throw Error('Koneksi database belum siap');const form=new FormData(e.currentTarget);const {data,error}=await db.auth.signInWithPassword({email:String(form.get('email')).trim(),password:String(form.get('password'))});if(error)throw error;await activate(data.user);e.currentTarget.reset()}catch(err){setAlert(err.message||'Login gagal');notify('Login gagal',true)}finally{b.disabled=false}}
+async function login(e){e.preventDefault();const b=$('#loginButton');b.disabled=true;setAlert('');try{if(!db)throw Error('Koneksi database belum siap');const form=new FormData(e.currentTarget);const {data,error}=await db.auth.signInWithPassword({email:String(form.get('email')).trim(),password:String(form.get('password'))});if(error)throw error;await activate(data.user);e.currentTarget.reset()}catch(err){const message=err?.message||'Login gagal';setAlert(/invalid login credentials/i.test(message)?'Email atau kata sandi tidak cocok. Periksa email akun Anda, atau pilih Lupa kata sandi untuk membuat yang baru.':message);notify('Login gagal',true)}finally{b.disabled=false}}
+
+
+async function requestPasswordReset(e){
+ e.preventDefault();
+ const button=$('#forgotButton');button.disabled=true;setAlert('');setInfo('');
+ try{
+  if(!db)throw Error('Koneksi Supabase belum tersedia. Muat ulang halaman.');
+  const email=String(new FormData(e.currentTarget).get('email')||'').trim().toLowerCase();
+  const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:'https://gooninks.co.id/admin.html'});
+  if(error)throw error;
+  setInfo('Jika alamat email tersebut terdaftar, tautan pemulihan telah dikirim. Periksa kotak masuk atau spam. Buka tautan dari perangkat yang sama jika memungkinkan.');
+ }catch(err){setAlert(err?.message||'Tidak dapat mengirim tautan pemulihan.')}
+ finally{button.disabled=false}
+}
+async function saveNewPassword(e){
+ e.preventDefault();
+ const button=$('#recoveryButton');button.disabled=true;setAlert('');setInfo('');
+ try{
+  if(!db)throw Error('Koneksi Supabase belum tersedia. Muat ulang halaman.');
+  const form=new FormData(e.currentTarget),password=String(form.get('password')||'');
+  if(password.length<12||!/[a-zA-Z]/.test(password)||!/[0-9]/.test(password))throw Error('Gunakan minimal 12 karakter yang mengandung huruf dan angka.');
+  if(password!==form.get('confirm_password'))throw Error('Konfirmasi kata sandi tidak sama.');
+  const {data:{user},error:sessionError}=await db.auth.getUser();
+  if(sessionError||!user)throw Error('Sesi pemulihan kedaluwarsa. Minta tautan baru melalui Lupa kata sandi.');
+  const {error}=await db.auth.updateUser({password});
+  if(error)throw error;
+  await db.auth.signOut();
+  recovering=false;
+  e.currentTarget.reset();
+  switchAuth('login');
+  setInfo('Kata sandi berhasil diperbarui. Silakan masuk kembali dengan kata sandi baru.');
+ }catch(err){setAlert(err?.message||'Gagal memperbarui kata sandi.')}
+ finally{button.disabled=false}
+}
 
 async function signup(e){
  e.preventDefault();
@@ -116,6 +181,10 @@ function setMobileMenu(open){const sidebar=$('#sidebar');const trigger=$('#mobil
 function events(){
  $('#loginForm').addEventListener('submit',login);
  $('#signupForm').addEventListener('submit',signup);
+ $('#forgotForm').addEventListener('submit',requestPasswordReset);
+ $('#recoveryForm').addEventListener('submit',saveNewPassword);
+ $('#forgotPassword').addEventListener('click',()=>{switchAuth('forgot');$('#forgotForm [name="email"]').value=$('#loginForm [name="email"]').value.trim()});
+ $('#backFromForgot').addEventListener('click',()=>switchAuth('login'));
  $('#showSignup').addEventListener('click',()=>switchAuth('signup'));
  $('#showLogin').addEventListener('click',()=>switchAuth('login'));
  $('#logoutButton').addEventListener('click',logout);
