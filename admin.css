@@ -71,3 +71,103 @@
  .auth-content{padding:28px 20px}.metric{padding:15px}.panel-heading{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.sidebar,.toast,.primary{transition:none}}
+/* GoO Ninks Admin Studio — cohesive spacing, legible logo & mobile usability · 2026-10-22 */
+html{scroll-behavior:smooth}
+body{overflow-x:clip}
+.auth-art{background:linear-gradient(145deg,#394337,#242b25)}
+.auth-art:before,.auth-art:after{pointer-events:none}
+.auth-layout,.shell{width:100%;max-width:100%}
+.auth-card{max-width:100%;min-width:0}
+.auth-card h2{letter-spacing:-.035em}
+.auth-card>p{line-height:1.8}
+.gn-brand-auth{align-self:flex-start}
+.gn-brand-auth img,.gn-admin-form-logo img,.gn-sidebar-brand img,.gn-topbar-full-logo{object-fit:contain}
+.gn-brand-auth small,.gn-sidebar-brand small{line-height:1.5;text-align:center}
+.gn-admin-form-logo{margin-bottom:18px;width:118px}
+.gn-sidebar-brand{margin-bottom:22px;padding:0 12px 20px}
+.gn-sidebar-brand img{width:112px}
+.sidebar{z-index:16}
+.sidebar-label{margin-top:2px}
+.nav-link{min-height:45px;transition:background .2s,color .2s}
+.nav-link span{width:25px;flex-shrink:0}
+.sidebar-bottom a,.sidebar-bottom button{min-height:40px;display:flex;align-items:center}
+.topbar{backdrop-filter:blur(10px)}
+.breadcrumbs{flex:1;min-width:0;overflow-wrap:anywhere}
+.page-head{gap:20px}
+.page-head h1{text-wrap:balance}
+.metrics,.panel-grid{min-width:0}
+.metric{position:relative;overflow:hidden}
+.metric:before{content:"";position:absolute;left:23px;right:23px;top:0;height:2px;background:linear-gradient(90deg,#c19e5e,#d7d7c8,transparent)}
+.metric-value{overflow-wrap:anywhere}
+.panel{min-width:0}
+.panel-heading h2{line-height:1.3}
+.activity-list .row-item,.stock-item{align-items:flex-start}
+.activity-list .row-item>* ,.stock-item>*{min-width:0}
+.notice{line-height:1.65;overflow-wrap:anywhere}
+.toolbar{flex-wrap:wrap}
+.search-control input{min-width:0;font-size:14px}
+.records{max-width:100%;overscroll-behavior-x:contain}
+.record-table{width:100%}
+.record-table th,.record-table td{vertical-align:middle}
+.record-table tr:hover td{background:#fafbf8}
+.record-table .actions button{min-height:36px}
+.editor{overflow:hidden}
+.editor-head,.editor-footer{gap:12px}
+.editor-body{overscroll-behavior:contain}
+.editor-footer{background:#fff}
+.field input,.field textarea,.field select{max-width:100%}
+.field textarea{line-height:1.65}
+.auth-card input:focus,.field input:focus,.field textarea:focus,.field select:focus,.search-control input:focus{outline:2px solid #b49a60;outline-offset:2px}
+@media(max-width:1100px){
+ .content{padding:32px 25px 70px}
+ .topbar{padding-left:25px;padding-right:25px}
+ .metrics{gap:12px}
+}
+@media(max-width:800px){
+ .auth-layout{grid-template-columns:1fr}
+ .auth-art{grid-template-columns:92px minmax(0,1fr);gap:18px;padding:24px 20px;min-height:0}
+ .gn-brand-auth,.gn-brand-auth img{width:92px}
+ .auth-message .eyebrow{font-size:8px;letter-spacing:.12em}
+ .auth-message h1{font-size:clamp(28px,5vw,37px);margin:8px 0 0}
+ .auth-content{padding:30px 20px 50px}
+ .auth-card{width:min(420px,100%)}
+ .gn-admin-form-logo{width:110px;margin-bottom:16px}
+ .sidebar{width:min(272px,calc(100vw - 48px));height:100dvh}
+ body.gn-admin-menu-open:before{content:"";position:fixed;inset:0;z-index:15;background:#11191080}
+ .mobile-nav{display:grid;place-items:center;width:44px;height:44px;border-radius:8px}
+ .mobile-nav:hover{background:#f0f2ec}
+ .topbar{min-height:64px;padding:10px 14px}
+ .breadcrumbs{font-size:11px;line-height:1.6}
+ .content{padding:28px 16px 65px}
+ .page-head{flex-wrap:wrap;align-items:flex-start;margin-bottom:22px}
+ .page-head h1{font-size:clamp(30px,7vw,38px)}
+ .page-head .small{min-height:44px}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:15px}
+ .metric{padding:18px 16px;min-height:122px}
+ .metric:before{left:16px;right:16px}
+ .metric-label{font-size:11px;line-height:1.5;margin-bottom:15px}
+ .metric-note{line-height:1.4}
+ .panel{padding:19px 16px}
+ .panel-heading{align-items:flex-start;gap:10px}
+ .panel-heading h2{font-size:18px}
+ .records{margin-inline:-16px;padding-inline:16px}
+ .record-table{min-width:640px}
+ .record-table td{padding:13px 10px}
+ .editor{width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+ .editor-head,.editor-footer{padding:16px}
+ .editor-body{padding:18px 16px;max-height:calc(100dvh - 190px)}
+ .editor-footer{position:sticky;bottom:0}
+ .editor-footer button{min-height:44px}
+}
+@media(max-width:390px){
+ .auth-art{grid-template-columns:78px minmax(0,1fr);gap:12px;padding:20px 15px}
+ .gn-brand-auth,.gn-brand-auth img{width:78px}
+ .auth-message h1{font-size:clamp(25px,7vw,31px)}
+ .auth-content{padding:26px 16px 45px}
+ .metrics{gap:8px}
+ .metric{padding:15px 12px;min-height:120px}
+ .metric:before{left:12px;right:12px}
+ .metric-value{font-size:clamp(24px,7vw,29px)}
+ .panel{padding:16px 13px}
+}
+@media(prefers-reduced-motion:reduce){.nav-link{transition:none}}
