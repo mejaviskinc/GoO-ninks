@@ -46,6 +46,8 @@ window.GN_MIDTRANS_OPEN=()=>{
 const count=()=>window.GN_CART_SNAPSHOT?.().reduce((n,x)=>n+x.qty,0)||0;
 const sync=()=>{pay.disabled=processing||count()===0};
 const message=(key,bad=false)=>{lastMessage=key;lastError=bad;info.textContent=tr(key);info.classList.toggle('gn-midtrans-error',bad)};
+updateCheckoutAction();
+sync();
 window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction()});
 document.addEventListener('gn-cart-changed',sync);
 fetch(endpoint,{headers:{apikey:cfg.publishableKey},cache:'no-store'}).then(async res=>{
@@ -57,7 +59,7 @@ fetch(endpoint,{headers:{apikey:cfg.publishableKey},cache:'no-store'}).then(asyn
  message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
  updateCheckoutAction();
  sync();
-}).catch(()=>{available=false;window.GN_MIDTRANS_READY=false;form.hidden=true;updateCheckoutAction();message('offline',true)});
+}).catch(()=>{available=false;window.GN_MIDTRANS_READY=false;form.hidden=true;updateCheckoutAction();message('offline',true);sync()});
 
 async function requestManualOrder(customer,items){
   // Manual fallback is an inquiry only: never mark an order paid or create shipping.
