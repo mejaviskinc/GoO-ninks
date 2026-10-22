@@ -1,0 +1,60 @@
+name: Import user-supplied GoO Ninks photo in 4K
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-heritage-4k.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish-photo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Prepare imaging tools
+        run: python -m pip install --quiet Pillow
+      - name: Fetch exact uploaded photograph and upscale for 4K web display
+        env:
+          USER_IMAGE_EXPORT: "https://export-download.canva.com/35ee945a-a3fd-477a-b57a-ec20bb5feedf/0/0001-8141901974039982608.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20261022%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261022T012000Z&X-Amz-Expires=20613&X-Amz-Signature=7c25a11d767284f00cc05dcd21e6fd0f0cd772ac2a6c56aa97e8106d2a34d19c&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Thu%2C%2022%20Oct%202026%2007%3A03%3A33%20GMT"
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, io, hashlib, urllib.request
+          from pathlib import Path
+          from PIL import Image, ImageFilter, ImageOps
+          url=os.environ['USER_IMAGE_EXPORT']
+          req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(req,timeout=60) as response:
+              content=response.read(16_000_000)
+          original=Image.open(io.BytesIO(content)).convert('RGB')
+          print('Exported image:',original.size,'bytes:',len(content))
+          if original.width < 1000 or original.height < 1400:
+              raise RuntimeError('Canva image was only a thumbnail; refusing to publish low-resolution photo.')
+          if not (0.68 <= original.width/original.height <= 0.74):
+              raise RuntimeError('Unexpected image aspect ratio for two-look portrait photo')
+          target_h=3840
+          target_w=round(original.width*target_h/original.height)
+          print('4K output resolution:',(target_w,target_h))
+          resized=original.resize((target_w,target_h),Image.Resampling.LANCZOS)
+          resized=resized.filter(ImageFilter.UnsharpMask(radius=1.2,percent=80,threshold=2))
+          dest=Path('assets/gooninks-story-photo2.webp')
+          dest.parent.mkdir(parents=True,exist_ok=True)
+          resized.save(dest,'WEBP',quality=90,method=6)
+          if dest.stat().st_size < 170_000: 
+              raise RuntimeError('Generated 4K asset is unexpectedly small; aborting replacement')
+          print('Published image:',dest.stat().st_size,'bytes; SHA256:',hashlib.sha256(dest.read_bytes()).hexdigest())
+          PY
+      - name: Commit permanent website photo
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/gooninks-story-photo2.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: install exact user-supplied GoO Ninks photo at 4K dimensions"
+            git push origin HEAD:main
+          fi
