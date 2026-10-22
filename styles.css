@@ -202,3 +202,27 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
  .story-photo{min-height:clamp(410px,125vw,585px)}
  .story-photo span{left:16px;bottom:16px}
 }
+/* Tradition, reimagined — user-supplied black and gold editorial photo. */
+.hero-visual.gn-hero-editorial{background:#25221e;isolation:isolate}
+.hero-visual.gn-hero-editorial::before{
+  content:"";position:absolute;inset:-12%;z-index:0;pointer-events:none;
+  background:url("/assets/gooninks-hero-editorial-1086.webp?v=20261022") center/cover no-repeat;
+  opacity:.75;filter:blur(38px) brightness(.42);mix-blend-mode:normal;
+}
+.hero-visual.gn-hero-editorial::after{display:none}
+.hero-visual.gn-hero-editorial>img{
+  position:absolute;inset:0;width:100%;height:100%;z-index:1;
+  object-fit:contain;object-position:center center;filter:none;
+}
+.hero-visual.gn-hero-editorial .hero-image-label{display:none}
+@media(min-width:801px){
+  .hero-inner:has(.gn-hero-editorial){min-height:620px}
+  .hero-visual.gn-hero-editorial{min-height:620px}
+}
+@media(max-width:600px){
+  .hero-visual.gn-hero-editorial{
+    min-height:0;height:clamp(455px,130vw,690px);max-height:none;
+  }
+  .hero-visual.gn-hero-editorial::before{filter:blur(26px) brightness(.42)}
+}
+@media(prefers-reduced-motion:reduce){.hero-visual.gn-hero-editorial>img{transition:none}}
