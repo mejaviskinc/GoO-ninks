@@ -322,3 +322,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .header-actions{gap:1px}
 }
 @media(prefers-reduced-motion:reduce){.language-select{transition:none}}
+
+/* Checkout payment-primary path */
+.gn-whatsapp-alternative[hidden]{display:none!important}
+.gn-whatsapp-alternative{
+ display:block;text-align:center;font-size:12px;font-weight:600;color:#53634d;
+ margin:9px auto 3px;padding:11px 12px;text-decoration:underline;text-underline-offset:4px;
+}
+.gn-whatsapp-alternative:hover{color:#2c3d2b}
+.gn-midtrans-section:has(form:not([hidden])){border-top-color:#acb79e}
+.gn-midtrans-section:has(form:not([hidden])) .gn-midtrans-head strong{color:#283f2f}
+.gn-midtrans-section input:focus-visible,.gn-midtrans-section textarea:focus-visible{outline:2px solid #8a7953;outline-offset:2px}
+.gn-midtrans-pay:not(:disabled):hover{background:#465443}
+@media(max-width:600px){.gn-midtrans-pay{min-height:48px;width:100%}}
