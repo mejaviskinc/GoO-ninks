@@ -189,3 +189,29 @@ body{overflow-x:clip}
 .gn-payment-readiness-links button,.gn-payment-readiness-links a{display:inline-flex;align-items:center;justify-content:center;min-height:41px;padding:10px 14px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #cbd2c5;background:white;color:#3b5541}
 .gn-payment-readiness-links button:hover,.gn-payment-readiness-links a:hover{background:#e3eadd}
 @media(max-width:550px){.gn-payment-readiness-links{display:grid;grid-template-columns:1fr}.gn-payment-readiness-links button,.gn-payment-readiness-links a{width:100%}}
+
+/* Fulfillment dashboard queue / paid-only shipping controls */
+.gn-orders-queue{display:grid;gap:13px;padding:8px 0}
+.gn-order-card{border:1px solid #d8ddd3;border-radius:10px;background:#fff;overflow:hidden}
+.gn-order-card[open]{box-shadow:0 8px 25px #2634250f;border-color:#adbca8}
+.gn-order-card summary{cursor:pointer;display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(120px,1.1fr) auto auto auto;gap:13px;align-items:center;min-height:62px;padding:16px 20px;font-size:12px;color:#39443a;list-style:none}
+.gn-order-card summary::-webkit-details-marker{display:none}
+.gn-order-card summary:hover{background:#f6f7f1}
+.gn-order-number{font-weight:750;overflow-wrap:anywhere}
+.gn-order-more{font-size:11px;color:#728073;white-space:nowrap}
+.gn-order-body{padding:24px;border-top:1px solid #e0e6da;background:#fafbf7;display:grid;grid-template-columns:1fr 1fr;gap:28px;overflow-wrap:anywhere}
+.gn-order-body h4{font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin:0 0 11px;color:#324331}
+.gn-order-body p{font-size:12px;line-height:1.85;margin:8px 0 14px;color:#505d51}
+.gn-order-body p span{display:block;white-space:pre-line}
+.gn-order-body button:not(.primary){border:1px solid #94a88e;background:white;color:#3c5541;padding:12px 17px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700}
+.gn-ship-summary-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 5px}
+.gn-ship-summary{padding:9px 12px;background:#f1f3ec;border-radius:6px;font-size:11px;color:#405040;border:1px solid #e3e9de}
+.gn-ship-summary b{margin-left:6px;font-weight:800}
+.gn-shipment-editor{display:grid;gap:13px;margin:12px 0 0}
+.gn-shipment-editor label{display:grid;gap:7px;font-size:12px;color:#475849}
+.gn-shipment-editor input,.gn-shipment-editor textarea{border:1px solid #ccd7c9;background:#fff;padding:11px 12px;border-radius:6px;font:inherit;font-size:13px;color:#27382a;width:100%}
+.gn-shipment-editor button{justify-self:start}
+.gn-shipping-notice,.gn-ship-warning{font-size:11px!important;color:#806a43!important;line-height:1.6!important;padding:9px 12px;background:#fbf5e6;border-left:3px solid #c3a36a}
+.gn-shipping-line-gap{height:7px}
+@media(max-width:850px){.gn-order-card summary{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:16px}.gn-order-card summary>span:last-child{grid-column:2;justify-self:end}.gn-order-body{grid-template-columns:1fr;padding:17px;gap:22px}}
+@media(max-width:400px){.gn-order-card summary{grid-template-columns:1fr 1fr}.gn-order-card .pill{max-width:100%;word-break:break-word}.gn-order-more{font-size:10px}}
