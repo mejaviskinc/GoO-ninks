@@ -180,3 +180,12 @@ body{overflow-x:clip}
 .auth-card form[hidden],.auth-tabs[hidden]{display:none!important}
 #recoveryForm,#forgotForm{width:100%}
 #recoveryForm .primary,#forgotForm .primary{margin-bottom:8px}
+/* Midtrans readiness panel: no keys are ever handled in the browser. */
+.gn-payment-readiness{margin:20px 0 24px;padding:clamp(20px,2.8vw,32px);background:#f1f2eb;border:1px solid #d5ddce}
+.gn-payment-readiness .panel-heading{margin-bottom:14px}
+.gn-payment-readiness-summary{color:#3d493f;font-size:13px;line-height:1.7;margin:5px 0 9px}
+.gn-payment-readiness-note{font-size:12px;color:#6d756d;line-height:1.65;margin:20px 0 0}
+.gn-payment-readiness-links{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.gn-payment-readiness-links button,.gn-payment-readiness-links a{display:inline-flex;align-items:center;justify-content:center;min-height:41px;padding:10px 14px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #cbd2c5;background:white;color:#3b5541}
+.gn-payment-readiness-links button:hover,.gn-payment-readiness-links a:hover{background:#e3eadd}
+@media(max-width:550px){.gn-payment-readiness-links{display:grid;grid-template-columns:1fr}.gn-payment-readiness-links button,.gn-payment-readiness-links a{width:100%}}
