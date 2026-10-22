@@ -171,3 +171,12 @@ body{overflow-x:clip}
  .panel{padding:16px 13px}
 }
 @media(prefers-reduced-motion:reduce){.nav-link{transition:none}}
+/* Account recovery is part of the admin auth card, never a public admin bypass. */
+.gn-auth-textbtn{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:43px;margin:0 0 15px;padding:10px 12px;border:1px solid transparent;background:transparent;color:var(--olive);font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.gn-auth-textbtn:hover{background:#f0f2ec;border-color:#eaeee6}
+.gn-auth-explain{font-size:12px;line-height:1.75;color:var(--mute);margin:3px 0 22px}
+.auth-card .auth-info{margin:13px 0 16px;padding:13px 14px;border:1px solid #cbd9c5;border-radius:8px;color:#34563b;background:#f0f7ee;font-size:12px;line-height:1.65}
+.auth-card .alert{margin:12px 0 16px;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+.auth-card form[hidden],.auth-tabs[hidden]{display:none!important}
+#recoveryForm,#forgotForm{width:100%}
+#recoveryForm .primary,#forgotForm .primary{margin-bottom:8px}
