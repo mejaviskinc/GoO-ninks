@@ -151,6 +151,47 @@ async function overview(){const result=await Promise.all(Object.keys(schemas).ma
  const all=[...x.articles.map(a=>({what:'Artikel · '+a.title,when:a.created_at,state:a.status})),...x.leads.map(a=>({what:'Lead · '+a.name,when:a.created_at,state:a.stage})),...x.promotions.map(a=>({what:'Promosi · '+a.title,when:a.created_at,state:a.active?'aktif':'nonaktif'}))].sort((a,b)=>new Date(b.when)-new Date(a.when)).slice(0,7);
  $('#activity').innerHTML=all.length?all.map(a=>'<div class="row-item"><div><strong>'+safe(a.what)+'</strong><span>'+dateText(a.when)+'</span></div><span class="pill">'+safe(a.state)+'</span></div>').join(''):'<div class="empty"><strong>Belum ada aktivitas</strong>Mulai dari membuat artikel atau promosi pertama.</div>';
  $('#stockAlert').innerHTML=low.length?low.slice(0,8).map(p=>'<div class="stock-item"><div><strong>'+safe(p.product_name)+'</strong><span>'+safe(p.sku)+'</span></div><span class="inventory-warning">'+Number(p.stock)+' tersisa</span></div>').join(''):'<div class="empty"><strong>Stok aman</strong>Belum ada produk dengan stok terkonfirmasi di bawah batas. Stok yang belum diketahui tidak dihitung.</div>';
+ void refreshPaymentReadiness(x.inventory);
+}
+async function refreshPaymentReadiness(inventory){
+ const target=$('#paymentReadiness');
+ if(!target)return;
+ const visible=inventory.filter(p=>p.visible!==false);
+ const confirmed=visible.filter(p=>Number.isInteger(p.stock)&&p.stock>0);
+ const unknown=visible.filter(p=>p.stock===null||p.stock===undefined);
+ const soldOut=visible.filter(p=>p.stock===0);
+ const adminStockUrl='https://gooninks.co.id/admin.html';
+ target.replaceChildren();
+ const info=document.createElement('p');
+ info.className='gn-payment-readiness-summary';
+ info.textContent='Stok terkonfirmasi: '+confirmed.length+' dari '+visible.length+' produk tampil. '+unknown.length+' belum memiliki angka stok, '+soldOut.length+' habis.';
+ target.append(info);
+ const mode=document.createElement('p');
+ mode.className='gn-payment-readiness-summary';
+ mode.textContent='Memeriksa status Midtrans…';
+ target.append(mode);
+ const controls=document.createElement('div');
+ controls.className='gn-payment-readiness-links';
+ const manage=document.createElement('button');
+ manage.type='button';manage.textContent='Atur stok produk ↗';
+ manage.addEventListener('click',()=>loadView('inventory'));
+ controls.append(manage);
+ const status=document.createElement('a');
+ status.href='https://supabase.com/dashboard/project/etahuzvozoomklsqepyt/functions/secrets';
+ status.target='_blank';status.rel='noopener noreferrer';
+ status.textContent='Buka pengaturan secrets ↗';
+ controls.append(status);
+ target.append(controls);
+ try{
+  const response=await fetch(cfg.url+'/functions/v1/gn-midtrans-checkout',{method:'GET',cache:'no-store'});
+  if(!response.ok)throw Error('Gateway tidak dapat dihubungi (HTTP '+response.status+')');
+  const data=await response.json();
+  if(typeof data.enabled!=='boolean'||!['sandbox','production'].includes(data.mode))throw Error('Respons gateway tidak valid');
+  mode.textContent='Midtrans: '+(data.enabled?(data.mode==='production'?'mode LIVE aktif':'SANDBOX untuk pengujian'):'belum diaktifkan')+'.';
+  if(data.mode==='production'&&data.enabled&&unknown.length)mode.textContent+=' Periksa stok yang belum dikonfirmasi sebelum menerima pesanan.';
+ }catch(error){
+  mode.textContent='Status gateway belum dapat dicek dari dashboard: '+(error instanceof Error?error.message:'Koneksi tidak tersedia')+'.';
+ }
 }
 function pill(label,on){return '<span class="pill '+(on?'on':'off')+'">'+safe(label)+'</span>'}
 function rowDetails(r){switch(currentView){case 'orders':return [safe(r.customer_name),rupiah(r.amount),pill(r.status,r.status==='paid')];case 'articles':return [safe(r.slug),pill(r.status,r.status==='published'),dateText(r.created_at)];case 'ads':return [safe(r.placement),pill(r.active?'Tayang':'Nonaktif',r.active),dateText(r.created_at)];case 'promotions':return [safe(r.code||'—'),safe((r.discount_percent||0)+'%'),pill(r.active?'Aktif':'Nonaktif',r.active)];case 'leads':return [safe(r.phone||r.email||'—'),safe(r.interest||'—'),pill(r.stage,r.stage==='won')];case 'inventory':return [safe(r.sku),rupiah(r.price),r.stock===null?'Belum diketahui':pill(String(r.stock),r.stock>r.low_stock_threshold)];default:return []}}
