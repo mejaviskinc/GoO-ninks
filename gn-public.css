@@ -1,1 +1,22 @@
 .gn-inner{max-width:1280px;margin:0 auto;padding:0 24px}.gn-promos,.gn-ads,.gn-articles{padding:65px 0;background:#f6f5ef;color:#2e352f}.gn-ads{background:#efeee6}.gn-title{font:clamp(29px,4vw,47px) Georgia,serif;margin:0 0 29px}.gn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.gn-offer{padding:24px;background:#fff;border:1px solid #e6e2d6;border-radius:9px;overflow:hidden}.gn-offer b{font:36px Georgia,serif;color:#8a674e}.gn-offer h3{font:25px Georgia,serif;margin:12px 0}.gn-offer p{line-height:1.6}.gn-offer code{border:1px dashed #a79b8b;padding:5px 10px;letter-spacing:.1em}.gn-offer a{color:inherit;display:block}.gn-card-img{display:block;width:100%;height:250px;object-fit:cover;margin:-24px -24px 20px;width:calc(100% + 48px)}.gn-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}.product-visual .gn-photo+.look-shape{display:none}.gn-detail-photo{width:100%;height:100%;object-fit:cover}.gn-lead-box{padding:25px;border-radius:9px;border:1px solid #e6e2d6;background:#f6f5ef;max-width:670px;margin:26px 0}.gn-lead-box h3{font:25px Georgia,serif}.gn-lead-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gn-lead-form>input:not(.gn-honey){padding:12px;border:1px solid #cfcabc;border-radius:5px;min-width:0;background:#fff;font:inherit}.gn-lead-form>input:nth-child(3){grid-column:1/-1}.gn-honey{position:absolute;left:-9999px;height:0;opacity:0}.gn-consent,.gn-message{grid-column:1/-1;font-size:12px}.gn-consent{display:flex;gap:7px}.gn-send{grid-column:1/-1;background:#4d5948;color:white;border:0;padding:12px 16px;cursor:pointer;border-radius:5px}.gn-send:disabled{opacity:.5}.gn-story-title{font:clamp(40px,6vw,75px) Georgia,serif;margin:35px 0}.gn-story-image{width:100%;max-height:520px;object-fit:cover;margin:27px 0}.gn-story-body{font:18px/1.9 system-ui,sans-serif;white-space:pre-wrap;margin-top:30px}.gn-article-page{max-width:850px;margin:0 auto;padding:40px 25px 120px}@media(max-width:800px){.gn-grid,.gn-lead-form{grid-template-columns:1fr}.gn-promos,.gn-ads,.gn-articles{padding:45px 0}}
+/* Customer-facing dynamic content matches the GoO Ninks boutique storefront. */
+.gn-inner{max-width:1380px;padding-inline:clamp(16px,5vw,76px)}
+.gn-promos,.gn-ads,.gn-articles{padding-block:clamp(58px,6.5vw,96px)}
+.gn-title{font-family:'Playfair Display',Georgia,serif;font-weight:400;line-height:1.18;letter-spacing:-.035em}
+.gn-grid{gap:clamp(13px,2vw,24px)}
+.gn-offer{border-radius:7px;padding:24px;min-width:0;transition:transform .2s,box-shadow .2s}
+.gn-offer h3{font-family:'Playfair Display',Georgia,serif;font-size:clamp(20px,2vw,27px);line-height:1.3;overflow-wrap:anywhere}
+.gn-offer p{color:#716e63;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+.gn-offer a{height:100%}
+.gn-offer:has(a:hover){transform:translateY(-3px);box-shadow:0 14px 28px #11191112}
+.gn-card-img{aspect-ratio:3/2;height:auto;max-height:290px;object-fit:cover}
+.gn-lead-box{padding:clamp(18px,3vw,30px);max-width:760px}
+.gn-lead-box h3{font-family:'Playfair Display',Georgia,serif}
+.gn-lead-form>input:not(.gn-honey){min-height:46px;border-radius:5px}
+.gn-consent{align-items:flex-start;line-height:1.6}
+.gn-consent input{flex:0 0 auto;margin-top:3px}
+.gn-send{min-height:46px;font-weight:600}
+.gn-story-body{font-size:clamp(15px,1.5vw,18px);line-height:1.9;overflow-wrap:anywhere}
+@media(max-width:800px){.gn-promos,.gn-ads,.gn-articles{padding-block:58px}.gn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gn-lead-form{grid-template-columns:1fr}}
+@media(max-width:540px){.gn-grid{grid-template-columns:1fr}.gn-title{font-size:clamp(31px,8vw,42px)}.gn-inner{padding-inline:17px}.gn-offer{padding:20px}.gn-card-img{margin:-20px -20px 18px;width:calc(100% + 40px)}.gn-story-title{font-size:clamp(38px,10vw,56px)}.gn-article-page{padding:30px 18px 80px}}
+@media(prefers-reduced-motion:reduce){.gn-offer{transition:none}}
