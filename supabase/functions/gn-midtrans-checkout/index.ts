@@ -41,7 +41,7 @@ async function reconcile(orderId: string, client: ReturnType<typeof db>, key: st
   const { data: order, error } = await client.from("gn_orders").select("amount").eq("order_id", orderId).maybeSingle();
   if (error || !order || trx.order_id !== orderId || Number(trx.gross_amount) !== order.amount) return;
   const status = trx.transaction_status;
-  const paid = status === "settlement" || (status === "capture" && trx.fraud_status !== "challenge" && trx.fraud_status !== "deny");
+  const paid = status === "settlement" || (status === "capture" && trx.fraud_status === "accept");
   const mapped = paid ? "paid" :
     status === "expire" ? "expired" :
     status === "cancel" ? "cancelled" :
@@ -106,6 +106,7 @@ Deno.serve(async (req) => {
     req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown").slice(0, 100);
   const fp = await fingerprint(ip + "|" + config.serverKey);
   let reserved = false;
+  let snapCreated = false;
   try {
     const { data: reservation, error: orderError } = await client.rpc("gn_payment_reserve_v1", {
       p_order_id: orderId, p_access_hash: accessHash, p_customer: { name, email, phone, address },
@@ -140,14 +141,20 @@ Deno.serve(async (req) => {
     const redirect = new URL(snap.redirect_url);
     if (redirect.protocol !== "https:" || redirect.hostname !== new URL(midtransOrigin(config.isProduction, "snap")).hostname)
       throw new Error("Midtrans mengembalikan URL tidak dikenal");
+    // The Snap token now exists. Never release stock merely because the optional
+    // payment-link audit field could not be saved: the shopper may still pay.
+    snapCreated = true;
     const { error: saveError } = await client.from("gn_orders").update({ payment_url: redirect.href })
       .eq("order_id", orderId);
-    if (saveError) throw new Error("Gagal menyimpan transaksi");
+    if (saveError) console.warn("Snap link storage failed; order remains pending", orderId);
     return respond(req, { order_id: orderId, access_token: accessToken,
       redirect_url: redirect.href, amount: reservation.gross_amount,
       mode: config.isProduction ? "production" : "sandbox" });
   } catch (e) {
-    if (reserved) {
+    // Release a reservation only when no Snap payment session was created.
+    // Once a Snap session exists, Midtrans webhook/status is the sole payment
+    // authority and the reservation must stay intact until verified.
+    if (reserved && !snapCreated) {
       try {
         const { error: releaseError } = await client.rpc("gn_payment_update_v1", {
           p_order_id: orderId, p_status: "failed", p_midtrans_status: "checkout_error"
@@ -158,6 +165,8 @@ Deno.serve(async (req) => {
       }
     }
     console.error("Midtrans checkout:", e instanceof Error ? e.message : "Unknown");
-    return respond(req, { error: "Gagal memulai pembayaran. Silakan coba kembali atau hubungi admin." }, 502);
+    return respond(req, { error: snapCreated
+      ? "Sesi pembayaran sudah dibuat, tetapi halaman gagal menyelesaikan proses. Hubungi admin sebelum mencoba ulang."
+      : "Gagal memulai pembayaran. Silakan coba kembali atau hubungi admin." }, 502);
   }
 });
