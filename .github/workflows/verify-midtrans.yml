@@ -41,7 +41,9 @@ jobs:
           includes(app,"document.dispatchEvent(new CustomEvent('gn-cart-changed'");
           includes(app,String.fromCharCode(36,36)+"('[data-i18n]').forEach");
           includes(mid,'window.GN_MIDTRANS_READY=available');
-          includes(mid,'primary.textContent=words.continue');
+          includes(mid,'primary.textContent=label');
+          includes(mid,'requestManualOrder(customer,items)');
+          includes(mid,"from('gn_leads').insert(payload)");
           includes(mid,'window.location.assign(url.href)');
           includes(mid,"['app.sandbox.midtrans.com','app.midtrans.com']");
           includes(html,'id="gnCheckoutWhatsAppBackup"');
@@ -55,6 +57,10 @@ jobs:
           grep -q 'gn-midtrans.js' index.html
           grep -q 'data-view="orders"' admin.html
           grep -q 'gn_orders' admin.js
+          grep -q 'data-view="shipping"' admin.html
+          grep -q 'gn_set_shipping_progress_v1' admin.js
+          grep -q 'name="postal_code"' index.html
+          grep -q 'name="order_consent"' index.html
           grep -q 'MIDTRANS_SERVER_KEY' supabase/functions/gn-midtrans-checkout/index.ts
           grep -q 'gn_payment_reserve_v1' supabase/functions/gn-midtrans-checkout/index.ts
           grep -q 'gn_payment_update_v1' supabase/functions/gn-midtrans-webhook/index.ts
