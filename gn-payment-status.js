@@ -31,6 +31,14 @@ async function check(){
   if(!row||!labels[row.status])throw Error('Status tidak tersedia.');
   message.textContent=labels[row.status];
   el('paymentAmount').textContent='Total produk: Rp'+new Intl.NumberFormat('id-ID').format(row.amount);
+  const track=el('shippingStatusText');
+  const names={awaiting_payment:'Menunggu pembayaran',ready_to_pack:'Pembayaran lunas · menunggu dikemas',packing:'Pesanan sedang dikemas',ready_to_ship:'Siap diserahkan ke ekspedisi',shipped:'Paket telah dikirim',delivered:'Paket selesai dikirim',cancelled:'Pengiriman dibatalkan',review:'Pengiriman memerlukan pemeriksaan admin'};
+  const ship=data.shipping;
+  if(track){
+    track.textContent=ship&&names[ship.status] ? names[ship.status] : 'Menunggu pembaruan dari admin.';
+    if(ship?.tracking_number&&row.status==='paid')track.textContent+='\nEkspedisi: '+(ship.carrier||'Kurir')+' · Resi: '+ship.tracking_number;
+    if(ship?.status==='ready_to_pack'||ship?.status==='packing')track.textContent+='\nOngkos kirim dikonfirmasi terpisah oleh admin.';
+  }
   if(row.status==='pending'&&tries++<24)setTimeout(check,15000);
  }catch(error){message.textContent=error instanceof Error?error.message:'Gagal memeriksa status.';}
  finally{busy=false;button.disabled=false}
