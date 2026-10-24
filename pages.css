@@ -1,0 +1,93 @@
+/* Shared navigation and page layouts for the GoO Ninks storefront. */
+:root{--header-h:76px}
+.site-header .header-inner{height:76px;max-width:1440px;display:grid;grid-template-columns:1fr auto 1fr;padding:0 5%;gap:22px}
+.site-header .gn-official-wordmark{grid-column:2;justify-self:center;width:auto;max-width:none}
+.site-header .gn-official-wordmark img{width:218px;height:35px;max-width:100%;object-fit:contain}
+.site-header .header-actions{grid-column:3;justify-self:end}
+.site-header>.nav{position:static;display:flex;justify-content:center;gap:36px;padding:0 20px;height:47px;border-top:1px solid #e7e3d9;background:var(--paper);box-shadow:none}
+.site-header>.nav a{position:relative;display:flex;align-items:center;min-height:44px;font-size:12px;font-weight:500;letter-spacing:.3px}
+.site-header>.nav a[aria-current=page]:after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--olive)}
+.site-header>.nav a[aria-current=page]{color:var(--olive);font-weight:700}
+.header-actions .bag-btn,.header-inner .menu-btn{min-width:44px;min-height:44px}
+.breadcrumbs{display:flex;gap:12px;align-items:center;max-width:1440px;margin:0 auto;padding:24px 5%;font-size:11px;color:#79776e}
+.breadcrumbs a{text-decoration:underline;text-underline-offset:3px}.breadcrumbs span:last-child{color:var(--ink)}
+.page-tabs{display:flex;justify-content:center;gap:28px;padding:0 24px 22px;border-bottom:1px solid var(--line)}
+.page-tabs a{padding:10px 0;font-size:12px;color:#747267}.page-tabs a[aria-current=page]{color:var(--ink);border-bottom:1px solid var(--ink)}
+body:not([data-page=home]) #main{min-height:55vh}
+body[data-page=collection] .collection-section{padding-top:48px}
+body[data-page=collection] .section-heading{font-size:clamp(42px,5vw,64px)}
+body[data-page=special-price] .gn-special-section{padding-top:45px}
+.story-copy h1{font-family:'Playfair Display',Georgia,serif;letter-spacing:-1.5px;font-weight:400;font-size:clamp(42px,4.5vw,64px);line-height:1.15;margin:0 0 24px;text-wrap:balance}
+.story-copy h1 i,.wastra-heading h1 i,.contact-section h1 i{color:var(--olive);font-weight:400}
+body[data-page=story] .story-section{margin-top:0;align-items:start;background:#eeece4}
+body[data-page=story] .story-photo{position:sticky;top:123px;min-height:620px;height:calc(100vh - 123px);max-height:920px}
+body[data-page=story] .story-copy{padding:60px clamp(28px,5vw,82px)}
+.wastra-heading h1{font:400 clamp(44px,5vw,70px)/1.15 'Playfair Display',Georgia,serif;letter-spacing:-2px;margin:0}
+body[data-page=wastra] .wastra-section{padding-top:55px}
+.contact-section h1{font:400 clamp(44px,6vw,76px)/1.15 'Playfair Display',Georgia,serif;letter-spacing:-2px;margin:0 0 22px}
+body[data-page=contact] .contact-section{padding:55px 24px 85px}
+.home-collection .section-heading{font-size:clamp(40px,4vw,60px)}
+.collection-more{text-align:center;margin-top:38px}
+body[data-page=home] .hero-inner{min-height:510px}
+body[data-page=home] .hero-visual{min-height:510px}
+body[data-page=home] .hero-copy{padding-top:70px;padding-bottom:40px}
+body[data-page=home] .hero h1{font-size:clamp(58px,6vw,90px)}
+body[data-page=home] .collection-section{padding-top:65px;padding-bottom:65px}
+.journal-intro{text-align:center;max-width:800px;margin:0 auto;padding:36px 24px 12px}
+.journal-intro h1{font:400 clamp(44px,5vw,70px)/1.15 'Playfair Display',Georgia,serif;letter-spacing:-1.8px;margin:0 0 22px}.journal-intro h1 i{color:var(--olive)}
+.journal-intro>p:last-child{color:#747267;line-height:1.8;font-size:14px}
+.journal-status{text-align:center;padding:35px 24px 55px;color:#77756a;line-height:1.8}
+#journalMount{min-height:220px;max-width:1400px;margin:0 auto;padding-bottom:30px}
+.journal-retry{display:block;margin:0 auto 45px}
+.gn-articles .gn-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.gn-articles .gn-offer{overflow:hidden;min-width:0}
+.gn-articles .gn-card-img{aspect-ratio:4/3;object-fit:contain;background:#eae7e2;width:calc(100% + 48px);height:auto}
+.gn-articles .gn-offer h3{font:400 25px/1.35 'Playfair Display',Georgia,serif}
+.gn-articles .gn-offer p{line-height:1.8;color:#77756a}
+.gn-articles .gn-offer a{display:block;height:100%}
+.gn-articles .gn-offer strong{display:inline-block;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}
+.article-page{max-width:850px;margin:0 auto;padding:25px 24px 40px}
+.article-page .gn-story-title{font:400 clamp(34px,4.2vw,58px)/1.2 'Playfair Display',Georgia,serif;letter-spacing:-1px;text-wrap:balance;margin:10px 0 22px}
+.article-page .gn-story-image{display:block;max-height:550px;width:100%;object-fit:contain;background:#eae7e2;margin:28px 0}
+.article-page .gn-story-body{white-space:pre-line;font-size:15px;line-height:1.95;color:#55564d;overflow-wrap:anywhere}
+.article-back{max-width:850px;margin:0 auto;padding:0 24px 75px}
+footer .footer-links{max-width:650px;line-height:1.7;gap:18px 24px}
+.gn-special-copy h1{font:400 clamp(58px,7.3vw,108px)/1 'Playfair Display',Georgia,serif;letter-spacing:-.065em;margin:0 0 30px;text-wrap:balance}
+.gn-special-copy h1 i{color:#667054;font-weight:400}
+body[data-page=contact] #contact>.gn-lead-box{margin:36px auto 0;text-align:left}
+@media(max-width:800px){
+ .site-header .header-inner{height:70px;padding:0 16px;gap:8px;grid-template-columns:44px 1fr auto}
+ .site-header .gn-official-wordmark{max-width:195px;justify-self:start}
+ .site-header .gn-official-wordmark img{width:195px;height:auto}
+ .header-inner .menu-btn{display:flex;grid-column:1;grid-row:1;justify-self:start;padding:8px}
+ .site-header .header-actions{gap:4px}
+ .site-header>.nav{display:none;position:absolute;top:100%;left:0;right:0;height:auto;flex-direction:column;gap:0;align-items:stretch;padding:12px 22px 20px;border-bottom:1px solid var(--line);box-shadow:0 18px 28px #25251f18;max-height:calc(100dvh - 100px);overflow:auto}
+ .site-header>.nav.open{display:flex}
+ .site-header>.nav a{font-size:15px;padding:14px 8px;min-height:52px;border-bottom:1px solid #e8e5dc}
+ .site-header>.nav a[aria-current=page]:after{display:none}
+ .site-header>.nav a[aria-current=page]{background:#eeece4;padding-left:15px}
+ .breadcrumbs{padding:22px 24px}
+ body[data-page=story] .story-photo{position:relative;top:auto;height:auto;min-height:520px}
+ .gn-articles .gn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .site-header .header-inner{padding:0 10px;gap:2px;grid-template-columns:40px minmax(0,1fr) auto}
+ .site-header .gn-official-wordmark{max-width:160px}
+ .site-header .gn-official-wordmark img{width:160px}
+ .site-header .language-select{min-width:55px!important;width:55px!important}
+ .header-actions .bag-btn{min-width:40px}
+ body[data-page=home] .hero-inner{min-height:0}
+ body[data-page=home] .hero-copy{min-height:355px;padding:42px 25px 24px}
+ body[data-page=home] .hero h1{font-size:65px}
+ body[data-page=home] .hero-visual{min-height:380px}
+ body[data-page=story] .story-photo{min-height:clamp(400px,125vw,585px)}
+ body[data-page=story] .story-copy{padding:45px 26px}
+ .gn-articles .gn-grid{grid-template-columns:1fr;gap:30px}
+ .page-tabs{gap:25px;padding-bottom:14px}
+ .journal-intro{padding-top:25px}
+ .journal-intro h1{font-size:45px}
+ .gn-special-copy h1{font-size:clamp(51px,15.2vw,73px);margin-bottom:22px}
+ .gn-articles .gn-card-img{width:calc(100% + 40px)}
+ .article-page{padding-top:10px}
+ .article-page .gn-story-body{font-size:14px}
+}
