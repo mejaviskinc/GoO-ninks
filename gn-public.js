@@ -94,8 +94,8 @@
  window.addEventListener('gn-language-changed',syncDynamicLanguage);
  async function ads(){if(document.body.dataset.page!=='collection')return;const {data,error}=await api.from('gn_ads').select('title,image_url,link_url').eq('active',true).limit(6);if(error||!data?.length)return;const [s,w]=section('GoO Ninks — Featured','gn-ads');const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),u=validUrl(a.link_url),img=validUrl(a.image_url);const target=u?put(card,'a'):card;if(u){target.href=u;target.rel='noopener noreferrer sponsored';target.target='_blank'}if(img){const image=put(target,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(target,'h3','',a.title)});document.querySelector('#collection')?.insertAdjacentElement('beforebegin',s)}
  async function articles(){
-  const page=document.body.dataset.page||'home';if(!['home','journal'].includes(page))return;
-  const mount=document.querySelector('#journalMount');
+  const page=document.body.dataset.page||'home';if(page!=='journal')return;
+  const mount=document.querySelector('#journalMount');if(!mount)return;
   try{
    const {data,error}=await api.from('gn_articles').select('title,slug,excerpt,image_url').eq('status','published').order('created_at',{ascending:false}).limit(page==='journal'?100:3);
    if(error)throw error;
