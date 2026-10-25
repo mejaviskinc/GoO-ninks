@@ -335,3 +335,30 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .gn-midtrans-section input:focus-visible,.gn-midtrans-section textarea:focus-visible{outline:2px solid #8a7953;outline-offset:2px}
 .gn-midtrans-pay:not(:disabled):hover{background:#465443}
 @media(max-width:600px){.gn-midtrans-pay{min-height:48px;width:100%}}
+
+/* GoO Ninks actual supplied fabric photography: batik, tenun ikat, and lurik.
+   Each swatch uses its own panel from one lightweight 3-panel WebP atlas. */
+.wastra-grid .motif {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  margin: 16px 0 22px;
+  background-color: #e8e2d6;
+  background-image: url("assets/wastra-kain-2026.webp");
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+  border-radius: 4px;
+  box-shadow: 0 12px 30px rgba(40, 42, 34, .08);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.wastra-grid .motif-batik { background-position: left center; }
+.wastra-grid .motif-tenun { background-position: center center; }
+.wastra-grid .motif-lurik { background-position: right center; }
+.wastra-grid article:hover .motif {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(40, 42, 34, .15);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wastra-grid .motif { transition: none; }
+}
