@@ -13,7 +13,9 @@ on:
       - pages.css
       - 'assets/gooninks-photo2-part-*.b64'
       - assets/gooninks-story-photo2.webp
-      - assets/wastra-kain-2026.webp
+      - assets/gooninks-kain-batik-asli-20261025.jpeg
+      - assets/gooninks-kain-tenun-asli-20261025.jpeg
+      - assets/gooninks-kain-lurik-asli-20261025.jpeg
       - assets/gooninks-hero-editorial-4k.webp
       - assets/gooninks-hero-editorial-1086.webp
       - styles.css
@@ -63,8 +65,10 @@ jobs:
           cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html admin.html admin.css admin.js article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg gooninks-admin-logo.png CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cp assets/gooninks-story-photo2.webp _site/assets/
-          cp assets/wastra-kain-2026.webp _site/assets/
-          echo 'a33c29e86a53ffcb9fa58aa3239243cc6e2b1e3dadc09e97faafb668284544fc  _site/assets/wastra-kain-2026.webp' | sha256sum --check
+          cp assets/gooninks-kain-batik-asli-20261025.jpeg assets/gooninks-kain-tenun-asli-20261025.jpeg assets/gooninks-kain-lurik-asli-20261025.jpeg _site/assets/
+          echo '61f552bc3345b736a6c786487ce409f75f295ae7b5e82bc9c1e84f15cfee5bb7  _site/assets/gooninks-kain-batik-asli-20261025.jpeg' | sha256sum --check
+          echo '4fafd77cee9d18f1eea1a7f9809a4536cbd11a03b6c2086041cd40cfb8852004  _site/assets/gooninks-kain-tenun-asli-20261025.jpeg' | sha256sum --check
+          echo 'e78d22c636a52dc031492cf8741146e9ab1716a42c1f9b13dfa04d24efe9ae4e  _site/assets/gooninks-kain-lurik-asli-20261025.jpeg' | sha256sum --check
           cp assets/gooninks-hero-editorial-4k.webp assets/gooninks-hero-editorial-1086.webp _site/assets/
           cat assets/gooninks-photo2-part-*.b64 | base64 --decode > _site/assets/gooninks-photo2.webp
           test "$(file -b --mime-type _site/assets/gooninks-photo2.webp)" = 'image/webp'
