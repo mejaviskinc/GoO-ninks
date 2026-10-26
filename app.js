@@ -1,3 +1,90 @@
+
+/* Progressive scroll reveal: static and asynchronously loaded storefront content. */
+(() => {
+  function startScrollReveal() {
+    const main = document.querySelector('#main');
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!main || motion.matches || !window.IntersectionObserver || !Element.prototype.animate) return;
+    const selectors = [
+      '.hero-copy > *', '.hero-visual',
+      '.section-head > *', '.section-header > *', '.section-heading',
+      '.gn-special-copy > *', '.gn-special-visual', '.gn-special-offer',
+      '.product-grid > *', '.wastra-heading > *', '.wastra-grid > article',
+      '.story-copy > *', '.story-photo', '.story-values > *',
+      '.journal-intro > *', '.gn-grid > article',
+      '.contact-section > h1', '.contact-section > h2', '.contact-section > p',
+      '.contact-links > *', '.gn-lead-box',
+      '#articleBody > *', '.collection-more', '.gn-special-empty'
+    ].join(',');
+    const seen = new WeakSet();
+    const pending = new Set();
+    const running = new Map();
+    let stopped = false;
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top ||
+          a.boundingClientRect.left - b.boundingClientRect.left);
+      const groups = new Map();
+      visible.forEach(entry => {
+        const node = entry.target;
+        observer.unobserve(node);
+        pending.delete(node);
+        if (stopped || !node.isConnected || node.contains(document.activeElement)) return;
+        // Reveal only once; cap the stagger so large product lists remain quick.
+        const order = groups.get(node.parentElement) || 0;
+        groups.set(node.parentElement, order + 1);
+        const animation = node.animate([
+          { opacity: 0, translate: '0 24px' },
+          { opacity: 1, translate: '0 0' }
+        ], {
+          duration: 620, delay: Math.min(order, 3) * 110,
+          easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards'
+        });
+        running.set(node, animation);
+        const finish = () => { if (running.get(node) === animation) running.delete(node); };
+        animation.onfinish = finish;
+        animation.oncancel = finish;
+      });
+    }, { threshold: 0 });
+    function scan() {
+      if (stopped) return;
+      // Drop detached cards after filtering, sorting, or a language switch.
+      pending.forEach(node => {
+        if (!node.isConnected) { observer.unobserve(node); pending.delete(node); }
+      });
+      main.querySelectorAll(selectors).forEach(node => {
+        if (seen.has(node) || node.closest('[hidden], dialog, [role="dialog"]')) return;
+        seen.add(node);
+        pending.add(node);
+        observer.observe(node);
+      });
+    }
+    const mutations = new MutationObserver(scan);
+    mutations.observe(main, { childList: true, subtree: true });
+    function stop() {
+      stopped = true;
+      observer.disconnect();
+      mutations.disconnect();
+      pending.clear();
+      running.forEach(animation => animation.cancel());
+      running.clear();
+    }
+    motion.addEventListener('change', event => { if (event.matches) stop(); });
+    main.addEventListener('focusin', event => {
+      running.forEach((animation, node) => {
+        if (node.contains(event.target)) animation.cancel();
+      });
+    });
+    window.addEventListener('pagehide', () => {
+      running.forEach(animation => animation.cancel());
+    });
+    scan();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startScrollReveal, { once: true });
+  } else startScrollReveal();
+})();
+
 /* GoO Ninks — 2026 boutique storefront. Static website; no payment/stocks processed. */
 'use strict';
 const CONTACT_NUMBER = '6285740393953';
