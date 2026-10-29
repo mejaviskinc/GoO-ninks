@@ -357,3 +357,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media (prefers-reduced-motion: reduce) {
   .wastra-grid img.motif { transition: none; }
 }
+
+/* Full-width homepage video, with a readable foreground and poster fallback. */
+.gn-video-hero{position:relative;isolation:isolate;overflow:hidden;background:#28271f url('assets/gooninks-home-poster.jpg') center/cover no-repeat}
+.gn-video-hero .hero-inner{position:relative;display:flex;align-items:center;max-width:1600px;min-height:clamp(570px,75vh,900px)}
+.gn-video-hero .hero-inner::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.65),rgba(0,0,0,.17))}
+.gn-video-hero .gn-hero-video{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:center}
+.gn-video-hero .hero-copy{position:relative;color:white;max-width:760px;padding:70px clamp(24px,7vw,110px)}
+.gn-video-hero .hero-copy>p,.gn-video-hero .eyebrow,.gn-video-hero h1 i,.gn-video-hero .hero-index{color:#fff}
+.gn-video-hero .eyebrow-line{background:#fff}.gn-video-hero .text-btn{border-color:#fff}
+.gn-video-hero .hero-index{margin-top:28px;padding-top:0}
+.gn-video-toggle{position:absolute;bottom:24px;right:24px;border:1px solid #fff8;border-radius:50%;width:42px;height:42px;background:#0005;color:white;font-size:18px;z-index:2}
+@media(max-width:600px){.gn-video-hero .hero-inner{min-height:650px;min-height:85svh}.gn-video-hero .hero-copy{padding:60px 24px 90px}.gn-video-hero h1{font-size:clamp(52px,14vw,76px)}.gn-video-hero .hero-inner::after{background:linear-gradient(90deg,#000a,#0004)}}
