@@ -199,3 +199,6 @@ document.addEventListener('click',e=>{if(!e.target.closest('.site-header'))close
 document.addEventListener('focusin',e=>{if(!e.target.closest('.site-header'))closeNavigation()});
 init();
 
+
+// Native autoplay is muted; retain a poster if playback is unavailable.
+(()=>{const video=document.querySelector('.gn-hero-video'),button=document.querySelector('.gn-video-toggle');if(!video||!button)return;video.muted=true;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');function sync(){button.textContent=video.paused?'▶':'Ⅱ';button.setAttribute('aria-label',video.paused?'Putar video background':'Jeda video background');button.setAttribute('aria-pressed',String(video.paused));}if(reduced.matches){video.autoplay=false;video.pause();}else{video.play().catch(()=>sync());}button.addEventListener('click',()=>{if(video.paused)video.play().catch(()=>sync());else video.pause();});video.addEventListener('play',sync);video.addEventListener('pause',sync);sync();})();
