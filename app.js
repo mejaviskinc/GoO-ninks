@@ -200,5 +200,41 @@ document.addEventListener('focusin',e=>{if(!e.target.closest('.site-header'))clo
 init();
 
 
-// Native autoplay is muted; retain a poster if playback is unavailable.
-(()=>{const video=document.querySelector('.gn-hero-video'),button=document.querySelector('.gn-video-toggle');if(!video||!button)return;video.muted=true;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');function sync(){button.textContent=video.paused?'▶':'Ⅱ';button.setAttribute('aria-label',video.paused?'Putar video background':'Jeda video background');button.setAttribute('aria-pressed',String(video.paused));}if(reduced.matches){video.autoplay=false;video.pause();}else{video.play().catch(()=>sync());}button.addEventListener('click',()=>{if(video.paused)video.play().catch(()=>sync());else video.pause();});video.addEventListener('play',sync);video.addEventListener('pause',sync);sync();})();
+// Start muted playback when media is ready and on page restoration.
+(()=>{
+  const video=document.querySelector('.gn-hero-video');
+  const button=document.querySelector('.gn-video-toggle');
+  if(!video||!button)return;
+  let userPaused=false;
+  video.defaultMuted=true;
+  video.muted=true;
+  video.autoplay=true;
+  video.playsInline=true;
+  function sync(){
+    button.textContent=video.paused?'▶':'Ⅱ';
+    button.setAttribute('aria-label',video.paused?'Putar video background':'Jeda video background');
+    button.setAttribute('aria-pressed',String(video.paused));
+  }
+  function start(){
+    if(userPaused||document.hidden)return;
+    video.muted=true;
+    const attempt=video.play();
+    if(attempt)attempt.catch(sync);
+  }
+  video.addEventListener('loadeddata',start);
+  video.addEventListener('canplay',start);
+  window.addEventListener('pageshow',start);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)start();});
+  // Some mobile browsers require the first page interaction before playback.
+  document.addEventListener('touchstart',start,{once:true,passive:true});
+  document.addEventListener('pointerdown',event=>{if(!button.contains(event.target))start();},{once:true,passive:true});
+  document.addEventListener('keydown',event=>{if(!button.contains(event.target))start();},{once:true});
+  button.addEventListener('click',()=>{
+    if(video.paused){userPaused=false;start();}
+    else{userPaused=true;video.pause();}
+  });
+  video.addEventListener('play',sync);
+  video.addEventListener('pause',sync);
+  start();
+  sync();
+})();
