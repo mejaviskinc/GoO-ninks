@@ -16,6 +16,7 @@
   document.querySelectorAll('#productGrid [data-open]').forEach(btn=>{
    const row=products.find(x=>x.sku===btn.dataset.open);if(!row)return;
    const visual=btn.closest('.product-visual');if(!visual)return;
+   const quick=visual.querySelector('[data-add]');if(quick)quick.hidden=!!row.preorder;
    const url=validUrl(row.image_url);
    if(url&&!visual.querySelector('.gn-photo')){const img=el('img','gn-photo');img.src=url;img.alt=row.product_name;img.loading='lazy';visual.prepend(img)}
    if(!visual.querySelector('.gn-product-category')){
