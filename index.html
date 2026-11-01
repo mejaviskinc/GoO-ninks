@@ -23,7 +23,7 @@
 <script defer="" src="gn-config.js"></script>
 <script defer="" src="app.js?v=20261030-autoplay2"></script>
 <script defer="" src="gn-midtrans.js?v=20261022-shipping-checkout3"></script>
-<link href="/favicon.svg?v=3" rel="icon" type="image/svg+xml"/><link href="/brand-loader.css" rel="stylesheet"/><link as="image" href="/logo-gooninks.svg" rel="preload" type="image/svg+xml"/><script defer="" src="/brand-loader.js"></script><link href="pages.css?v=20261101-premium2" rel="stylesheet"/><script>(()=>{const routes={"collection": "collection.html", "special-price": "special-price.html", "story": "story.html", "journal": "journal.html", "contact": "contact.html"};const target=routes[location.hash.slice(1)];if(target)location.replace(target+location.search)})();</script></head>
+<link href="/favicon.svg?v=3" rel="icon" type="image/svg+xml"/><link href="/brand-loader.css" rel="stylesheet"/><link as="image" href="/logo-gooninks.svg" rel="preload" type="image/svg+xml"/><script defer="" src="/brand-loader.js"></script><link href="pages.css?v=20261101-premium2" rel="stylesheet"/><script>(()=>{const routes={"collection": "collection.html", "special-price": "special-price.html", "story": "story.html", "journal": "journal.html", "contact": "contact.html"};const target=routes[location.hash.slice(1)];if(target)location.replace(target+location.search)})();</script><link rel="stylesheet" href="storefront-plus.css?v=20261101-features1"/></head>
 <body data-page="home">
 <div aria-label="Memuat GoO Ninks" class="gn-boot-loader" id="gnBootLoader" role="status"><div class="gn-boot-content"><img alt="" class="gn-boot-logo" decoding="async" height="214" src="/logo-gooninks.svg" width="330"/><div class="gn-boot-caption">CRAFTED IN YOGYAKARTA</div><div aria-hidden="true" class="gn-boot-progress"><span></span></div></div></div>
 <a class="skip-link" data-i18n="skip" href="#main">Langsung ke konten</a>
@@ -102,6 +102,7 @@
 <label><span data-i18n="payDistrict">Kecamatan / Kelurahan</span><input maxlength="100" minlength="3" name="district" placeholder="Contoh: Depok, Condongcatur" required=""/></label>
 <label><span data-i18n="payPostal">Kode pos</span><input autocomplete="postal-code" inputmode="numeric" maxlength="5" minlength="5" name="postal_code" pattern="[0-9]{5}" placeholder="55281" required="" type="text"/></label>
 <label><span data-i18n="payAddress">Alamat jalan lengkap dan nomor rumah</span><textarea autocomplete="street-address" maxlength="260" minlength="10" name="address" placeholder="Nama jalan, nomor rumah, RT/RW, patokan" required="" rows="3"></textarea></label>
+<label class="gn-coupon-field"><span>Kode diskon (opsional)</span><input autocomplete="off" name="promo_code" maxlength="32" pattern="[A-Za-z0-9_-]{0,32}" placeholder="Masukkan kode promo"/><small>Diskon yang aktif dihitung otomatis di server dan ditampilkan di halaman Midtrans.</small></label>
 <label class="gn-payment-confirm"><input name="order_consent" required="" type="checkbox"/><span data-i18n="payConsent">Saya setuju data pesanan dan alamat digunakan untuk konfirmasi transaksi serta pengiriman, bukan otomatis untuk promosi.</span></label>
 <label class="gn-payment-confirm"><input name="shipping_ack" required="" type="checkbox"/><span data-i18n="payShippingAck">Saya paham ongkos kirim belum termasuk dan akan dikonfirmasi admin sebelum pengiriman.</span></label>
 <button class="gn-midtrans-pay" data-i18n="payNow" disabled="" id="midtransBtn" type="submit">Bayar via Midtrans ↗</button>
@@ -112,6 +113,6 @@
 <div aria-hidden="true" aria-labelledby="detailTitle" aria-modal="true" class="detail-modal" id="detailModal" role="dialog" tabindex="-1"><div class="detail-dialog"><button aria-label="Tutup" class="close-btn detail-close" id="detailClose" type="button">×</button><div class="detail-image" id="detailImage"></div><div class="detail-content"><p class="kicker">GOO NINKS · 2026</p><h2 id="detailTitle"></h2><p class="detail-price" id="detailPrice"></p><p data-i18n="detailDesc">Koleksi eksklusif yang terinspirasi wastra Nusantara. Foto asli, ukuran, stok, dan detail bahan dapat dikonfirmasi langsung melalui admin.</p><label data-i18n="sizeLabel" for="sizeInput">Ukuran / catatan (opsional)</label><input data-placeholder="sizePlaceholder" id="sizeInput" maxlength="120" placeholder="Contoh: M, L, custom"/><button class="primary-btn" data-i18n="addBag" id="addToCartBtn" type="button">Tambah ke tas +</button><a class="detail-catalog-link" data-i18n="verifyCatalog" href="https://www.canva.com/d/49tPKYXczCxY3Ui" rel="noopener noreferrer" target="_blank">Lihat foto di katalog resmi ↗</a></div></div></div>
 <div aria-live="polite" class="toast" id="toast" role="status"></div>
 <script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
-<script defer="" src="gn-public.js?v=20261025-wastra-journal2"></script>
+<script defer="" src="gn-public.js?v=20261101-features1"></script>
 </body>
 </html>
