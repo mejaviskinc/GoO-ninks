@@ -84,7 +84,7 @@ form.addEventListener('submit',async e=>{
   const customer={name:String(fd.get('name')||'').trim(),email:String(fd.get('email')||'').trim(),phone:String(fd.get('phone')||'').trim(),address:String(fd.get('address')||'').trim(),province:String(fd.get('province')||'').trim(),city:String(fd.get('city')||'').trim(),district:String(fd.get('district')||'').trim(),postal_code:String(fd.get('postal_code')||'').trim()};
   if(!/^[0-9]{5}$/.test(customer.postal_code))throw Error(tr('postalInvalid'));
   if(!available){await requestManualOrder(customer,items);processing=false;sync();return;}
-  const res=await fetch(endpoint,{method:'POST',headers:h,body:JSON.stringify({action:'checkout',customer,items})});
+  const res=await fetch(endpoint,{method:'POST',headers:h,body:JSON.stringify({action:'checkout',customer,items,promo_code:String(fd.get('promo_code')||'').trim().toUpperCase()})});
   const data=await res.json().catch(()=>({}));
   if(!res.ok)throw Error(data.error||tr('checkoutFail'));
   if(!/^GN-[A-Z0-9-]{8,45}$/.test(data.order_id)||typeof data.access_token!=='string')throw Error(tr('badId'));
