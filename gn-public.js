@@ -27,7 +27,7 @@
  function detailMedia(item){
   const visual=document.querySelector('#detailImage');if(!visual||!item)return;
   const links=[item.image_url,...String(item.gallery_media||'').split(/\r?\n/)].map(validUrl).filter(Boolean);
-  const unique=[...new Set(links)];if(!unique.length)return;
+  const unique=[...new Set(links)];
   let active=0;
   const repaint=()=>{
    visual.replaceChildren();const url=unique[active];
@@ -46,7 +46,7 @@
     visual.append(controls);
    }
   };
-  repaint();
+  if(unique.length)repaint();
   const content=document.querySelector('#detailModal .detail-content');
   const buy=document.getElementById('addToCartBtn');
   let preorder=document.getElementById('gnPreorderInquiry');
@@ -62,6 +62,26 @@
   if(typeof PRODUCTS!=='undefined'){PRODUCTS.forEach(p=>{const r=products.find(x=>x.sku===p.id);if(r){p.name=r.product_name;p.price=r.price;p.stock=r.stock;p.visible=r.visible&&!r.archived;p.image_url=validUrl(r.image_url);p.category=r.category;p.preorder=r.preorder;p.preorder_lead_days=r.preorder_lead_days}else p.visible=false});if(typeof renderProducts==='function')renderProducts();if(typeof renderCart==='function')renderCart()}
   const grid=document.querySelector('#productGrid');if(!grid)return;
   photos();new MutationObserver(photos).observe(grid,{childList:true});
+  if(document.body.dataset.page==='collection'){
+    const wrap=document.querySelector('.catalog-controls');let selected='all';
+    const cats=[...new Set(products.filter(x=>x.visible&&!x.archived).map(x=>x.category).filter(Boolean))];
+    if(wrap&&cats.length>1){
+     const chooser=el('div','gn-category-filters');chooser.setAttribute('aria-label','Filter kategori produk');
+     const labels=['Semua Kategori',...cats];
+     labels.forEach((label,i)=>{const b=el('button',i===0?'gn-category-chip active':'gn-category-chip',label);b.type='button';b.dataset.category=i===0?'all':label;chooser.append(b)});
+     wrap.insertAdjacentElement('afterend',chooser);
+     const apply=()=>{
+       let count=0;grid.querySelectorAll('.product').forEach(card=>{
+        const sku=card.querySelector('[data-open]')?.dataset.open,product=products.find(x=>x.sku===sku);
+        const show=selected==='all'||product?.category===selected;card.hidden=!show;if(show)count++;
+       });
+       if(document.getElementById('visibleCount'))document.getElementById('visibleCount').textContent=String(count);
+     };
+     chooser.addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;selected=b.dataset.category;chooser.querySelectorAll('button').forEach(el=>el.classList.toggle('active',el===b));apply()});
+     new MutationObserver(apply).observe(grid,{childList:true});apply();
+    }
+   }
+
   grid.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(!b)return;const item=products.find(p=>p.sku===b.dataset.open);if(!item)return;requestAnimationFrame(()=>detailMedia(item))});
  }
  const section=(title,klass)=>{const s=el('section',klass),wrap=put(s,'div','gn-inner');put(wrap,'h2','gn-title',title);return [s,wrap]};
@@ -135,7 +155,7 @@
   renderSpecialOffers();
  }
  window.addEventListener('gn-language-changed',syncDynamicLanguage);
- async function ads(){if(document.body.dataset.page!=='collection')return;const {data,error}=await api.from('gn_ads').select('title,image_url,video_url,link_url').eq('active',true).limit(6);if(error||!data?.length)return;const [s,w]=section('GoO Ninks — Featured','gn-ads');const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),u=validUrl(a.link_url),img=validUrl(a.image_url);const target=u?put(card,'a'):card;if(u){target.href=u;target.rel='noopener noreferrer sponsored';target.target='_blank'}if(validUrl(a.video_url)&&/\.(mp4|webm)(?:[?#]|$)/i.test(a.video_url)){const v=put(target,'video','gn-card-video');v.src=validUrl(a.video_url);v.muted=true;v.autoplay=true;v.loop=true;v.playsInline=true;v.controls=true;v.preload='metadata';if(img)v.poster=img;}else if(img){const image=put(target,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(target,'h3','',a.title)});document.querySelector('#collection')?.insertAdjacentElement('beforebegin',s)}
+ async function ads(){const page=document.body.dataset.page;if(!['home','collection'].includes(page))return;const {data,error}=await api.from('gn_ads').select('title,image_url,video_url,link_url,placement').eq('active',true).eq('placement',page).limit(6);if(error||!data?.length)return;const [s,w]=section('GoO Ninks — Featured','gn-ads');const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),u=validUrl(a.link_url),img=validUrl(a.image_url);const target=u?put(card,'a'):card;if(u){target.href=u;target.rel='noopener noreferrer sponsored';target.target='_blank'}if(validUrl(a.video_url)&&/\.(mp4|webm)(?:[?#]|$)/i.test(a.video_url)){const v=put(target,'video','gn-card-video');v.src=validUrl(a.video_url);v.muted=true;v.autoplay=true;v.loop=true;v.playsInline=true;v.controls=true;v.preload='metadata';if(img)v.poster=img;}else if(img){const image=put(target,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(target,'h3','',a.title)});document.querySelector('#collection')?.insertAdjacentElement('beforebegin',s)}
  async function articles(){
   const page=document.body.dataset.page||'home';if(page!=='journal')return;
   const mount=document.querySelector('#journalMount');if(!mount)return;
