@@ -33,6 +33,7 @@ on:
       - gn-config.js
       - gn-public.js
       - gn-public.css
+      - storefront-plus.css
       - article.html
       - CNAME
       - robots.txt
@@ -72,12 +73,21 @@ jobs:
           curl --fail --location --retry 3 --max-time 300 'https://drive.usercontent.google.com/download?id=1MUhnX5UymowW1RTOWFBwDP5jwNwUNd75&export=download&confirm=t' -o /tmp/gooninks-original.mp4
           ffmpeg -hide_banner -loglevel error -i /tmp/gooninks-original.mp4 -an -vf 'scale=1280:-2,fps=24' -c:v libx264 -preset veryfast -crf 29 -movflags +faststart .hero-media/gooninks-home-background.mp4
           ffmpeg -hide_banner -loglevel error -ss 5 -i /tmp/gooninks-original.mp4 -frames:v 1 -vf scale=1280:-2 .hero-media/gooninks-home-poster.jpg
+      - name: Validate storefront JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check gn-public.js
+          node --check gn-midtrans.js
+          grep -q 'name="promo_code"' index.html
+          grep -q 'name="promo_code"' collection.html
       - name: Assemble static website
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html article.html gn-public.js gn-public.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html article.html gn-public.js gn-public.css storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cp .hero-media/gooninks-home-background.mp4 .hero-media/gooninks-home-poster.jpg _site/assets/
           cp assets/gooninks-story-photo2.webp _site/assets/
