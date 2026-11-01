@@ -128,9 +128,10 @@ Deno.serve(async (req) => {
   let reserved = false;
   let snapCreated = false;
   try {
-    const { data: reservation, error: orderError } = await client.rpc("gn_payment_reserve_v1", {
+    const { data: reservation, error: orderError } = await client.rpc("gn_payment_reserve_v2", {
       p_order_id: orderId, p_access_hash: accessHash, p_customer: { name, email, phone, address },
       p_items: items, p_fingerprint: fp,
+      p_promo_code: String(input.promo_code ?? "").trim().toUpperCase().slice(0,33),
     });
     if (orderError || !reservation) return respond(req, {
       error: orderError?.message ?? "Tidak dapat memesan produk. Periksa stok dan coba kembali.",
