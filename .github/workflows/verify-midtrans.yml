@@ -7,6 +7,8 @@ on:
       - styles.css
       - app.js
       - gn-midtrans.js
+      - gn-public.js
+      - storefront-plus.css
       - gn-payment-status.js
       - payment-status.html
       - supabase/functions/gn-midtrans-checkout/index.ts
@@ -25,6 +27,7 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check gn-midtrans.js
+          node --check gn-public.js
           node - <<'NODE'
           const fs = require('fs');
           const html = fs.readFileSync('index.html','utf8');
@@ -54,8 +57,10 @@ jobs:
           grep -q 'gn-midtrans.js' index.html
           grep -q 'name="postal_code"' index.html
           grep -q 'name="order_consent"' index.html
+          grep -q 'name="promo_code"' index.html
+          grep -q 'p_promo_code' supabase/functions/gn-midtrans-checkout/index.ts
           grep -q 'MIDTRANS_SERVER_KEY' supabase/functions/gn-midtrans-checkout/index.ts
-          grep -q 'gn_payment_reserve_v1' supabase/functions/gn-midtrans-checkout/index.ts
+          grep -q 'gn_payment_reserve_v2' supabase/functions/gn-midtrans-checkout/index.ts
           grep -q 'gn_payment_update_v1' supabase/functions/gn-midtrans-webhook/index.ts
           if grep -Eo 'SB-Mid-server-[A-Za-z0-9_-]+' gn-midtrans.js index.html; then echo 'MIDTRANS SERVER KEY LEAK!' >&2; exit 1; fi
           echo 'Static Midtrans checks PASSED'
