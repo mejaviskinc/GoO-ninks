@@ -33,3 +33,5 @@
 .gn-category-chip:hover,.gn-category-chip.active{background:#302d27;color:#fff;border-color:#302d27}
 .product[hidden]{display:none!important}
 @media(max-width:600px){.gn-category-filters{gap:7px}.gn-category-chip{font-size:10px;min-height:37px;padding-inline:11px}}
+
+.quick-btn[hidden]{display:none!important}
