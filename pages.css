@@ -376,3 +376,121 @@ footer small,footer p{color:#c6bba9}
   .product-visual .gn-photo,.story-photo>img,.wastra-grid article .motif,.wastra-grid article img.motif,
   .primary-btn,.gn-special-main-cta,.gn-send,.outline-btn{transition:none}
 }
+
+
+/* GoO Ninks: responsive finishing and consistent navigation — 2026-11-01 */
+.site-header .header-inner{box-sizing:border-box}
+.site-header .nav a,.site-header>.nav a{white-space:nowrap}
+.product-name{
+  font-size:clamp(17px,1.55vw,21px);
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.product-meta{flex-wrap:wrap;row-gap:6px;line-height:1.5}
+.product-price{font-weight:600;letter-spacing:.025em}
+.product-visual .gn-photo{display:block;width:100%;height:100%}
+.product:focus-within .product-visual .gn-photo{transform:scale(1.025)}
+.product-open:focus-visible,.quick-btn:focus-visible{outline:2px solid #a18b69;outline-offset:-3px}
+.gn-special-layout>*{min-width:0}
+.gn-special-copy h1,.gn-special-copy h2{overflow-wrap:anywhere}
+.gn-special-empty h3{overflow-wrap:anywhere}
+.gn-special-offers{overscroll-behavior:contain}
+.wastra-grid article img.motif{
+  width:100%;
+  height:auto;
+  max-height:none;
+  aspect-ratio:3/4;
+  object-fit:contain;
+  object-position:center center;
+  background:transparent;
+}
+.wastra-grid article:hover img.motif{transform:translateY(-2px)}
+.catalog-controls .filter-wrap{flex-wrap:wrap}
+.catalog-controls .chip{min-height:38px;white-space:nowrap}
+.catalog-controls .sort-wrap{min-width:0}
+.catalog-controls select{max-width:100%}
+.gn-articles .gn-card-img{object-fit:contain}
+.contact-section,.journal-intro{overflow-wrap:anywhere}
+@media(max-width:900px){
+  .site-header>.nav{gap:clamp(11px,2vw,25px)}
+  .site-header>.nav a{font-size:10px;letter-spacing:.10em}
+}
+@media(max-width:800px){
+  .site-header .header-inner{
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr) auto;
+    align-items:center;
+    column-gap:8px;
+    height:72px;
+  }
+  .site-header .header-inner>.menu-btn{grid-row:1;grid-column:1;justify-self:start}
+  .site-header .gn-official-wordmark{
+    grid-row:1;grid-column:2;
+    min-width:0;max-width:100%;
+    justify-self:center;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .site-header .gn-official-wordmark img{max-width:100%;max-height:46px;object-fit:contain}
+  .site-header .header-actions{grid-row:1;grid-column:3;justify-self:end;min-width:0}
+  .site-header>.nav{
+    position:absolute;top:100%;left:0;right:0;
+    padding:10px 20px 22px;z-index:90;
+    max-height:calc(100dvh - 115px);
+    overflow-y:auto;
+  }
+  .site-header>.nav:not(.open){display:none}
+  .site-header>.nav.open{display:flex}
+  .site-header>.nav a{font-size:12px;white-space:normal;letter-spacing:.12em}
+  body[data-page=collection] .catalog-controls{align-items:stretch;gap:14px}
+  body[data-page=collection] .catalog-controls .search-wrap{flex:1 1 230px;width:auto;max-width:none}
+  body[data-page=collection] .catalog-controls .filter-wrap{flex:1 1 100%;order:3}
+  body[data-page=collection] .catalog-controls .sort-wrap{flex:0 0 auto}
+  .wastra-grid article img.motif{height:auto;max-height:none}
+}
+@media(max-width:600px){
+  .site-header .header-inner{
+    grid-template-columns:40px minmax(0,1fr) auto;
+    padding-inline:10px;
+    column-gap:4px;
+    height:69px;
+  }
+  .site-header .gn-official-wordmark{width:100%;max-width:176px}
+  .site-header .gn-official-wordmark img{width:min(100%,165px);height:auto}
+  .site-header .header-actions{gap:2px}
+  .site-header .language-select{width:55px;min-width:55px;flex-shrink:0}
+  .site-header .header-actions .bag-btn{min-width:40px;width:40px}
+  .gn-video-hero .hero-copy,.gn-video-hero .hero-copy>p{max-width:100%}
+  .hero-cta{align-items:flex-start}
+  body[data-page=home] .gn-video-hero .hero-inner{min-height:max(610px,75svh)}
+  .collection-section{padding-inline:clamp(15px,4.3vw,26px)}
+  body[data-page=collection] .collection-counter{align-self:flex-start}
+  body[data-page=collection] .catalog-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px 12px}
+  body[data-page=collection] .catalog-controls .search-wrap{grid-column:1;grid-row:1;min-width:0;width:100%}
+  body[data-page=collection] .catalog-controls .sort-wrap{grid-column:2;grid-row:1}
+  body[data-page=collection] .catalog-controls .filter-wrap{grid-column:1/-1;grid-row:2;gap:7px}
+  body[data-page=collection] .catalog-controls .sort-wrap select{max-width:115px;text-overflow:ellipsis}
+  body[data-page=collection] .catalog-controls .chip{font-size:10px;padding:8px 10px}
+  .product-meta{display:flex;align-items:flex-start}
+  .product-name{font-size:17px}
+  .wastra-grid article img.motif{height:auto;max-height:none;aspect-ratio:3/4}
+  .breadcrumbs{padding-block:18px;flex-wrap:wrap}
+  .page-tabs{gap:20px;overflow-x:auto;justify-content:flex-start;scrollbar-width:thin}
+  .gn-articles .gn-grid{gap:19px}
+  footer .footer-links{gap:14px 19px}
+}
+@media(max-width:390px){
+  .site-header .gn-official-wordmark{max-width:137px}
+  .site-header .gn-official-wordmark img{width:100%}
+  .site-header .language-select{min-width:49px;width:49px;padding-inline:5px}
+  .site-header .language-globe{width:14px;height:14px}
+  .site-header .language-chevron{width:10px;height:10px}
+  .site-header .header-actions .bag-btn{width:37px;min-width:37px}
+  .product-visual{aspect-ratio:3/4.2}
+  .product-grid{gap:25px 10px}
+  .product-name{font-size:16px}
+  .wastra-section{padding-inline:17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .product:focus-within .product-visual .gn-photo{transform:none}
+  .wastra-grid article:hover img.motif{transform:none}
+}
