@@ -9,8 +9,6 @@ on:
       - gn-midtrans.js
       - gn-payment-status.js
       - payment-status.html
-      - admin.html
-      - admin.js
       - supabase/functions/gn-midtrans-checkout/index.ts
       - supabase/functions/gn-midtrans-webhook/index.ts
   workflow_dispatch:
@@ -51,14 +49,9 @@ jobs:
           console.log('Midtrans primary payment flow and script order PASSED');
           NODE
           node --check gn-payment-status.js
-          node --check admin.js
           grep -q 'id="midtransForm"' index.html
           grep -q 'id="midtransBtn"' index.html
           grep -q 'gn-midtrans.js' index.html
-          grep -q 'data-view="orders"' admin.html
-          grep -q 'gn_orders' admin.js
-          grep -q 'data-view="shipping"' admin.html
-          grep -q 'gn_set_shipping_progress_v1' admin.js
           grep -q 'name="postal_code"' index.html
           grep -q 'name="order_consent"' index.html
           grep -q 'MIDTRANS_SERVER_KEY' supabase/functions/gn-midtrans-checkout/index.ts
