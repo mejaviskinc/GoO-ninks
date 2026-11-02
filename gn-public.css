@@ -160,3 +160,49 @@
  .gn-special-offers{max-height:none}
 }
 @media(prefers-reduced-motion:reduce){.gn-special-main-cta{transition:none}}
+
+/* Wide, auto-rotating editorial advertising banner (managed from gn_ads). */
+.gn-ads-carousel-section{background:#efeee6;padding-block:clamp(42px,5vw,74px)}
+.gn-ads-carousel-section .gn-inner{max-width:1440px}
+.gn-ads-carousel-section .gn-title{font-size:clamp(24px,3.1vw,38px);margin-bottom:24px}
+.gn-ad-carousel{width:100%;min-width:0}
+.gn-ad-viewport{overflow:hidden;border-radius:12px;background:#242a25;box-shadow:0 16px 45px rgba(22,26,22,.11)}
+.gn-ad-track{display:flex;transition:transform .7s cubic-bezier(.22,1,.36,1);will-change:transform}
+.gn-ad-carousel.gn-ad-reduced-motion .gn-ad-track{transition:none}
+.gn-ad-slide{flex:0 0 100%;width:100%;min-width:0;aspect-ratio:16/7;min-height:230px;position:relative;overflow:hidden;background:#283027}
+.gn-ad-content{position:relative;display:block;width:100%;height:100%;overflow:hidden;color:#fff;text-decoration:none}
+.gn-ad-slide a.gn-ad-content{color:#fff}
+.gn-ad-slide a.gn-ad-content:focus-visible{outline:3px solid #fff;outline-offset:-5px}
+.gn-ad-media{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.gn-ad-video{background:#151a15}
+.gn-ad-content::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(17,21,17,.74) 0%,rgba(19,23,19,.32) 53%,rgba(19,23,19,.05) 100%);pointer-events:none}
+.gn-ad-caption{position:absolute;z-index:1;left:clamp(22px,6vw,88px);bottom:clamp(28px,5.2vw,78px);max-width:min(690px,73%);pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,.18)}
+.gn-ad-eyebrow{display:block;font-size:clamp(9px,1.1vw,12px);font-weight:700;letter-spacing:.24em;color:#eeece4;margin-bottom:14px}
+.gn-ad-heading{margin:0;font:400 clamp(34px,5.8vw,82px)/1.06 'Playfair Display',Georgia,serif;letter-spacing:-.045em;overflow-wrap:break-word;text-wrap:balance}
+.gn-ad-cta{display:inline-block;margin-top:23px;border-bottom:1px solid #fff;padding-bottom:5px;font-size:12px;font-weight:600;letter-spacing:.04em}
+.gn-ad-controls{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:20px}
+.gn-ad-controls[hidden]{display:none}
+.gn-ad-arrow,.gn-ad-toggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #b9baa9;background:transparent;color:#2e352f;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;transition:background .2s,color .2s}
+.gn-ad-arrow:hover,.gn-ad-toggle:hover{background:#2e352f;color:#fff}
+.gn-ad-dots{display:flex;gap:10px;align-items:center;justify-content:center}
+.gn-ad-dot{width:8px;height:8px;border:0;border-radius:100px;padding:0;background:#acae9e;cursor:pointer;transition:width .25s,background .25s}
+.gn-ad-dot.is-active{width:27px;background:#353e32}
+.gn-ad-arrow:focus-visible,.gn-ad-toggle:focus-visible,.gn-ad-dot:focus-visible{outline:2px solid #75694b;outline-offset:4px}
+@media(max-width:700px){
+ .gn-ads-carousel-section .gn-title{margin-bottom:18px}
+ .gn-ad-slide{aspect-ratio:16/10;min-height:205px}
+ .gn-ad-caption{left:24px;bottom:26px;max-width:78%}
+ .gn-ad-heading{font-size:clamp(26px,7.5vw,46px)}
+ .gn-ad-eyebrow{margin-bottom:9px;letter-spacing:.16em}
+ .gn-ad-cta{margin-top:13px;font-size:11px}
+ .gn-ad-controls{gap:15px;margin-top:16px}
+ .gn-ad-arrow,.gn-ad-toggle{width:38px;height:38px}
+}
+@media(max-width:420px){
+ .gn-ad-slide{aspect-ratio:16/11;min-height:200px}
+ .gn-ad-caption{max-width:83%;left:19px;bottom:20px}
+ .gn-ad-heading{font-size:clamp(25px,7vw,32px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .gn-ad-track,.gn-ad-arrow,.gn-ad-toggle,.gn-ad-dot{transition:none}
+}
