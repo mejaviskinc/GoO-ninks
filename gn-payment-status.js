@@ -4,6 +4,7 @@ const el=x=>document.getElementById(x),id=new URL(location.href).searchParams.ge
 const message=el('paymentStatusText'),button=el('checkPaymentAgain');
 if(!/^GN-[A-Z0-9-]{8,45}$/.test(id)){message.textContent='Nomor pesanan tidak valid.';button.disabled=true;return}
 el('paymentOrderId').textContent=id;
+const trackingLink=el('goTrackOrder');if(trackingLink)trackingLink.href='/tracking.html?order_id='+encodeURIComponent(id);
 let token='';try{token=JSON.parse(sessionStorage.getItem('gn_payment_'+id)||'{}').token||''}catch{}
 if(!token){message.textContent='Kode verifikasi tidak tersedia di perangkat ini. Hubungi admin menggunakan nomor pesanan.';button.disabled=true;return}
 const cfg=window.GN_CONFIG;
