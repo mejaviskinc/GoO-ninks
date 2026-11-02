@@ -15,6 +15,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo "=== Authoritative nameservers ==="
+          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id NS || true
+          echo "=== DNS SOA ==="
+          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id SOA || true
+          echo "=== DNS AAAA records ==="
+          dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id AAAA || true
+          echo "=== www CNAME ==="
+          dig @1.1.1.1 +time=4 +tries=1 +short www.gooninks.co.id CNAME || true
+          echo "=== Live TLS headers (nonfatal diagnostic) ==="
+          curl --location --head --show-error --max-time 15 https://gooninks.co.id/ || true
+          echo "=== GitHub Pages diagnostic (nonfatal) ==="
+          curl --location --head --show-error --max-time 15 https://mejaviskinc.github.io/GoO-ninks/ || true
           echo "=== DNS A records ==="
           dig @1.1.1.1 +time=4 +tries=1 +short gooninks.co.id A | sort | tee /tmp/addresses
           for ip in 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153; do grep -Fxq "$ip" /tmp/addresses; done
