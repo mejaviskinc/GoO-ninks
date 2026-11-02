@@ -494,3 +494,22 @@ footer small,footer p{color:#c6bba9}
   .product:focus-within .product-visual .gn-photo{transform:none}
   .wastra-grid article:hover img.motif{transform:none}
 }
+
+/* Special Price heading: keep words intact and scale cleanly on narrow screens. */
+.gn-special-copy h1,
+.gn-special-copy h2 {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+.gn-special-copy h1 i,
+.gn-special-copy h2 i {
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .gn-special-copy h1,
+  .gn-special-copy h2 {
+    font-size: clamp(42px, 14vw, 68px);
+    letter-spacing: -.055em;
+  }
+}
