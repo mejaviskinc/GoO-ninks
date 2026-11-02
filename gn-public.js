@@ -166,7 +166,7 @@
    if(error)throw error;
    const campaigns=(data||[]).map(ad=>({
     ...ad,photo:validUrl(ad.image_url),clip:validUrl(ad.video_url),href:validUrl(ad.link_url)
-   })).filter(ad=>ad.photo||(ad.clip&&/\\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)));
+   })).filter(ad=>ad.photo||(ad.clip&&/\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)));
    if(!campaigns.length)return;
    const words={
     id:{title:'Pilihan GoO Ninks',previous:'Iklan sebelumnya',next:'Iklan berikutnya',pause:'Jeda slide otomatis',play:'Lanjutkan slide otomatis',slide:'Iklan'},
@@ -191,7 +191,7 @@
     slide.setAttribute('aria-roledescription','slide');
     const content=put(slide,ad.href?'a':'div','gn-ad-content');
     if(ad.href){content.href=ad.href;content.target='_blank';content.rel='noopener noreferrer sponsored';links.push(content);}
-    if(ad.clip&&/\\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)){
+    if(ad.clip&&/\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)){
      const video=put(content,'video','gn-ad-media gn-ad-video');
      video.src=ad.clip;video.muted=true;video.loop=true;video.playsInline=true;
      video.preload=i===0?'metadata':'none';
