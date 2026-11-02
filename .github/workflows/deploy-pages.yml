@@ -25,6 +25,8 @@ on:
       - gn-midtrans.js
       - gn-payment-status.js
       - payment-status.html
+      - tracking.html
+      - gn-tracking.js
       - brand-loader.css
       - brand-loader.js
       - logo-gooninks.svg
@@ -80,6 +82,9 @@ jobs:
           node --check app.js
           node --check gn-public.js
           node --check gn-midtrans.js
+          node --check gn-tracking.js
+          test -s tracking.html
+          grep -q 'gn-tracking.js' tracking.html
           grep -q 'name="promo_code"' index.html
           grep -q 'name="promo_code"' collection.html
       - name: Assemble static website
@@ -87,7 +92,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html article.html gn-public.js gn-public.css storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cp .hero-media/gooninks-home-background.mp4 .hero-media/gooninks-home-poster.jpg _site/assets/
           cp assets/gooninks-story-photo2.webp _site/assets/
