@@ -68,7 +68,7 @@ Deno.serve(async (request: Request) => {
       source:"manual_admin_updates",
     });
   }
-  if (action !== "issue" && action !== "note") return respond(request,{error:"Aksi tidak tersedia"},400);
+  if (action !== "issue" && action !== "note" && action !== "history") return respond(request,{error:"Aksi tidak tersedia"},400);
   // verify_jwt is deliberately disabled on this endpoint to permit customer tracking.
   // Every admin mutation independently validates the Supabase user and approved admin row.
   const bearer=(request.headers.get("authorization") ?? "").match(/^Bearer\s+(\S+)$/i)?.[1];
@@ -82,6 +82,15 @@ Deno.serve(async (request: Request) => {
   const {data:order,error:orderError}=await db.from("gn_orders")
     .select("order_id,status,deleted_at").eq("order_id",orderId).maybeSingle();
   if (orderError || !order || order.deleted_at) return respond(request,{error:"Pesanan tidak tersedia"},404);
+  if (action === "history") {
+    const [shipments,history] = await Promise.all([
+      db.from("gn_shipments").select("status,carrier,tracking_number,updated_at").eq("order_id",orderId).maybeSingle(),
+      db.from("gn_tracking_events").select("id,kind,status,message,created_at").eq("order_id",orderId)
+        .order("created_at",{ascending:false}).order("id",{ascending:false}).limit(80)
+    ]);
+    if (shipments.error || history.error) return respond(request,{error:"Riwayat tidak dapat dimuat"},503);
+    return respond(request,{order_id:orderId,payment_status:order.status,shipment:shipments.data,history:history.data??[]});
+  }
   if (action === "issue") {
     const bytes = crypto.getRandomValues(new Uint8Array(32));
     const code = [...bytes].map(x=>x.toString(16).padStart(2,"0")).join("");
