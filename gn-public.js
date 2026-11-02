@@ -156,7 +156,153 @@
   renderSpecialOffers();
  }
  window.addEventListener('gn-language-changed',syncDynamicLanguage);
- async function ads(){const page=document.body.dataset.page;if(!['home','collection'].includes(page))return;const {data,error}=await api.from('gn_ads').select('title,image_url,video_url,link_url,placement').eq('active',true).eq('placement',page).limit(6);if(error||!data?.length)return;const [s,w]=section('GoO Ninks — Featured','gn-ads');const grid=put(w,'div','gn-grid');data.forEach(a=>{const card=put(grid,'article','gn-offer'),u=validUrl(a.link_url),img=validUrl(a.image_url);const target=u?put(card,'a'):card;if(u){target.href=u;target.rel='noopener noreferrer sponsored';target.target='_blank'}if(validUrl(a.video_url)&&/\.(mp4|webm)(?:[?#]|$)/i.test(a.video_url)){const v=put(target,'video','gn-card-video');v.src=validUrl(a.video_url);v.muted=true;v.autoplay=true;v.loop=true;v.playsInline=true;v.controls=true;v.preload='metadata';if(img)v.poster=img;}else if(img){const image=put(target,'img','gn-card-img');image.src=img;image.alt=a.title;image.loading='lazy'}put(target,'h3','',a.title)});document.querySelector('#collection')?.insertAdjacentElement('beforebegin',s)}
+ async function ads(){
+  const page=document.body.dataset.page;
+  if(!['home','collection'].includes(page))return;
+  try{
+   const {data,error}=await api.from('gn_ads')
+    .select('title,image_url,video_url,link_url,placement')
+    .eq('active',true).eq('placement',page).limit(10);
+   if(error)throw error;
+   const campaigns=(data||[]).map(ad=>({
+    ...ad,photo:validUrl(ad.image_url),clip:validUrl(ad.video_url),href:validUrl(ad.link_url)
+   })).filter(ad=>ad.photo||(ad.clip&&/\\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)));
+   if(!campaigns.length)return;
+   const words={
+    id:{title:'Pilihan GoO Ninks',previous:'Iklan sebelumnya',next:'Iklan berikutnya',pause:'Jeda slide otomatis',play:'Lanjutkan slide otomatis',slide:'Iklan'},
+    en:{title:'GoO Ninks Featured',previous:'Previous advertisement',next:'Next advertisement',pause:'Pause autoplay',play:'Resume autoplay',slide:'Advertisement'},
+    nl:{title:'GoO Ninks uitgelicht',previous:'Vorige advertentie',next:'Volgende advertentie',pause:'Automatisch afspelen pauzeren',play:'Automatisch afspelen hervatten',slide:'Advertentie'},
+    ko:{title:'GoO Ninks 추천',previous:'이전 광고',next:'다음 광고',pause:'자동 넘김 일시정지',play:'자동 넘김 다시 시작',slide:'광고'}
+   };
+   const label=()=>words[loc()]||words.id;
+   const [s,w]=section(label().title,'gn-ads');
+   s.classList.add('gn-ads-carousel-section');
+   const carousel=put(w,'div','gn-ad-carousel');
+   carousel.setAttribute('role','region');
+   carousel.setAttribute('aria-roledescription','carousel');
+   carousel.setAttribute('aria-label','GoO Ninks — Featured');
+   const viewport=put(carousel,'div','gn-ad-viewport');
+   const track=put(viewport,'div','gn-ad-track');
+   const videos=[];
+   const links=[];
+   const slides=[];
+   campaigns.forEach((ad,i)=>{
+    const slide=put(track,'article','gn-ad-slide');
+    slide.setAttribute('aria-roledescription','slide');
+    const content=put(slide,ad.href?'a':'div','gn-ad-content');
+    if(ad.href){content.href=ad.href;content.target='_blank';content.rel='noopener noreferrer sponsored';links.push(content);}
+    if(ad.clip&&/\\.(mp4|webm)(?:[?#]|$)/i.test(ad.clip)){
+     const video=put(content,'video','gn-ad-media gn-ad-video');
+     video.src=ad.clip;video.muted=true;video.loop=true;video.playsInline=true;
+     video.preload=i===0?'metadata':'none';
+     if(ad.photo)video.poster=ad.photo;
+     video.controls=true;
+     videos.push({video,index:i});
+    }else{
+     const image=put(content,'img','gn-ad-media');
+     image.src=ad.photo;image.alt=String(ad.title||'GoO Ninks');
+     image.loading=i===0?'eager':'lazy';image.decoding='async';
+    }
+    const caption=put(content,'div','gn-ad-caption');
+    put(caption,'span','gn-ad-eyebrow','GOO NINKS / FEATURED');
+    put(caption,'h3','gn-ad-heading',String(ad.title||'GoO Ninks'));
+    if(ad.href)put(caption,'span','gn-ad-cta','Explore ↗');
+    slides.push(slide);
+   });
+   const controls=put(carousel,'div','gn-ad-controls');
+   const previous=put(controls,'button','gn-ad-arrow','←');
+   previous.type='button';
+   const dots=put(controls,'div','gn-ad-dots');
+   dots.setAttribute('aria-label','Pilih banner iklan');
+   const next=put(controls,'button','gn-ad-arrow','→');
+   next.type='button';
+   const toggle=put(controls,'button','gn-ad-toggle','Ⅱ');
+   toggle.type='button';
+   const dotButtons=campaigns.map((ad,i)=>{
+    const dot=put(dots,'button','gn-ad-dot');
+    dot.type='button';
+    dot.setAttribute('aria-label',label().slide+' '+(i+1));
+    dot.addEventListener('click',()=>go(i));
+    return dot;
+   });
+   const multiple=campaigns.length>1;
+   controls.hidden=!multiple;
+   let active=0,timer=null,userPaused=false,hovered=false,focused=false;
+   const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+   const setLabels=()=>{
+    w.querySelector('.gn-title').textContent=label().title;
+    previous.setAttribute('aria-label',label().previous);
+    next.setAttribute('aria-label',label().next);
+    toggle.setAttribute('aria-label',userPaused?label().play:label().pause);
+    dotButtons.forEach((dot,i)=>dot.setAttribute('aria-label',label().slide+' '+(i+1)));
+    slides.forEach((slide,i)=>slide.setAttribute('aria-label',label().slide+' '+(i+1)+' / '+campaigns.length));
+   };
+   const schedule=()=>{
+    clearTimeout(timer);
+    if(multiple&&!userPaused&&!hovered&&!focused&&!motion.matches&&!document.hidden){
+     timer=setTimeout(()=>go(active+1),6500);
+    }
+   };
+   const go=index=>{
+    active=(index+campaigns.length)%campaigns.length;
+    track.style.transform='translateX(-'+(active*100)+'%)';
+    slides.forEach((slide,i)=>slide.setAttribute('aria-hidden',i===active?'false':'true'));
+    links.forEach(link=>{link.tabIndex=link.closest('.gn-ad-slide')===slides[active]?0:-1});
+    dotButtons.forEach((dot,i)=>{
+     dot.classList.toggle('is-active',i===active);
+     dot.setAttribute('aria-current',i===active?'true':'false');
+    });
+    videos.forEach(({video,index:i})=>{
+     if(i===active&&!document.hidden){
+      video.controls=true;video.tabIndex=0;
+      const promise=video.play();if(promise&&typeof promise.catch==='function')promise.catch(()=>{});
+     }else{
+      video.pause();video.controls=false;video.tabIndex=-1;
+     }
+    });
+    schedule();
+   };
+   previous.addEventListener('click',()=>go(active-1));
+   next.addEventListener('click',()=>go(active+1));
+   toggle.addEventListener('click',()=>{
+    userPaused=!userPaused;
+    toggle.textContent=userPaused?'▶':'Ⅱ';
+    toggle.setAttribute('aria-pressed',String(userPaused));
+    setLabels();schedule();
+   });
+   carousel.addEventListener('mouseenter',()=>{hovered=true;schedule()});
+   carousel.addEventListener('mouseleave',()=>{hovered=false;schedule()});
+   carousel.addEventListener('focusin',()=>{focused=true;schedule()});
+   carousel.addEventListener('focusout',e=>{if(!carousel.contains(e.relatedTarget)){focused=false;schedule()}});
+   carousel.addEventListener('keydown',e=>{
+    if(e.target.tagName==='VIDEO')return;
+    if(e.key==='ArrowRight'){e.preventDefault();go(active+1)}
+    if(e.key==='ArrowLeft'){e.preventDefault();go(active-1)}
+   });
+   let touchX=null;
+   viewport.addEventListener('touchstart',e=>{touchX=e.touches[0]?.clientX??null},{passive:true});
+   viewport.addEventListener('touchend',e=>{
+    if(touchX===null)return;
+    const dx=(e.changedTouches[0]?.clientX??touchX)-touchX;
+    if(Math.abs(dx)>50&&multiple)go(active+(dx<0?1:-1));
+    touchX=null;
+   },{passive:true});
+   document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){videos.forEach(({video})=>video.pause());schedule();}
+    else go(active);
+   });
+   const updateMotion=()=>{
+    carousel.classList.toggle('gn-ad-reduced-motion',motion.matches);
+    schedule();
+   };
+   if(motion.addEventListener)motion.addEventListener('change',updateMotion);
+   window.addEventListener('gn-language-changed',setLabels);
+   const mount=document.querySelector('#collection')||document.querySelector('#productGrid')?.closest('section');
+   if(mount)mount.insertAdjacentElement('beforebegin',s);
+   else document.querySelector('#main')?.append(s);
+   setLabels();updateMotion();go(0);
+  }catch(error){console.warn('GoO Ninks ads:',error.message)}
+ }
  async function articles(){
   const page=document.body.dataset.page||'home';if(page!=='journal')return;
   const mount=document.querySelector('#journalMount');if(!mount)return;
