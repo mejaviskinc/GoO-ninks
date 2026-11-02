@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f7f5ef">
+<meta name="referrer" content="no-referrer">
+<title>Lacak Pesanan — GoO ninks</title>
+<meta name="description" content="Lihat status pesanan dan riwayat pengiriman GoO ninks dengan kode pelacakan pribadi Anda.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/gn-config.js" defer></script>
+<script src="/gn-tracking.js?v=20261102-tracking1" defer></script>
+<style>
+:root{font-family:"DM Sans",system-ui,-apple-system,sans-serif;color:#2e332d;background:#f7f5ef;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}a{color:#415043}button,input{font:inherit}
+header{border-bottom:1px solid #e2dfd6;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(16px,5vw,64px)}
+header img{width:min(200px,48vw);height:34px;object-fit:contain}header a{text-decoration:none;font-size:13px;font-weight:600}
+main{width:min(880px,calc(100% - 32px));margin:56px auto 75px}
+.eyebrow{color:#ab873f;font-size:11px;letter-spacing:.20em;text-transform:uppercase;font-weight:700}
+h1,h2{font-family:Georgia,serif;font-weight:500}h1{font-size:clamp(32px,6vw,52px);margin:12px 0}h2{font-size:23px;margin:0 0 18px}
+.intro{color:#777b70;line-height:1.7;max-width:630px}
+.panel{background:white;border:1px solid #e6e3db;border-radius:15px;padding:clamp(20px,4vw,32px);box-shadow:0 14px 45px #27322108;margin-top:24px}
+form{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;align-items:end}
+label{display:grid;gap:8px;font-size:13px;font-weight:600}input{border:1px solid #c9cbbf;border-radius:8px;padding:13px 14px;background:#fff;min-width:0;width:100%;color:#29332c}input:focus{outline:2px solid #70806b;outline-offset:1px}
+button{border:0;border-radius:8px;background:#3f5041;color:white;padding:14px 20px;font-weight:600;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+.form-actions{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:15px}.help{font-size:12px;color:#73786e;line-height:1.5}.feedback{margin:14px 0 0;min-height:20px;color:#58624d;font-size:13px;line-height:1.6}.feedback.error{color:#a14236}
+.hidden{display:none!important}
+.heading-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.chip{display:inline-flex;padding:6px 12px;border-radius:30px;background:#edeedf;color:#435b44;font-size:12px;font-weight:700}.chip.warn{color:#8f571c;background:#fff0d7}
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:22px}.label{font-size:12px;color:#6c7569;margin-bottom:5px}.value{font-size:15px;font-weight:650;overflow-wrap:anywhere}
+.divider{height:1px;background:#e6e7e0;margin:27px 0}
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;list-style:none;padding:0;margin:24px 0}
+.steps li{position:relative;border-top:5px solid #e0e3db;padding-top:13px;color:#8a8e83;font-size:11px;line-height:1.4;font-weight:600}
+.steps li.complete{border-color:#52694d;color:#3d5240}.steps li.current{border-color:#b28d50;color:#3d5240}
+.timeline{list-style:none;padding:0;margin:0;border-left:2px solid #d5decf}
+.timeline li{position:relative;padding:0 0 25px 21px}
+.timeline li:last-child{padding-bottom:0}
+.timeline li:before{position:absolute;content:"";width:10px;height:10px;background:#6f8266;border:3px solid white;box-shadow:0 0 0 1px #c8d4c0;border-radius:50%;left:-9px;top:3px}
+.timeline h3{margin:0 0 5px;font-size:14px}.timeline p{margin:0 0 6px;color:#5c665d;font-size:13px;line-height:1.55}.timeline time{font-size:11px;color:#83887d}
+.notice{font-size:12px;line-height:1.7;color:#747a71;margin:28px 0}
+footer{text-align:center;font-size:12px;color:#777f74;padding:20px 10px;border-top:1px solid #e0dfd6}
+@media(max-width:640px){header{padding:15px 18px}main{margin-top:35px}form,.summary{grid-template-columns:1fr}.steps{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.steps li{font-size:10px;overflow-wrap:anywhere}.panel{padding:20px}}
+</style>
+</head>
+<body>
+<header><a href="/" aria-label="Kembali ke beranda GoO ninks"><img src="/gooninks-horizontal-logo.svg" alt="GoO ninks" width="200" height="34"></a><a href="/">Kembali ke toko ↗</a></header>
+<main>
+<p class="eyebrow">GOO NINKS · ORDER EXPERIENCE</p>
+<h1>Lacak pesanan Anda.</h1>
+<p class="intro">Pantau status pembayaran, pengemasan, pengiriman, dan nomor resi. Informasi diperbarui oleh tim GoO ninks melalui dashboard admin.</p>
+<section class="panel" aria-labelledby="search-title">
+<h2 id="search-title">Cek status pesanan</h2>
+<form id="trackingForm">
+<label>Nomor pesanan<input name="order_id" id="trackOrderId" placeholder="GN-XXXXXXXX-..." maxlength="48" autocapitalize="characters" required autocomplete="off"></label>
+<label>Kode akses pelacakan (jika diberikan admin)<input name="code" id="trackCode" placeholder="Masukkan kode dari admin" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+<div class="form-actions"><button id="trackSubmit" type="submit">Lacak pesanan</button><span class="help">Pelanggan yang checkout di perangkat ini dapat melacak tanpa memasukkan kode lagi.</span></div>
+</form>
+<p id="trackMessage" class="feedback" role="status" aria-live="polite">Masukkan nomor pesanan dan kode akses yang dibagikan admin.</p>
+</section>
+<section id="trackResult" class="panel hidden" aria-label="Hasil pelacakan">
+<div class="heading-row"><div><p class="eyebrow">RINGKASAN PESANAN</p><h2 id="resultOrderId">—</h2></div><span id="resultBadge" class="chip">—</span></div>
+<div class="summary"><div><div class="label">Status pembayaran</div><div class="value" id="paymentState">—</div></div><div><div class="label">Pesanan dibuat</div><div class="value" id="orderCreated">—</div></div><div><div class="label">Kurir / ekspedisi</div><div class="value" id="carrierName">Belum ditentukan</div></div><div><div class="label">Nomor resi</div><div class="value" id="trackingNumber">Belum tersedia</div></div></div>
+<div class="divider"></div><h2>Perjalanan pesanan</h2>
+<ol id="shippingSteps" class="steps" aria-label="Tahapan pengiriman"></ol>
+<div class="divider"></div><h2>Riwayat pembaruan</h2>
+<ol id="trackingHistory" class="timeline"></ol>
+</section>
+<p class="notice">Status di halaman ini merupakan pembaruan operasional dari admin GoO ninks, bukan pelacakan GPS atau pembaruan otomatis dari API ekspedisi. Untuk informasi lebih lanjut, <a href="https://wa.me/6285740393953" target="_blank" rel="noopener noreferrer">hubungi tim GoO ninks melalui WhatsApp</a>. Jangan bagikan kode pelacakan ke orang lain.</p>
+</main><footer>© 2026 GoO ninks · Crafted for every story.</footer>
+</body></html>
