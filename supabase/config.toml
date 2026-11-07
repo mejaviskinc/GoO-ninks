@@ -3,3 +3,9 @@ verify_jwt = false
 
 [functions.gn-midtrans-webhook]
 verify_jwt = false
+
+[functions.gn-doku-checkout]
+verify_jwt = false
+
+[functions.gn-doku-webhook]
+verify_jwt = false

@@ -1,4 +1,4 @@
-/* Midtrans return URL is not payment proof; query the server with a private order token. */
+/* A gateway return URL is not payment proof; query the server with a private order token. */
 (()=>{'use strict';
 const el=x=>document.getElementById(x),id=new URL(location.href).searchParams.get('order_id')||'';
 const message=el('paymentStatusText'),button=el('checkPaymentAgain');
@@ -25,7 +25,7 @@ async function check(){
  if(busy)return;
  busy=true;button.disabled=true;
  try{
-  const res=await fetch(cfg.url+'/functions/v1/gn-midtrans-checkout',{method:'POST',
+  const res=await fetch(cfg.url+'/functions/v1/'+(id.startsWith('GN-DK-')?'gn-doku-checkout':'gn-midtrans-checkout'),{method:'POST',
     headers:{'Content-Type':'application/json',apikey:cfg.publishableKey},
     body:JSON.stringify({action:'status',order_id:id,access_token:token}),
     signal:AbortSignal.timeout(20000),cache:'no-store'});

@@ -1,4 +1,4 @@
-/* Midtrans Snap Redirect. The Midtrans Server Key is never present on the website. */
+/* Payment routing: switch new orders to DOKU only when production is configured. */
 (()=>{'use strict';
 const form=document.getElementById('midtransForm');
 if(!form)return;
@@ -15,22 +15,26 @@ const CHECKOUT_LABELS={
   ko:{continue:'Midtrans 결제 계속하기 ↗',manual:'주문 정보 입력 ↗',help:'도움이 필요하신가요? WhatsApp으로 주문 ↗'}
 };
 const local=()=>{try{return JSON.parse(localStorage.getItem('goo-ninks-lang')||'"id"')}catch{return 'id'}};
+const providerName=()=>provider==='doku'?'DOKU':'Midtrans';
 const tr=key=>(PAYMENT_MESSAGES[local()]||PAYMENT_MESSAGES.id)[key]||(ORDER_LABELS[local()]||ORDER_LABELS.id)[key]||key;
 const ORDER_LABELS={"id":{"payMidtransButton":"Bayar melalui Midtrans ↗","manualButton":"Ajukan Pesanan ke Admin ↗","postalInvalid":"Kode pos harus 5 angka.","manualSaved":"Data pesanan tercatat di Leads. Mengarahkan ke WhatsApp untuk konfirmasi; pesanan belum dibayar.","manualFailed":"Gagal menyimpan data pesanan. Jangan lanjutkan sebelum data tercatat."},"en":{"payMidtransButton":"Pay securely with Midtrans ↗","manualButton":"Send Order Request ↗","postalInvalid":"Postal code must be 5 digits.","manualSaved":"Order details saved. Redirecting to WhatsApp for confirmation; this is not a paid order.","manualFailed":"Could not save your order. Please try again before continuing."},"nl":{"payMidtransButton":"Veilig betalen via Midtrans ↗","manualButton":"Bestelaanvraag versturen ↗","postalInvalid":"De postcode moet 5 cijfers bevatten.","manualSaved":"Bestelgegevens opgeslagen. Doorsturen naar WhatsApp voor bevestiging; nog niet betaald.","manualFailed":"Bestelling opslaan is mislukt. Probeer het opnieuw."},"ko":{"payMidtransButton":"Midtrans 결제하기 ↗","manualButton":"주문 요청 제출 ↗","postalInvalid":"우편번호는 숫자 5자리여야 합니다.","manualSaved":"주문 정보가 저장되었습니다. WhatsApp으로 이동하여 확인하며, 아직 결제되지 않았습니다.","manualFailed":"주문 정보를 저장하지 못했습니다. 다시 시도해 주세요."}};
 const cfg=window.GN_CONFIG;
 if(!cfg?.url||!cfg?.publishableKey){info.textContent=tr('noConnect');return;}
-const endpoint=cfg.url+'/functions/v1/gn-midtrans-checkout';
+let provider='midtrans',endpoint=cfg.url+'/functions/v1/gn-midtrans-checkout';
 const h={'Content-Type':'application/json','apikey':cfg.publishableKey};
 let available=false,processing=false,modeKey='offMode',lastMessage='disabled',lastError=false;
 window.GN_MIDTRANS_READY=false;
 const updateCheckoutAction=()=>{
   if(primary){
     const words=CHECKOUT_LABELS[local()]||CHECKOUT_LABELS.id;
-    const label=available?words.continue:words.manual;
+    const label=(available?words.continue:words.manual).replaceAll('Midtrans',providerName());
     primary.textContent=label;
     primary.setAttribute('aria-label',label);
   }
-  pay.textContent=available?tr('payMidtransButton'):tr('manualButton');
+  pay.textContent=(available?tr('payMidtransButton'):tr('manualButton')).replaceAll('Midtrans',providerName());
+  document.querySelectorAll('[data-i18n="payOnline"],[data-i18n="payExplain"]').forEach(el=>{
+    el.innerHTML=el.innerHTML.replace(/Midtrans|DOKU/g,providerName());
+  });
   if(backup){
     backup.hidden=true;
   }
@@ -45,21 +49,32 @@ window.GN_MIDTRANS_OPEN=()=>{
 };
 const count=()=>window.GN_CART_SNAPSHOT?.().reduce((n,x)=>n+x.qty,0)||0;
 const sync=()=>{pay.disabled=processing||count()===0};
-const message=(key,bad=false)=>{lastMessage=key;lastError=bad;info.textContent=tr(key);info.classList.toggle('gn-midtrans-error',bad)};
+const message=(key,bad=false)=>{lastMessage=key;lastError=bad;info.textContent=tr(key).replaceAll('Midtrans',providerName());info.classList.toggle('gn-midtrans-error',bad)};
 updateCheckoutAction();
 sync();
 window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction()});
 document.addEventListener('gn-cart-changed',sync);
-fetch(endpoint,{headers:{apikey:cfg.publishableKey},cache:'no-store'}).then(async res=>{
- if(!res.ok)throw Error('Tidak dapat tersambung');
- const data=await res.json();available=data.enabled===true;
- window.GN_MIDTRANS_READY=available;
- form.hidden=true;
- modeKey=available?(data.mode==='production'?'activeMode':'sandboxMode'):'offMode';mode.textContent=tr(modeKey);
- message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
- updateCheckoutAction();
- sync();
-}).catch(()=>{available=false;window.GN_MIDTRANS_READY=false;form.hidden=true;updateCheckoutAction();message('offline',true);sync()});
+async function chooseGateway(){
+  const ready=async path=>{
+    const res=await fetch(cfg.url+'/functions/v1/'+path,{headers:{apikey:cfg.publishableKey},cache:'no-store',signal:AbortSignal.timeout(10000)});
+    if(!res.ok)throw Error('Payment unavailable');
+    return res.json();
+  };
+  let data;
+  try{
+    const doku=await ready('gn-doku-checkout');
+    if(doku.enabled===true && doku.mode==='production'){provider='doku';endpoint=cfg.url+'/functions/v1/gn-doku-checkout';data=doku;}
+  }catch{}
+  try{
+    if(!data)data=await ready('gn-midtrans-checkout');
+    available=data.enabled===true;
+    window.GN_MIDTRANS_READY=available;
+    modeKey=available?(data.mode==='production'?'activeMode':'sandboxMode'):'offMode';
+    mode.textContent=tr(modeKey);message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
+  }catch{available=false;window.GN_MIDTRANS_READY=false;message('offline',true);}
+  form.hidden=true;updateCheckoutAction();sync();
+}
+void chooseGateway();
 
 async function requestManualOrder(customer,items){
   // Manual fallback is an inquiry only: never mark an order paid or create shipping.
@@ -89,7 +104,7 @@ form.addEventListener('submit',async e=>{
   if(!res.ok)throw Error(data.error||tr('checkoutFail'));
   if(!/^GN-[A-Z0-9-]{8,45}$/.test(data.order_id)||typeof data.access_token!=='string')throw Error(tr('badId'));
   const url=new URL(data.redirect_url);
-  if(url.protocol!=='https:'||!['app.sandbox.midtrans.com','app.midtrans.com'].includes(url.hostname))throw Error(tr('badUrl'));
+  if(url.protocol!=='https:'||url.username||url.password||url.port||!(provider==='doku'?['checkout.doku.com']:['app.sandbox.midtrans.com','app.midtrans.com']).includes(url.hostname))throw Error(tr('badUrl'));
   sessionStorage.setItem('gn_payment_'+data.order_id,JSON.stringify({token:data.access_token,created:Date.now()}));
   message('redirect');
   window.location.assign(url.href);
