@@ -22,6 +22,8 @@ const cfg=window.GN_CONFIG;
 if(!cfg?.url||!cfg?.publishableKey){info.textContent=tr('noConnect');return;}
 let provider='midtrans',endpoint=cfg.url+'/functions/v1/gn-midtrans-checkout';
 const h={'Content-Type':'application/json','apikey':cfg.publishableKey};
+const turnstileSiteKey='0x4AAAAAAF3Q3TmIn0l4k_PE';
+let turnstileToken='',turnstileWidget=null,turnstileLoad=null;
 let available=false,processing=false,modeKey='offMode',lastMessage='disabled',lastError=false;
 window.GN_MIDTRANS_READY=false;
 const updateCheckoutAction=()=>{
@@ -43,6 +45,7 @@ window.GN_MIDTRANS_OPEN=()=>{
   const area=document.getElementById('midtransArea');
   if(!area)return false;
   form.hidden=false;
+  void mountTurnstile();
   area.scrollIntoView({behavior:'smooth',block:'nearest'});
   form.querySelector('input[name="name"]')?.focus({preventScroll:true});
   return true;
@@ -50,6 +53,46 @@ window.GN_MIDTRANS_OPEN=()=>{
 const count=()=>window.GN_CART_SNAPSHOT?.().reduce((n,x)=>n+x.qty,0)||0;
 const sync=()=>{pay.disabled=processing||count()===0};
 const message=(key,bad=false)=>{lastMessage=key;lastError=bad;info.textContent=tr(key).replaceAll('Midtrans',providerName());info.classList.toggle('gn-midtrans-error',bad)};
+const securityMessages={
+ id:{wait:'Selesaikan verifikasi keamanan sebelum membayar.',failed:'Verifikasi keamanan gagal dimuat. Muat ulang halaman atau coba jaringan lain.'},
+ en:{wait:'Complete the security check before paying.',failed:'Security verification could not load. Reload the page or try another network.'},
+ nl:{wait:'Voltooi de beveiligingscontrole voordat u betaalt.',failed:'Beveiligingscontrole kon niet laden. Vernieuw de pagina of probeer een ander netwerk.'},
+ ko:{wait:'결제 전 보안 확인을 완료해 주세요.',failed:'보안 확인을 불러오지 못했습니다. 페이지를 새로고침하거나 다른 네트워크를 이용해 주세요.'}
+};
+const securityText=key=>(securityMessages[local()]||securityMessages.id)[key];
+function loadTurnstile(){
+ if(window.turnstile)return Promise.resolve();
+ if(turnstileLoad)return turnstileLoad;
+ turnstileLoad=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  const timeout=setTimeout(()=>reject(Error(securityText('failed'))),15000);
+  script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  script.async=true;script.defer=true;
+  script.onload=()=>{clearTimeout(timeout);window.turnstile?resolve():reject(Error(securityText('failed')))};
+  script.onerror=()=>{clearTimeout(timeout);reject(Error(securityText('failed')))};
+  document.head.appendChild(script);
+ });
+ return turnstileLoad;
+}
+async function mountTurnstile(){
+ try{
+  await loadTurnstile();
+  if(turnstileWidget!==null)return;
+  let holder=document.getElementById('gnCheckoutTurnstile');
+  if(!holder){holder=document.createElement('div');holder.id='gnCheckoutTurnstile';holder.style.margin='12px 0';pay.before(holder);}
+  turnstileWidget=window.turnstile.render(holder,{
+   sitekey:turnstileSiteKey,action:'checkout',size:'flexible',theme:'light',
+   callback:token=>{turnstileToken=token;sync()},
+   'expired-callback':()=>{turnstileToken='';sync()},
+   'error-callback':()=>{turnstileToken='';message(securityText('failed'),true);sync()}
+  });
+ }catch{message(securityText('failed'),true)}
+}
+function resetTurnstile(){
+ turnstileToken='';
+ if(window.turnstile && turnstileWidget!==null)window.turnstile.reset(turnstileWidget);
+}
+
 updateCheckoutAction();
 sync();
 window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction()});
@@ -99,7 +142,8 @@ form.addEventListener('submit',async e=>{
   const customer={name:String(fd.get('name')||'').trim(),email:String(fd.get('email')||'').trim(),phone:String(fd.get('phone')||'').trim(),address:String(fd.get('address')||'').trim(),province:String(fd.get('province')||'').trim(),city:String(fd.get('city')||'').trim(),district:String(fd.get('district')||'').trim(),postal_code:String(fd.get('postal_code')||'').trim()};
   if(!/^[0-9]{5}$/.test(customer.postal_code))throw Error(tr('postalInvalid'));
   if(!available){await requestManualOrder(customer,items);processing=false;sync();return;}
-  const res=await fetch(endpoint,{method:'POST',headers:h,body:JSON.stringify({action:'checkout',customer,items,promo_code:String(fd.get('promo_code')||'').trim().toUpperCase()})});
+  if(!turnstileToken){void mountTurnstile();throw Error(securityText('wait'));}
+  const res=await fetch(endpoint,{method:'POST',headers:h,body:JSON.stringify({action:'checkout',customer,items,turnstile_token:turnstileToken,promo_code:String(fd.get('promo_code')||'').trim().toUpperCase()})});
   const data=await res.json().catch(()=>({}));
   if(!res.ok)throw Error(data.error||tr('checkoutFail'));
   if(!/^GN-[A-Z0-9-]{8,45}$/.test(data.order_id)||typeof data.access_token!=='string')throw Error(tr('badId'));
@@ -108,6 +152,6 @@ form.addEventListener('submit',async e=>{
   sessionStorage.setItem('gn_payment_'+data.order_id,JSON.stringify({token:data.access_token,created:Date.now()}));
   message('redirect');
   window.location.assign(url.href);
- }catch(error){message(error instanceof Error?error.message:'unknown',true);processing=false;sync();}
+ }catch(error){resetTurnstile();message(error instanceof Error?error.message:'unknown',true);processing=false;sync();}
 });
 })();

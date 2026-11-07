@@ -1,3 +1,4 @@
+import { turnstileStatus, verifyCheckoutTurnstile } from "../_shared/turnstile.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.0";
 // GoO Ninks / Midtrans Snap Redirect, server-side only. No Midtrans Server Key in the browser.
 const PROJECT_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -56,7 +57,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: headersFor(req) });
   const config = env();
   const active = config.enabled && !!config.serverKey && !!SERVICE_KEY && !!PROJECT_URL;
-  if (req.method === "GET") return respond(req, { enabled: active, mode: config.isProduction ? "production" : "sandbox", configuration: { payments_enabled: config.enabled, server_key_configured: !!config.serverKey } });
+  if (req.method === "GET") return respond(req, { turnstile: turnstileStatus(), enabled: active, mode: config.isProduction ? "production" : "sandbox", configuration: { payments_enabled: config.enabled, server_key_configured: !!config.serverKey } });
   if (req.method !== "POST") return respond(req, { error: "Metode tidak tersedia" }, 405);
   if (!validOrigins.has(req.headers.get("origin") ?? "")) return respond(req, { error: "Origin tidak diizinkan" }, 403);
   if (!active) return respond(req, { error: "Midtrans belum diaktifkan oleh pengelola toko." }, 503);
@@ -94,6 +95,8 @@ Deno.serve(async (req) => {
     return respond(req, { order: verified, shipping });
   }
   if (input.action !== "checkout") return respond(req, { error: "Aksi tidak tersedia" }, 400);
+  const security = await verifyCheckoutTurnstile(input.turnstile_token);
+  if (!security.ok) return respond(req, { error: security.error }, security.status);
   const rawItems = input.items;
   const customer = input.customer;
   if (!Array.isArray(rawItems) || rawItems.length < 1 || rawItems.length > 15 || !customer || typeof customer !== "object")

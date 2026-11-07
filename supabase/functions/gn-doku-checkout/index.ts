@@ -1,3 +1,4 @@
+import { turnstileStatus, verifyCheckoutTurnstile } from "../_shared/turnstile.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.0";
 import { dokuConfig, dokuRequest, validDokuUrl, applyDokuPayment } from "../_shared/doku.ts";
 // GoO Ninks DOKU Checkout, server-side prices and stock reservation.
@@ -26,7 +27,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: headersFor(req) });
   const config = env();
   const active = config.enabled && !!config.clientId && !!config.secret && !!SERVICE_KEY && !!PROJECT_URL;
-  if (req.method === "GET") return respond(req, { provider: "doku", enabled: active, mode: config.production ? "production" : "sandbox", configuration: { payments_enabled: config.enabled, client_id_configured: !!config.clientId, secret_key_configured: !!config.secret } });
+  if (req.method === "GET") return respond(req, { provider: "doku", turnstile: turnstileStatus(), enabled: active, mode: config.production ? "production" : "sandbox", configuration: { payments_enabled: config.enabled, client_id_configured: !!config.clientId, secret_key_configured: !!config.secret } });
   if (req.method !== "POST") return respond(req, { error: "Metode tidak tersedia" }, 405);
   if (!validOrigins.has(req.headers.get("origin") ?? "")) return respond(req, { error: "Origin tidak diizinkan" }, 403);
   if (Number(req.headers.get("content-length") ?? "0") > 12000) return respond(req, { error: "Data terlalu besar" }, 413);
@@ -67,6 +68,8 @@ Deno.serve(async (req) => {
   }
   if (input.action !== "checkout") return respond(req, { error: "Aksi tidak tersedia" }, 400);
   if (!active) return respond(req, { error: "DOKU belum diaktifkan oleh pengelola toko." }, 503);
+  const security = await verifyCheckoutTurnstile(input.turnstile_token);
+  if (!security.ok) return respond(req, { error: security.error }, security.status);
   const rawItems = input.items;
   const customer = input.customer;
   if (!Array.isArray(rawItems) || rawItems.length < 1 || rawItems.length > 15 || !customer || typeof customer !== "object")

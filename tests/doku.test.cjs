@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),{stripTypeScriptTypes}=require('node:module');
 const {webcrypto,createHash,createHmac}=require('node:crypto');
 const read=f=>stripTypeScriptTypes(fs.readFileSync('supabase/functions/'+f,'utf8')).replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
-const secrets={SUPABASE_URL:'https://project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service',DOKU_CLIENT_ID:'test-client',DOKU_SECRET_KEY:'test-secret',DOKU_PAYMENTS_ENABLED:'true',DOKU_IS_PRODUCTION:'true'};
+const secrets={SUPABASE_URL:'https://project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service',DOKU_CLIENT_ID:'test-client',DOKU_SECRET_KEY:'test-secret',DOKU_PAYMENTS_ENABLED:'true',DOKU_IS_PRODUCTION:'true',TURNSTILE_SECRET_KEY:'test-turnstile-secret',MIDTRANS_SERVER_KEY:'test-midtrans',MIDTRANS_PAYMENTS_ENABLED:'true'};
 const orderId='GN-DK-'+ 'A'.repeat(24);
 function runtime(slug,options={}){
  const updates=[],calls=[],writes=[];let handler;
@@ -20,15 +20,19 @@ function runtime(slug,options={}){
  const context=vm.createContext({console,crypto:webcrypto,TextEncoder,URL,Request,Response,AbortSignal,btoa,Date,JSON,Uint8Array,
    Deno:{env:{get:key=>({...secrets,...options.secrets})[key]},serve:fn=>{handler=fn}},
    createClient:()=>client,fetch:async(url,init)=>{
+    if(url==='https://challenges.cloudflare.com/turnstile/v0/siteverify'){
+     if(options.turnstileTimeout)throw Error('verification timeout');
+     return new Response(JSON.stringify(options.turnstileResult??{success:true,hostname:'gooninks.co.id',action:'checkout'}),{status:options.turnstileHttp??200});
+    }
     const body=JSON.parse(init.body);options.inspect?.(url,init,body);
     if(options.timeout)throw Error('timeout');
     return new Response(JSON.stringify({response:{order:{invoice_number:body.order.invoice_number,amount:body.order.amount},payment:{url:'https://checkout.doku.com/v2/test'}}}),{status:options.httpStatus??200});
    }});
- vm.runInContext(read('_shared/doku.ts')+'\n'+read(slug+'/index.ts'),context);
+ vm.runInContext(read('_shared/doku.ts')+'\n'+read('_shared/turnstile.ts')+'\n'+read(slug+'/index.ts'),context);
  return {handler,updates,calls,writes,context};
 }
 function checkoutRequest(body){return new Request('https://project.supabase.co/functions/v1/gn-doku-checkout',{method:'POST',headers:{origin:'https://gooninks.co.id','Content-Type':'application/json'},body:JSON.stringify(body)})}
-const purchase={action:'checkout',customer:{name:'Test Buyer',email:'buyer@example.com',phone:'081234567890',address:'Jalan Pengujian Nomor 10',province:'Jawa Tengah',city:'Semarang',district:'Semarang Tengah',postal_code:'50111'},items:[{sku:'SHIRT',qty:1,price:1}],promo_code:'PROMO'};
+const purchase={action:'checkout',turnstile_token:'valid-test-token',customer:{name:'Test Buyer',email:'buyer@example.com',phone:'081234567890',address:'Jalan Pengujian Nomor 10',province:'Jawa Tengah',city:'Semarang',district:'Semarang Tengah',postal_code:'50111'},items:[{sku:'SHIRT',qty:1,price:1}],promo_code:'PROMO'};
 async function notify(runtime,event,mutate=false){
  const raw=JSON.stringify(event),timestamp='2026-11-07T03:00:00Z',requestId='notification-test';
  const sig=await vm.runInContext(`signature('test-secret','test-client','${requestId}','${timestamp}','/functions/v1/gn-doku-webhook',${JSON.stringify(raw)})`,runtime.context);
@@ -101,3 +105,24 @@ test('sandbox or unconfigured DOKU preserves existing live Midtrans checkout',as
   const r=await storefront(doku);assert.equal(r.fetched.length,2);assert.match(r.elements.get('midtransBtn').textContent,/Midtrans/);
  }
 });
+
+for(const gateway of ['gn-doku-checkout','gn-midtrans-checkout']){
+ test(gateway+': missing or oversized Turnstile token cannot reserve stock',async()=>{
+  for(const token of [undefined,'','x'.repeat(2049)]){
+   const r=runtime(gateway);const res=await r.handler(checkoutRequest({...purchase,turnstile_token:token}));
+   assert.equal(res.status,400);assert.equal(r.calls.length,0);
+  }
+ });
+ test(gateway+': forged, expired, wrong-hostname and wrong-action tokens fail closed',async()=>{
+  for(const result of [{success:false,'error-codes':['timeout-or-duplicate']},{success:false},{success:true,hostname:'attacker.example',action:'checkout'},{success:true,hostname:'gooninks.co.id',action:'login'}]){
+   const r=runtime(gateway,{turnstileResult:result});const res=await r.handler(checkoutRequest(purchase));
+   assert.equal(res.status,403);assert.equal(r.calls.length,0);
+  }
+ });
+ test(gateway+': missing secret and verifier outage never reserve stock',async()=>{
+  for(const options of [{secrets:{TURNSTILE_SECRET_KEY:''}},{turnstileTimeout:true},{turnstileHttp:503}]){
+   const r=runtime(gateway,options);const res=await r.handler(checkoutRequest(purchase));
+   assert.equal(res.status,503);assert.equal(r.calls.length,0);
+  }
+ });
+}

@@ -31,3 +31,7 @@ Official references:
 - https://developers.doku.com/accept-payments/doku-checkout/integration-guide/backend-integration
 - https://developers.doku.com/get-started-with-doku-api/notification/best-practice
 - https://developers.doku.com/get-started-with-doku-api/check-status-api/non-snap
+
+## Checkout bot protection
+
+Both DOKU and legacy Midtrans checkout now require Cloudflare Turnstile. Store the matching widget secret as `TURNSTILE_SECRET_KEY` in Supabase. The public site key is in `gn-midtrans.js`. Siteverify must return `success: true`, hostname `gooninks.co.id` or `www.gooninks.co.id`, and action `checkout`. Missing, forged, expired, reused, wrong-hostname or wrong-action tokens cannot reserve inventory. Verification outages fail closed. Existing payment notifications and private-token status reads do not require Turnstile.
