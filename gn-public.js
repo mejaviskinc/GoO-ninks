@@ -60,12 +60,12 @@
  async function inventory(){
   const {data,error}=await api.from('gn_inventory').select('sku,product_name,price,stock,visible,image_url,category,archived,preorder,preorder_lead_days,gallery_media');
   if(error){console.warn('Inventory:',error.message);return}products=data||[];
-  if(typeof PRODUCTS!=='undefined'){PRODUCTS.forEach(p=>{const r=products.find(x=>x.sku===p.id);if(r){p.name=r.product_name;p.price=r.price;p.stock=r.stock;p.visible=r.visible&&!r.archived;p.image_url=validUrl(r.image_url);p.category=r.category;p.preorder=r.preorder;p.preorder_lead_days=r.preorder_lead_days}else p.visible=false});if(typeof renderProducts==='function')renderProducts();if(typeof renderCart==='function')renderCart()}
+  if(typeof PRODUCTS!=='undefined'){PRODUCTS.forEach(p=>{const r=products.find(x=>x.sku===p.id);if(r){p.name=r.product_name;p.price=r.price;p.stock=r.stock;p.visible=Boolean(r.visible&&!r.archived&&(r.stock===null||Number(r.stock)>=1));p.image_url=validUrl(r.image_url);p.category=r.category;p.preorder=r.preorder;p.preorder_lead_days=r.preorder_lead_days}else p.visible=false});window.GN_INVENTORY_READY=true;if(typeof renderProducts==='function')renderProducts();if(typeof window.GN_SYNC_CART_STOCK==='function')window.GN_SYNC_CART_STOCK();else if(typeof renderCart==='function')renderCart()}
   const grid=document.querySelector('#productGrid');if(!grid)return;
   photos();new MutationObserver(photos).observe(grid,{childList:true});
   if(document.body.dataset.page==='collection'){
     const wrap=document.querySelector('.catalog-controls');let selected='all';
-    const cats=[...new Set(products.filter(x=>x.visible&&!x.archived).map(x=>x.category).filter(Boolean))];
+    const cats=[...new Set(products.filter(x=>x.visible&&!x.archived&&(x.stock===null||Number(x.stock)>=1)).map(x=>x.category).filter(Boolean))];
     if(wrap&&cats.length>1){
      const chooser=el('div','gn-category-filters');chooser.setAttribute('aria-label','Filter kategori produk');
      const labels=['Semua Kategori',...cats];
