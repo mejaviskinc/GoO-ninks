@@ -1,0 +1,18 @@
+/* GoO Ninks payment-region selector. PayPal is informational until a verified server checkout exists. */
+.gn-payment-choice[hidden], #midtransArea[hidden], .gn-payment-choice-notice[hidden]{display:none!important}
+.gn-payment-choice{margin:16px 0 22px;padding:17px 0 12px;border-top:1px solid #d8d1c5;color:#292824}
+.gn-payment-choice-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:15px}
+.gn-payment-choice-title{display:block;font-family:inherit;font-size:15px;font-weight:650;letter-spacing:.02em;line-height:1.4;margin:0}
+.gn-payment-choice-subtitle{font-size:12px;line-height:1.65;color:#777166;margin:5px 0 0}
+.gn-payment-choice-close{font-size:23px;line-height:1;flex:none;width:31px;height:31px;padding:0;border:0;background:transparent;color:#4c453a;cursor:pointer}
+.gn-payment-choice-buttons{display:grid;gap:10px}
+.gn-payment-choice-button{display:flex;align-items:center;text-align:left;gap:12px;min-height:72px;width:100%;border:1px solid #d6d0c4;border-radius:3px;background:#fff;padding:13px 14px;color:#24231f;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.gn-payment-choice-button:hover,.gn-payment-choice-button:focus-visible{border-color:#776650;background:#faf8f4;outline-offset:3px}
+.gn-payment-choice-button .gn-choice-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;background:#eee9e1;color:#665842;font-size:17px;border-radius:50%}
+.gn-payment-choice-button .gn-choice-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.gn-payment-choice-button .gn-choice-name{font-size:14px;font-weight:600;line-height:1.3}
+.gn-payment-choice-button .gn-choice-description{font-size:11px;line-height:1.5;color:#777166}
+.gn-payment-choice-button .gn-choice-arrow{font-size:18px;color:#72614d}
+.gn-payment-choice-button .gn-choice-coming{font-size:10px;color:#856f49;border:1px solid #c4b69b;padding:4px 6px;white-space:nowrap}
+.gn-payment-choice-notice{margin-top:12px;border:1px solid #d6cbb7;padding:12px 14px;background:#f8f5ed;color:#64533c;font-size:12px;line-height:1.7}
+@media(max-width:480px){.gn-payment-choice-button{padding:12px 10px;gap:10px}.gn-payment-choice-button .gn-choice-icon{height:32px;width:32px}}
