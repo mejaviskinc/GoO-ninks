@@ -25,7 +25,7 @@ async function check(){
  if(busy)return;
  busy=true;button.disabled=true;
  try{
-  const res=await fetch(cfg.url+'/functions/v1/'+(id.startsWith('GN-DK-')?'gn-doku-checkout':'gn-midtrans-checkout'),{method:'POST',
+  const res=await fetch(cfg.url+'/functions/v1/'+(id.startsWith('GN-PP-')?'gn-paypal-checkout':id.startsWith('GN-DK-')?'gn-doku-checkout':'gn-midtrans-checkout'),{method:'POST',
     headers:{'Content-Type':'application/json',apikey:cfg.publishableKey},
     body:JSON.stringify({action:'status',order_id:id,access_token:token}),
     signal:AbortSignal.timeout(20000),cache:'no-store'});
@@ -33,7 +33,7 @@ async function check(){
   if(!res.ok)throw Error(data.error||'Gagal memeriksa status pembayaran.');
   const row=data.order;
   if(!row||!labels[row.status])throw Error('Status tidak tersedia.');
-  message.textContent=labels[row.status];
+  message.textContent=row.status==='pending' && new URL(location.href).searchParams.get('cancelled')==='1' && id.startsWith('GN-PP-') ? 'Kamu membatalkan pembayaran PayPal. Pesanan belum lunas dan stok masih ditahan sementara sampai kedaluwarsa.' : labels[row.status];
   el('paymentAmount').textContent='Total produk: Rp'+new Intl.NumberFormat('id-ID').format(row.amount);
   const track=el('shippingStatusText');
   const names={awaiting_payment:'Menunggu pembayaran',ready_to_pack:'Pembayaran lunas · menunggu dikemas',packing:'Pesanan sedang dikemas',ready_to_ship:'Siap diserahkan ke ekspedisi',shipped:'Paket telah dikirim',delivered:'Paket selesai dikirim',cancelled:'Pengiriman dibatalkan',review:'Pengiriman memerlukan pemeriksaan admin'};
