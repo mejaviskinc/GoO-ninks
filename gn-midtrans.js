@@ -40,7 +40,7 @@ const CHOICE_LABELS={
 };
 const updatePaymentChoice=()=>{
  const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
- const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:t.soon};
+ const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:paypalReady?(paypalMode==='live'?'Available':'Sandbox'):t.soon};
  for(const [id,val] of Object.entries(values)){const el=document.getElementById(id);if(el)el.textContent=val;}
  document.getElementById('gnPaymentChoiceClose')?.setAttribute('aria-label',t.close);
  if(paymentChoiceNotice&&!paymentChoiceNotice.hidden)paymentChoiceNotice.textContent=t.notice;
@@ -49,15 +49,16 @@ const h={'Content-Type':'application/json','apikey':cfg.publishableKey};
 const turnstileSiteKey='0x4AAAAAAF3Q3TmIn0l4k_PE';
 let turnstileToken='',turnstileWidget=null,turnstileLoad=null;
 let available=false,processing=false,modeKey='offMode',lastMessage='disabled',lastError=false;
+let paypalReady=false,paypalMode='sandbox',selectedMethod='local';
 window.GN_MIDTRANS_READY=false;
 const updateCheckoutAction=()=>{
   if(primary){
     const words=CHECKOUT_LABELS[local()]||CHECKOUT_LABELS.id;
-    const label=available?words.continue:words.manual;
+    const label=(available||paypalReady)?words.continue:words.manual;
     primary.textContent=label;
     primary.setAttribute('aria-label',label);
   }
-  pay.textContent=(available?tr('payMidtransButton'):tr('manualButton')).replaceAll('Midtrans',providerName());
+  pay.textContent=selectedMethod==='paypal' ? (local()==='id'?'Bayar dengan PayPal ↗':local()==='nl'?'Betalen met PayPal ↗':local()==='ko'?'PayPal로 결제 ↗':'Continue with PayPal ↗') : (available?tr('payMidtransButton'):tr('manualButton')).replaceAll('Midtrans',providerName());
   document.querySelectorAll('[data-i18n="payOnline"],[data-i18n="payExplain"]').forEach(el=>{
     el.innerHTML=el.innerHTML.replace(/Midtrans|DOKU/g,providerName());
   });
@@ -65,7 +66,27 @@ const updateCheckoutAction=()=>{
     backup.hidden=true;
   }
 };
+const updatePaymentForm=()=>{
+ const intl=selectedMethod==='paypal';
+ const head=document.querySelector('#midtransArea .gn-midtrans-head strong');
+ const explain=document.querySelector('#midtransArea .gn-midtrans-explain');
+ if(head)head.textContent=intl?'Online payment · PayPal (USD)':(local()==='id'?'Pembayaran online · ':local()==='nl'?'Online betalen · ':'Online payment · ')+providerName();
+ if(explain)explain.textContent=intl
+   ? (local()==='id'?'Harga final dikonversi dari IDR ke USD oleh server. Ongkos kirim belum termasuk.':local()==='nl'?'Het bedrag wordt op de server naar USD omgerekend. Verzendkosten zijn apart.':local()==='ko'?'최종 금액은 서버에서 USD로 환산됩니다. 배송비는 별도입니다.':'Final prices are converted to USD by the server. Shipping is separate.')
+   : (local()==='id'?'Pembayaran aman melalui '+providerName()+'. Ongkos kirim dikonfirmasi terpisah.':local()==='nl'?'Veilig betalen via '+providerName()+'. Verzendkosten worden apart bevestigd.':local()==='ko'?providerName()+'을 통해 안전하게 결제하세요. 배송비는 별도입니다.':'Secure payment through '+providerName()+'. Shipping is confirmed separately.');
+ mode.textContent=intl?(paypalReady?(paypalMode==='live'?'Active':'Sandbox'):'Not active'):tr(modeKey);
+ let credit=document.getElementById('gnPaypalFxCredit');
+ if(!credit&&paymentArea){
+   credit=document.createElement('p');credit.id='gnPaypalFxCredit';credit.className='gn-midtrans-info';
+   const a=document.createElement('a');a.href='https://www.exchangerate-api.com';a.rel='noopener noreferrer';a.target='_blank';
+   a.textContent='Rates By Exchange Rate API';credit.append('USD/IDR · ',a);
+   form.before(credit);
+ }
+ if(credit)credit.hidden=!intl;
+ updateCheckoutAction();
+};
 const showLocalForm=()=>{
+ updatePaymentForm();
   if(!paymentArea)return false;
   if(paymentChoice)paymentChoice.hidden=true;
   primary?.setAttribute('aria-expanded','false');
@@ -134,8 +155,9 @@ function resetTurnstile(){
 updateCheckoutAction();
 updatePaymentChoice();
 sync();
-document.getElementById('gnPaymentLocal')?.addEventListener('click',showLocalForm);
+document.getElementById('gnPaymentLocal')?.addEventListener('click',()=>{selectedMethod='local';showLocalForm()});
 document.getElementById('gnPaymentIntl')?.addEventListener('click',()=>{
+  if(paypalReady){selectedMethod='paypal';return showLocalForm();}
   if(!paymentChoiceNotice)return;
   const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
   paymentChoiceNotice.textContent=t.notice;
@@ -148,7 +170,7 @@ document.getElementById('gnPaymentChoiceClose')?.addEventListener('click',()=>{
   if(paymentArea)paymentArea.hidden=false;
   primary?.focus({preventScroll:true});
 });
-window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction();updatePaymentChoice()});
+window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction();updatePaymentChoice();updatePaymentForm()});
 document.addEventListener('gn-cart-changed',sync);
 async function chooseGateway(){
   const ready=async path=>{
@@ -168,8 +190,13 @@ async function chooseGateway(){
     modeKey=available?(data.mode==='production'?'activeMode':'sandboxMode'):'offMode';
     mode.textContent=tr(modeKey);message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
   }catch{available=false;window.GN_MIDTRANS_READY=false;message('offline',true);}
+  try{
+    const p=await ready('gn-paypal-checkout');
+    paypalReady=p.enabled===true && ['sandbox','live'].includes(p.mode);
+    paypalMode=p.mode==='live'?'live':'sandbox';
+  }catch{paypalReady=false;}
   // Do not hide an order form already opened while gateway availability was loading.
-  updateCheckoutAction();updatePaymentChoice();sync();
+  updateCheckoutAction();updatePaymentChoice();updatePaymentForm();sync();
 }
 void chooseGateway();
 
@@ -195,6 +222,23 @@ form.addEventListener('submit',async e=>{
   const fd=new FormData(form);
   const customer={name:String(fd.get('name')||'').trim(),email:String(fd.get('email')||'').trim(),phone:String(fd.get('phone')||'').trim(),address:String(fd.get('address')||'').trim(),province:String(fd.get('province')||'').trim(),city:String(fd.get('city')||'').trim(),district:String(fd.get('district')||'').trim(),postal_code:String(fd.get('postal_code')||'').trim()};
   if(!/^[0-9]{5}$/.test(customer.postal_code))throw Error(tr('postalInvalid'));
+  if(selectedMethod==='paypal'){
+    if(!paypalReady)throw Error('PayPal belum aktif. Masukkan API PayPal di Supabase terlebih dahulu.');
+    if(!turnstileToken){void mountTurnstile();throw Error(securityText('wait'));}
+    const res=await fetch(cfg.url+'/functions/v1/gn-paypal-checkout',{
+      method:'POST',headers:h,cache:'no-store',signal:AbortSignal.timeout(35000),
+      body:JSON.stringify({action:'checkout',customer,items,turnstile_token:turnstileToken,promo_code:String(fd.get('promo_code')||'').trim().toUpperCase()})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw Error(data.error||'Gagal membuat pembayaran PayPal.');
+    if(!/^GN-PP-[A-F0-9]{24}$/.test(data.order_id)||typeof data.access_token!=='string'||data.access_token.length<50)throw Error(tr('badId'));
+    const approval=new URL(data.approval_url);
+    if(approval.protocol!=='https:'||approval.username||approval.password||approval.port||
+       !['www.paypal.com','www.sandbox.paypal.com'].includes(approval.hostname))throw Error(tr('badUrl'));
+    sessionStorage.setItem('gn_payment_'+data.order_id,JSON.stringify({token:data.access_token,created:Date.now(),provider:'paypal'}));
+    info.textContent='Redirecting to PayPal...';
+    window.location.assign(approval.href);return;
+  }
   if(!available){await requestManualOrder(customer,items);processing=false;sync();return;}
   if(!turnstileToken){void mountTurnstile();throw Error(securityText('wait'));}
   const res=await fetch(endpoint,{method:'POST',headers:h,body:JSON.stringify({action:'checkout',customer,items,turnstile_token:turnstileToken,promo_code:String(fd.get('promo_code')||'').trim().toUpperCase()})});
