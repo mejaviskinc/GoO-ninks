@@ -160,7 +160,8 @@ async function chooseGateway(){
     modeKey=available?(data.mode==='production'?'activeMode':'sandboxMode'):'offMode';
     mode.textContent=tr(modeKey);message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
   }catch{available=false;window.GN_MIDTRANS_READY=false;message('offline',true);}
-  form.hidden=true;updateCheckoutAction();updatePaymentChoice();sync();
+  // Do not hide an order form already opened while gateway availability was loading.
+  updateCheckoutAction();updatePaymentChoice();sync();
 }
 void chooseGateway();
 
