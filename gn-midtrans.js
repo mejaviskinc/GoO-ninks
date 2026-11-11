@@ -7,12 +7,15 @@ const mode=document.getElementById('midtransMode');
 const pay=document.getElementById('midtransBtn');
 const primary=document.getElementById('checkoutBtn');
 const backup=document.getElementById('gnCheckoutWhatsAppBackup');
+const paymentChoice=document.getElementById('gnPaymentChoice');
+const paymentArea=document.getElementById('midtransArea');
+const paymentChoiceNotice=document.getElementById('gnPaymentChoiceNotice');
 const PAYMENT_MESSAGES={"id":{"noConnect":"Koneksi belum siap.","activeMode":"Aktif","sandboxMode":"SANDBOX","offMode":"Belum aktif","active":"Pembayaran diproses oleh Midtrans.","sandbox":"SANDBOX: hanya untuk pengujian, tidak ada pembayaran sungguhan.","disabled":"Midtrans belum aktif. Sementara gunakan WhatsApp untuk pemesanan.","offline":"Midtrans sedang tidak tersedia. Gunakan WhatsApp sementara.","empty":"Keranjang kosong.","checking":"Memeriksa harga dan stok...","checkoutFail":"Checkout gagal","badId":"Nomor transaksi tidak valid","badUrl":"URL pembayaran tidak dikenal","redirect":"Mengalihkan ke pembayaran Midtrans...","unknown":"Gagal membuka Midtrans."},"en":{"noConnect":"Connection is not ready.","activeMode":"Active","sandboxMode":"SANDBOX","offMode":"Not active","active":"Your payment is processed securely by Midtrans.","sandbox":"SANDBOX: testing only, no real payments are made.","disabled":"Midtrans is not active yet. Please order via WhatsApp.","offline":"Midtrans is currently unavailable. Please use WhatsApp.","empty":"Your bag is empty.","checking":"Checking price and stock...","checkoutFail":"Checkout failed","badId":"Invalid transaction ID","badUrl":"Unrecognized payment URL","redirect":"Redirecting you to Midtrans...","unknown":"Unable to open Midtrans."},"nl":{"noConnect":"Verbinding is nog niet klaar.","activeMode":"Actief","sandboxMode":"SANDBOX","offMode":"Niet actief","active":"Uw betaling wordt veilig verwerkt door Midtrans.","sandbox":"SANDBOX: alleen om te testen, geen echte betalingen.","disabled":"Midtrans is nog niet actief. Bestel via WhatsApp.","offline":"Midtrans is tijdelijk niet beschikbaar. Gebruik WhatsApp.","empty":"Uw winkelmand is leeg.","checking":"Prijs en voorraad controleren...","checkoutFail":"Betalen is mislukt","badId":"Ongeldig transactienummer","badUrl":"Onbekende betaal-URL","redirect":"Doorsturen naar Midtrans...","unknown":"Midtrans kon niet worden geopend."},"ko":{"noConnect":"연결 준비 중입니다.","activeMode":"활성화","sandboxMode":"테스트 모드","offMode":"비활성화","active":"결제가 Midtrans에서 안전하게 처리됩니다.","sandbox":"테스트 모드: 실제 결제는 진행되지 않습니다.","disabled":"Midtrans가 아직 활성화되지 않았습니다. WhatsApp으로 주문해 주세요.","offline":"Midtrans를 일시적으로 사용할 수 없습니다. WhatsApp을 이용해 주세요.","empty":"장바구니가 비어 있습니다.","checking":"가격과 재고를 확인 중입니다...","checkoutFail":"결제 진행에 실패했습니다","badId":"유효하지 않은 거래 번호","badUrl":"확인할 수 없는 결제 URL","redirect":"Midtrans 결제 페이지로 이동 중입니다...","unknown":"Midtrans를 열 수 없습니다."}};
 const CHECKOUT_LABELS={
-  id:{continue:'Lanjutkan ke Pembayaran Midtrans ↗',manual:'Isi Data Pesanan ↗',help:'Butuh bantuan? Pesan via WhatsApp ↗'},
-  en:{continue:'Continue to Midtrans Payment ↗',manual:'Enter Order Details ↗',help:'Need help? Order via WhatsApp ↗'},
-  nl:{continue:'Verder naar Midtrans-betaling ↗',manual:'Vul bestelgegevens in ↗',help:'Hulp nodig? Bestel via WhatsApp ↗'},
-  ko:{continue:'Midtrans 결제 계속하기 ↗',manual:'주문 정보 입력 ↗',help:'도움이 필요하신가요? WhatsApp으로 주문 ↗'}
+  id:{continue:'Lanjutkan ke Pembayaran ↗',manual:'Isi Data Pesanan ↗',help:'Butuh bantuan? Pesan via WhatsApp ↗'},
+  en:{continue:'Continue to Payment ↗',manual:'Enter Order Details ↗',help:'Need help? Order via WhatsApp ↗'},
+  nl:{continue:'Verder naar betalen ↗',manual:'Vul bestelgegevens in ↗',help:'Hulp nodig? Bestel via WhatsApp ↗'},
+  ko:{continue:'결제 계속하기 ↗',manual:'주문 정보 입력 ↗',help:'도움이 필요하신가요? WhatsApp으로 주문 ↗'}
 };
 const local=()=>{try{return JSON.parse(localStorage.getItem('goo-ninks-lang')||'"id"')}catch{return 'id'}};
 const providerName=()=>provider==='doku'?'DOKU':'Midtrans';
@@ -21,6 +24,19 @@ const ORDER_LABELS={"id":{"payMidtransButton":"Bayar melalui Midtrans ↗","manu
 const cfg=window.GN_CONFIG;
 if(!cfg?.url||!cfg?.publishableKey){info.textContent=tr('noConnect');return;}
 let provider='midtrans',endpoint=cfg.url+'/functions/v1/gn-midtrans-checkout';
+const CHOICE_LABELS={
+ id:{title:'Pilih Metode Pembayaran',subtitle:'Pilih wilayah pembayaran untuk melanjutkan pesanan.',local:'Pembayaran Lokal',localDesc:'Indonesia · melalui {provider}',international:'Pembayaran Internasional',internationalDesc:'PayPal · untuk pembeli luar negeri',soon:'Belum aktif',notice:'PayPal untuk pembayaran internasional sedang disiapkan dan belum dapat menerima transaksi. Tidak ada pesanan yang dibayar. Untuk saat ini, pilih pembayaran lokal untuk melanjutkan.',close:'Tutup pilihan pembayaran'},
+ en:{title:'Choose Payment Method',subtitle:'Select a payment region to continue your order.',local:'Local Payment',localDesc:'Indonesia · via {provider}',international:'International Payment',internationalDesc:'PayPal · for overseas customers',soon:'Coming soon',notice:'International PayPal checkout is being set up and cannot accept payments yet. No payment has been made. Please choose Local Payment to continue for now.',close:'Close payment options'},
+ nl:{title:'Kies een betaalmethode',subtitle:'Kies de betaalregio om verder te gaan.',local:'Lokale betaling',localDesc:'Indonesië · via {provider}',international:'Internationale betaling',internationalDesc:'PayPal · voor buitenlandse klanten',soon:'Nog niet actief',notice:'PayPal voor internationale betalingen wordt voorbereid en accepteert nog geen betalingen. Er is niets betaald. Kies voorlopig lokale betaling.',close:'Betaalopties sluiten'},
+ ko:{title:'결제 방법 선택',subtitle:'주문을 진행할 결제 지역을 선택하세요.',local:'국내 결제',localDesc:'인도네시아 · {provider} 이용',international:'해외 결제',internationalDesc:'PayPal · 해외 고객용',soon:'준비 중',notice:'해외 결제를 위한 PayPal 연결을 준비 중이며 아직 결제할 수 없습니다. 결제는 이루어지지 않았습니다. 현재는 국내 결제를 선택해 주세요.',close:'결제 옵션 닫기'}
+};
+const updatePaymentChoice=()=>{
+ const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
+ const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:t.soon};
+ for(const [id,val] of Object.entries(values)){const el=document.getElementById(id);if(el)el.textContent=val;}
+ document.getElementById('gnPaymentChoiceClose')?.setAttribute('aria-label',t.close);
+ if(paymentChoiceNotice&&!paymentChoiceNotice.hidden)paymentChoiceNotice.textContent=t.notice;
+};
 const h={'Content-Type':'application/json','apikey':cfg.publishableKey};
 const turnstileSiteKey='0x4AAAAAAF3Q3TmIn0l4k_PE';
 let turnstileToken='',turnstileWidget=null,turnstileLoad=null;
@@ -29,7 +45,7 @@ window.GN_MIDTRANS_READY=false;
 const updateCheckoutAction=()=>{
   if(primary){
     const words=CHECKOUT_LABELS[local()]||CHECKOUT_LABELS.id;
-    const label=(available?words.continue:words.manual).replaceAll('Midtrans',providerName());
+    const label=available?words.continue:words.manual;
     primary.textContent=label;
     primary.setAttribute('aria-label',label);
   }
@@ -41,13 +57,27 @@ const updateCheckoutAction=()=>{
     backup.hidden=true;
   }
 };
-window.GN_MIDTRANS_OPEN=()=>{
-  const area=document.getElementById('midtransArea');
-  if(!area)return false;
+const showLocalForm=()=>{
+  if(!paymentArea)return false;
+  if(paymentChoice)paymentChoice.hidden=true;
+  primary?.setAttribute('aria-expanded','false');
+  paymentArea.hidden=false;
   form.hidden=false;
   void mountTurnstile();
-  area.scrollIntoView({behavior:'smooth',block:'nearest'});
+  paymentArea.scrollIntoView({behavior:'smooth',block:'nearest'});
   form.querySelector('input[name="name"]')?.focus({preventScroll:true});
+  return true;
+};
+window.GN_MIDTRANS_OPEN=()=>{
+  if(!paymentArea)return false;
+  if(!paymentChoice)return showLocalForm();
+  paymentChoice.hidden=false;
+  paymentArea.hidden=true;
+  form.hidden=true;
+  if(paymentChoiceNotice)paymentChoiceNotice.hidden=true;
+  primary?.setAttribute('aria-expanded','true');
+  paymentChoice.scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('gnPaymentLocal')?.focus({preventScroll:true});
   return true;
 };
 const count=()=>window.GN_CART_SNAPSHOT?.().reduce((n,x)=>n+x.qty,0)||0;
@@ -94,8 +124,23 @@ function resetTurnstile(){
 }
 
 updateCheckoutAction();
+updatePaymentChoice();
 sync();
-window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction()});
+document.getElementById('gnPaymentLocal')?.addEventListener('click',showLocalForm);
+document.getElementById('gnPaymentIntl')?.addEventListener('click',()=>{
+  if(!paymentChoiceNotice)return;
+  const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
+  paymentChoiceNotice.textContent=t.notice;
+  paymentChoiceNotice.hidden=false;
+  paymentChoiceNotice.scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+document.getElementById('gnPaymentChoiceClose')?.addEventListener('click',()=>{
+  if(paymentChoice)paymentChoice.hidden=true;
+  primary?.setAttribute('aria-expanded','false');
+  if(paymentArea)paymentArea.hidden=false;
+  primary?.focus({preventScroll:true});
+});
+window.addEventListener('gn-language-changed',()=>{mode.textContent=tr(modeKey);message(lastMessage,lastError);updateCheckoutAction();updatePaymentChoice()});
 document.addEventListener('gn-cart-changed',sync);
 async function chooseGateway(){
   const ready=async path=>{
@@ -115,7 +160,7 @@ async function chooseGateway(){
     modeKey=available?(data.mode==='production'?'activeMode':'sandboxMode'):'offMode';
     mode.textContent=tr(modeKey);message(available?(data.mode==='production'?'active':'sandbox'):'disabled');
   }catch{available=false;window.GN_MIDTRANS_READY=false;message('offline',true);}
-  form.hidden=true;updateCheckoutAction();sync();
+  form.hidden=true;updateCheckoutAction();updatePaymentChoice();sync();
 }
 void chooseGateway();
 
