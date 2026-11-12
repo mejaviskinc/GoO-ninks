@@ -56,7 +56,7 @@
 #gnPaymentChoice .gn-payment-choice-close:hover{background:#f2eee8;border-color:#a99b85}
 #gnPaymentChoice .gn-payment-choice-buttons{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;width:100%}
 #gnPaymentChoice .gn-payment-choice-button{
-  appearance:none;display:grid;grid-template-columns:38px minmax(0,1fr) auto;
+  appearance:none;display:grid;grid-template-columns:44px minmax(0,1fr) auto;
   align-items:center;justify-items:start;column-gap:13px;
   width:100%;min-width:0;min-height:78px;max-width:100%;margin:0;padding:14px 15px;
   border:1px solid #d9d1c6;border-radius:6px;background:#fff;color:#262521;
@@ -71,10 +71,11 @@
 #gnPaymentChoice .gn-payment-choice-close:focus-visible{outline:2px solid #92795a;outline-offset:3px}
 #gnPaymentChoice .gn-choice-icon{
   display:flex;align-items:center;justify-content:center;
-  width:38px;height:38px;min-width:38px;margin:0;padding:0;
-  border-radius:50%;background:#f1ede5;color:#675744;
+  width:44px;height:44px;min-width:44px;margin:0;padding:5px;
+  border:1px solid #e9e2d8;border-radius:10px;background:#fff;color:#675744;
   font:700 15px 'DM Sans',Arial,sans-serif;
 }
+#gnPaymentChoice .gn-choice-icon img{display:block;width:100%;height:100%;max-width:32px;max-height:32px;object-fit:contain}
 #gnPaymentChoice .gn-choice-copy{
   display:flex;flex-direction:column;align-items:flex-start;
   justify-content:center;gap:4px;min-width:0;max-width:100%;margin:0;padding:0;
@@ -106,7 +107,7 @@
   #gnPaymentChoice .gn-choice-description{font-size:10px}
 }
 </style>
-<link rel="stylesheet" href="/gn-footer-payments.css?v=20261112-grid1"/>
+<link rel="stylesheet" href="/gn-footer-payments.css?v=20261112-logo-fix1"/>
 </head>
 <body data-page="home">
 <div aria-label="Memuat GoO Ninks" class="gn-boot-loader" id="gnBootLoader" role="status"><div class="gn-boot-content"><img alt="" class="gn-boot-logo" decoding="async" height="214" src="/logo-gooninks.svg" width="330"/><div class="gn-boot-caption">CRAFTED IN YOGYAKARTA</div><div aria-hidden="true" class="gn-boot-progress"><span></span></div></div></div>
@@ -221,7 +222,7 @@
   </div>
   <div class="gn-payment-choice-buttons" role="group" aria-label="Payment regions">
     <button class="gn-payment-choice-button" id="gnPaymentLocal" type="button">
-      <span class="gn-choice-icon gn-choice-local" aria-hidden="true">ID</span>
+      <span class="gn-choice-icon gn-choice-local" aria-hidden="true"><img src="/gn-payment-doku.svg" alt="" width="32" height="32" loading="lazy" decoding="async"/></span>
       <span class="gn-choice-copy">
         <span class="gn-choice-name" id="gnPaymentLocalTitle">Local Payment</span>
         <span class="gn-choice-description" id="gnPaymentLocalDesc">Indonesia · via DOKU</span>
@@ -229,7 +230,7 @@
       <span class="gn-choice-arrow" aria-hidden="true">›</span>
     </button>
     <button class="gn-payment-choice-button" id="gnPaymentIntl" type="button" aria-describedby="gnPaymentIntlSoon">
-      <span class="gn-choice-icon" aria-hidden="true">🌐</span>
+      <span class="gn-choice-icon gn-choice-paypal" aria-hidden="true"><img src="/gn-payment-paypal.svg" alt="" width="32" height="32" loading="lazy" decoding="async"/></span>
       <span class="gn-choice-copy">
         <span class="gn-choice-name" id="gnPaymentIntlTitle">International Payment</span>
         <span class="gn-choice-description" id="gnPaymentIntlDesc">PayPal · for overseas customers</span>
