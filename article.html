@@ -21,9 +21,9 @@
 <link href="styles.css?v=20261022-shipping-checkout1" rel="stylesheet"/>
 <link href="gn-public.css?v=20261022-special-price1" rel="stylesheet"/>
 <script defer="" src="gn-config.js"></script>
-<script defer="" src="app.js?v=20261112-footer1"></script>
+<script defer="" src="app.js?v=20261112-grid1"></script>
 <script defer="" src="gn-midtrans.js?v=20261107-turnstile1"></script>
-<link href="/favicon.svg?v=3" rel="icon" type="image/svg+xml"/><link href="/brand-loader.css" rel="stylesheet"/><link as="image" href="/logo-gooninks.svg" rel="preload" type="image/svg+xml"/><script defer="" src="/brand-loader.js"></script><link href="pages.css?v=20261101-premium2" rel="stylesheet"/><link rel="stylesheet" href="/gn-footer-payments.css?v=20261112-1"/>
+<link href="/favicon.svg?v=3" rel="icon" type="image/svg+xml"/><link href="/brand-loader.css" rel="stylesheet"/><link as="image" href="/logo-gooninks.svg" rel="preload" type="image/svg+xml"/><script defer="" src="/brand-loader.js"></script><link href="pages.css?v=20261101-premium2" rel="stylesheet"/><link rel="stylesheet" href="/gn-footer-payments.css?v=20261112-grid1"/>
 </head>
 <body data-page="article">
 <div aria-label="Memuat GoO Ninks" class="gn-boot-loader" id="gnBootLoader" role="status"><div class="gn-boot-content"><img alt="" class="gn-boot-logo" decoding="async" height="214" src="/logo-gooninks.svg" width="330"/><div class="gn-boot-caption">CRAFTED IN YOGYAKARTA</div><div aria-hidden="true" class="gn-boot-progress"><span></span></div></div></div>
@@ -46,25 +46,37 @@
     <h2 id="gn-footer-payment-heading" data-i18n="footerPayTitle">Metode Pembayaran</h2>
     <p class="gn-footer-payments-intro" data-i18n="footerPayIntro">Pilihan pembayaran untuk Indonesia dan luar negeri</p>
   </div>
-  <div class="gn-footer-payment-groups">
-    <div class="gn-footer-payment-group">
-      <div class="gn-footer-payment-head"><strong data-i18n="footerPayLocal">Pembayaran Indonesia</strong><span data-i18n="footerPayLocalBy">Melalui DOKU Checkout</span></div>
-      <div class="gn-footer-payment-list" aria-label="DOKU payment methods">
-        <span class="gn-footer-payment-logo"><img src="/gn-payment-doku.svg" width="30" height="30" loading="lazy" decoding="async" alt="Logo DOKU"/><strong>DOKU</strong></span>
-        <span class="gn-footer-method" data-i18n="footerPayBank">Transfer Bank (VA)</span>
-        <span class="gn-footer-method">QRIS</span>
-        <span class="gn-footer-method">E-Wallet</span>
-        <span class="gn-footer-method" data-i18n="footerPayCard">Kartu Debit / Kredit</span>
-      </div>
-    </div>
-    <div class="gn-footer-payment-group">
-      <div class="gn-footer-payment-head"><strong data-i18n="footerPayIntl">Pembayaran Internasional</strong><span data-i18n="footerPayIntlBy">Jika aktif di checkout</span></div>
-      <div class="gn-footer-payment-list">
-        <span class="gn-footer-payment-logo paypal"><img src="/gn-payment-paypal.svg" width="30" height="30" loading="lazy" decoding="async" alt="Logo PayPal"/><strong>PayPal</strong></span>
-      </div>
+  <div class="gn-pay-category">
+    <h3 class="gn-pay-category-title" data-i18n="footerPayBankGroup">TRANSFER BANK / VIRTUAL ACCOUNT</h3>
+    <div class="gn-pay-grid" role="list" aria-label="Bank dan Virtual Account">
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-bca" role="img" aria-label="Logo BCA"></span></div><span class="gn-pay-card-name">BCA</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-bri" role="img" aria-label="Logo BRI"></span></div><span class="gn-pay-card-name">BRI</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-bni" role="img" aria-label="Logo BNI"></span></div><span class="gn-pay-card-name">BNI</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-mandiri" role="img" aria-label="Logo Mandiri"></span></div><span class="gn-pay-card-name">Mandiri</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-permata" role="img" aria-label="Logo PermataBank"></span></div><span class="gn-pay-card-name">PermataBank</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-cimb" role="img" aria-label="Logo CIMB Niaga"></span></div><span class="gn-pay-card-name">CIMB Niaga</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-danamon" role="img" aria-label="Logo Danamon"></span></div><span class="gn-pay-card-name">Danamon</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-maybank" role="img" aria-label="Logo Maybank"></span></div><span class="gn-pay-card-name">Maybank</span></div>
     </div>
   </div>
-  <p class="gn-footer-payment-note" data-i18n="footerPayNote">Metode yang dapat dipilih mengikuti aktivasi merchant dan ketersediaan di halaman pembayaran. Ongkos kirim dikonfirmasi secara terpisah.</p>
+  <div class="gn-pay-category">
+    <h3 class="gn-pay-category-title" data-i18n="footerPayWalletGroup">QRIS &amp; DOMPET DIGITAL</h3>
+    <div class="gn-pay-grid" role="list" aria-label="QRIS dan Dompet Digital">
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-qris" role="img" aria-label="Logo QRIS"></span></div><span class="gn-pay-card-name">QRIS</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-ovo" role="img" aria-label="Logo OVO"></span></div><span class="gn-pay-card-name">OVO</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-dana" role="img" aria-label="Logo DANA"></span></div><span class="gn-pay-card-name">DANA</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-shopeepay" role="img" aria-label="Logo ShopeePay"></span></div><span class="gn-pay-card-name">ShopeePay</span></div>
+        <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-sprite gn-pay-sprite-linkaja" role="img" aria-label="Logo LinkAja"></span></div><span class="gn-pay-card-name">LinkAja</span></div>
+    </div>
+  </div>
+  <div class="gn-pay-category gn-pay-category-intl">
+    <h3 class="gn-pay-category-title" data-i18n="footerPayIntlGroup">PEMBAYARAN INTERNASIONAL</h3>
+    <div class="gn-pay-grid" role="list" aria-label="Pembayaran Internasional">
+      <div class="gn-pay-card" role="listitem"><div class="gn-pay-logo-panel"><span class="gn-pay-paypal"><img src="/gn-payment-paypal.svg" alt="Logo PayPal" width="30" height="30" loading="lazy" decoding="async"/><strong>PayPal</strong></span></div><span class="gn-pay-card-name">PayPal</span></div>
+    </div>
+    <p class="gn-pay-intl-status" data-i18n="footerPayIntlBy">Jika aktif di checkout</p>
+  </div>
+  <div class="gn-pay-bottom"><p class="gn-footer-payment-note" data-i18n="footerPayNote">Metode yang dapat dipilih mengikuti aktivasi merchant dan ketersediaan di halaman pembayaran. Ongkos kirim dikonfirmasi secara terpisah.</p><div class="gn-pay-processor"><img src="/gn-payment-doku.svg" width="22" height="22" loading="lazy" decoding="async" alt="Logo DOKU"/><span data-i18n="footerPayLocalBy">Melalui DOKU Checkout</span></div></div>
 </section><small>© <span id="year">2026</span> GoO Ninks. Yogyakarta, Indonesia.</small></footer>
 <div class="overlay" hidden="" id="overlay"></div>
 <aside aria-hidden="true" aria-labelledby="cartTitle" aria-modal="true" class="cart-panel" id="cartPanel" role="dialog" tabindex="-1"><div class="panel-head"><h2 data-i18n="bagTitle" id="cartTitle">Tas Belanja</h2><button aria-label="Tutup" class="close-btn" id="closeCart" type="button">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-bottom"><div class="subtotal"><span data-i18n="subtotal">Subtotal (estimasi)</span><b id="cartTotal">Rp0</b></div><p data-i18n="cartNote">Isi data penerima lengkap sebelum pembayaran. Ongkos kirim dikonfirmasi terpisah oleh admin.</p><button class="primary-btn checkout-btn" data-i18n="checkout" id="checkoutBtn" type="button">Lanjutkan ke WhatsApp ↗</button><section aria-label="Pembayaran online" class="gn-midtrans-section" id="midtransArea">

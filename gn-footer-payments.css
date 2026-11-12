@@ -1,20 +1,70 @@
-/* Payment information across public GoO Ninks footers. */
-footer .gn-footer-payments{flex:0 0 100%;width:100%;min-width:0;margin-top:18px;padding-top:28px;border-top:1px solid rgba(255,255,255,.17);order:3}
-footer .gn-footer-payments-header{display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:19px}
-footer .gn-footer-payments h2{font-family:'DM Sans',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;line-height:1.5;color:#f8f4e8;margin:0}
-footer .gn-footer-payments .gn-footer-payments-intro{font-size:11px;color:#c5c4b8;line-height:1.7;margin:0}
-footer .gn-footer-payment-groups{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(200px,1fr);gap:14px}
-footer .gn-footer-payment-group{min-width:0;border:1px solid rgba(226,214,188,.2);background:rgba(255,255,255,.035);padding:20px 22px;border-radius:8px}
-footer .gn-footer-payment-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-footer .gn-footer-payment-head strong{font-size:12px;font-weight:700;color:#e7dac0;letter-spacing:.03em}
-footer .gn-footer-payment-head span{font-size:10px;color:#b3b6a7}
-footer .gn-footer-payment-list{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-footer .gn-footer-payment-logo{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#162f55;border:1px solid #ede8db;box-shadow:0 4px 10px rgba(0,0,0,.08);min-height:43px;padding:7px 13px;border-radius:6px;white-space:nowrap}
-footer .gn-footer-payment-logo img{display:block;width:30px;height:30px;object-fit:contain}
-footer .gn-footer-payment-logo strong{color:#202521;font-size:13px;letter-spacing:0}
-footer .gn-footer-payment-logo.paypal strong{font-size:16px;font-style:italic;color:#003087;letter-spacing:-.04em}
-footer .gn-footer-method{display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border:1px solid rgba(255,255,255,.21);border-radius:5px;color:#e6e7dc;font-size:11px;line-height:1.3;letter-spacing:.02em}
-footer .gn-footer-payment-note{font-size:11px;line-height:1.75;color:#bfc0b1;margin:16px 0 0}
-footer .gn-footer-payments + small{order:4;margin-top:14px}
-@media(max-width:850px){footer .gn-footer-payment-groups{grid-template-columns:1fr}footer .gn-footer-payment-group{padding:18px}}
-@media(max-width:480px){footer .gn-footer-payments{padding-top:22px}footer .gn-footer-payments-header{margin-bottom:15px;gap:5px}footer .gn-footer-payment-list{gap:8px}footer .gn-footer-payment-logo{min-height:40px;padding:6px 10px}footer .gn-footer-method{font-size:10px;min-height:32px;padding:6px 9px}}
+/* Compact payment footer inspired by supplied screenshot; one local sprite for 13 logos. */
+footer{background:#0b0e0c}
+footer .gn-footer-payments{
+  flex:0 0 100%;width:100%;min-width:0;order:3;margin:28px 0 0;padding:27px 0 0;
+  border-top:1px solid rgba(255,255,255,.14);background:transparent;color:#f4f4f1;
+}
+footer .gn-footer-payments-header{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 18px;flex-wrap:wrap;margin:0 0 20px}
+footer .gn-footer-payments h2{
+  font:700 clamp(20px,2.2vw,27px)/1.2 'DM Sans',Arial,sans-serif;letter-spacing:-.05em;
+  text-transform:none;color:#f3f4ef;margin:0;
+}
+footer .gn-footer-payments-intro{font-size:11px;line-height:1.5;color:#aeb3aa;margin:0}
+footer .gn-pay-category{margin-top:21px}
+footer .gn-pay-category-title{
+  margin:0 0 11px;font:700 10px/1.5 'DM Sans',Arial,sans-serif;
+  letter-spacing:.11em;color:#a5a9a2;text-transform:uppercase;
+}
+footer .gn-pay-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+footer .gn-pay-card{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  min-width:0;min-height:91px;padding:9px 10px 10px;
+  border:1px solid #2d332f;border-radius:10px;background:#101411;text-align:center;
+}
+footer .gn-pay-logo-panel{
+  width:100%;height:46px;display:flex;justify-content:center;align-items:center;
+  background:#fff;border:1px solid #e5e5e3;border-radius:6px;overflow:hidden;
+}
+footer .gn-pay-sprite{
+  display:block;flex:none;width:152px;height:48px;
+  background-image:url('/assets/gn-footer-payment-methods.png?v=20261112');
+  background-repeat:no-repeat;background-size:608px 192px;
+  transform:scale(.78);transform-origin:center center;
+}
+footer .gn-pay-sprite-bca{background-position:0 0}
+footer .gn-pay-sprite-bri{background-position:-152px 0}
+footer .gn-pay-sprite-bni{background-position:-304px 0}
+footer .gn-pay-sprite-mandiri{background-position:-456px 0}
+footer .gn-pay-sprite-permata{background-position:0 -48px}
+footer .gn-pay-sprite-cimb{background-position:-152px -48px}
+footer .gn-pay-sprite-danamon{background-position:-304px -48px}
+footer .gn-pay-sprite-maybank{background-position:-456px -48px}
+footer .gn-pay-sprite-qris{background-position:0 -96px}
+footer .gn-pay-sprite-ovo{background-position:-152px -96px}
+footer .gn-pay-sprite-dana{background-position:-304px -96px}
+footer .gn-pay-sprite-shopeepay{background-position:-456px -96px}
+footer .gn-pay-sprite-linkaja{background-position:0 -144px}
+footer .gn-pay-card-name{display:block;margin-top:8px;color:#e9ece7;font-size:10px;font-weight:700;line-height:1.45;overflow-wrap:anywhere}
+footer .gn-pay-category-intl{margin-top:23px}
+footer .gn-pay-paypal{display:flex;align-items:center;gap:7px;color:#003087}
+footer .gn-pay-paypal img{display:block;width:25px;height:25px;object-fit:contain}
+footer .gn-pay-paypal strong{font-size:16px;font-style:italic;letter-spacing:-.04em}
+footer .gn-pay-intl-status{margin:7px 0 0;font-size:10px;color:#a9afa8}
+footer .gn-pay-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 18px;margin-top:21px;padding-top:13px;border-top:1px solid rgba(255,255,255,.12)}
+footer .gn-footer-payment-note{flex:1 1 420px;margin:0;color:#aeb4a9;font-size:10px;line-height:1.7}
+footer .gn-pay-processor{display:flex;align-items:center;gap:8px;font-size:10px;color:#c7c9c2}
+footer .gn-pay-processor img{width:22px;height:22px;object-fit:contain}
+footer .gn-footer-payments+small{order:4;margin-top:2px}
+@media(max-width:1020px){footer .gn-pay-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){
+ footer .gn-footer-payments{margin-top:16px;padding-top:22px}
+ footer .gn-footer-payments-header{margin-bottom:17px}
+ footer .gn-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ footer .gn-pay-card{min-height:84px;padding:7px 7px 9px;border-radius:9px}
+ footer .gn-pay-logo-panel{height:42px}
+ footer .gn-pay-sprite{transform:scale(.70)}
+ footer .gn-pay-category{margin-top:17px}
+ footer .gn-pay-card-name{font-size:10px;margin-top:7px}
+}
+@media(max-width:370px){footer .gn-pay-grid{gap:7px}footer .gn-pay-card{padding:6px}footer .gn-pay-sprite{transform:scale(.66)}}
+@media(prefers-reduced-motion:reduce){footer .gn-pay-sprite{transition:none}}
