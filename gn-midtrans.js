@@ -40,7 +40,7 @@ const CHOICE_LABELS={
 };
 const updatePaymentChoice=()=>{
  const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
- const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:paypalReady?(paypalMode==='live'?'Available':'Sandbox'):t.soon};
+ const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:paypalReady?(paypalMode==='live'?'Available':'Sandbox'):(paypalAuthIssue?'API Error':t.soon)};
  for(const [id,val] of Object.entries(values)){const el=document.getElementById(id);if(el)el.textContent=val;}
  document.getElementById('gnPaymentChoiceClose')?.setAttribute('aria-label',t.close);
  if(paymentChoiceNotice&&!paymentChoiceNotice.hidden)paymentChoiceNotice.textContent=t.notice;
@@ -49,7 +49,7 @@ const h={'Content-Type':'application/json','apikey':cfg.publishableKey};
 const turnstileSiteKey='0x4AAAAAAF3Q3TmIn0l4k_PE';
 let turnstileToken='',turnstileWidget=null,turnstileLoad=null;
 let available=false,processing=false,modeKey='offMode',lastMessage='disabled',lastError=false;
-let paypalReady=false,paypalMode='sandbox',selectedMethod='local';
+let paypalReady=false,paypalMode='sandbox',paypalAuthIssue=false,selectedMethod='local';
 window.GN_MIDTRANS_READY=false;
 const updateCheckoutAction=()=>{
   if(primary){
@@ -160,7 +160,12 @@ document.getElementById('gnPaymentIntl')?.addEventListener('click',()=>{
   if(paypalReady){selectedMethod='paypal';return showLocalForm();}
   if(!paymentChoiceNotice)return;
   const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
-  paymentChoiceNotice.textContent=t.notice;
+  paymentChoiceNotice.textContent=paypalAuthIssue ? (
+    local()==='id'?'PayPal Live belum tersambung: Client ID atau Secret salah/tidak cocok. Admin perlu memperbarui API PayPal Live di Supabase. Belum ada pembayaran yang dibuat.':
+    local()==='nl'?'PayPal Live is niet verbonden: controleer Client ID en Secret in Supabase. Er is geen betaling aangemaakt.':
+    local()==='ko'?'PayPal Live API 인증에 실패했습니다. Supabase의 Client ID와 Secret을 확인하세요. 결제는 생성되지 않았습니다.':
+    'PayPal Live is not connected: the Client ID or Secret is invalid or mismatched. The store admin must update the Live API credentials in Supabase. No payment was created.'
+  ) : t.notice;
   paymentChoiceNotice.hidden=false;
   paymentChoiceNotice.scrollIntoView({behavior:'smooth',block:'nearest'});
 });
@@ -194,7 +199,8 @@ async function chooseGateway(){
     const p=await ready('gn-paypal-checkout');
     paypalReady=p.enabled===true && ['sandbox','live'].includes(p.mode);
     paypalMode=p.mode==='live'?'live':'sandbox';
-  }catch{paypalReady=false;}
+    paypalAuthIssue=p.configured===true && p.credentials_valid===false;
+  }catch{paypalReady=false;paypalAuthIssue=false;}
   // Do not hide an order form already opened while gateway availability was loading.
   updateCheckoutAction();updatePaymentChoice();updatePaymentForm();sync();
 }
