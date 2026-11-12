@@ -48,9 +48,29 @@ async function accessToken(c:ReturnType<typeof conf>){
   const r=await fetch(baseUrl(c)+"/v1/oauth2/token",{method:"POST",
     headers:{"Authorization":"Basic "+credentials,"Content-Type":"application/x-www-form-urlencoded"},
     body:"grant_type=client_credentials",signal:AbortSignal.timeout(14000)});
-  if(!r.ok)throw Error("Kredensial PayPal belum valid untuk mode "+c.mode+".");
+  if(!r.ok){
+    const data=await r.json().catch(()=>({}));
+    const code=typeof data.error==="string"?data.error.slice(0,60):"unknown";
+    console.warn("PayPal OAuth rejected",c.mode,r.status,code);
+    if(r.status===401 || code==="invalid_client")
+      throw Error("PayPal Live/Sandbox menolak Client ID dan Secret (HTTP 401). Pastikan kedua kredensial berasal dari aplikasi PayPal yang sama dan sesuai PAYPAL_MODE.");
+    throw Error("Autentikasi PayPal gagal (HTTP "+r.status+"). Hubungi pengelola dan periksa PayPal Developer.");
+  }
   const data=await r.json();if(typeof data.access_token!=="string")throw Error("Autentikasi PayPal gagal");
   return data.access_token as string;
+}
+// Readiness checks only request an OAuth token; they never create or capture a charge.
+let oauthHealth:{checked:number,mode:string,valid:boolean}|null=null;
+async function credentialsHealthy(c:ReturnType<typeof conf>):Promise<boolean>{
+  if(oauthHealth && oauthHealth.mode===c.mode && Date.now()-oauthHealth.checked<60000)return oauthHealth.valid;
+  try{
+    await accessToken(c);
+    oauthHealth={checked:Date.now(),mode:c.mode,valid:true};
+    return true;
+  }catch{
+    oauthHealth={checked:Date.now(),mode:c.mode,valid:false};
+    return false;
+  }
 }
 async function api(c:ReturnType<typeof conf>,token:string,path:string,method="GET",payload?:unknown,requestId?:string){
   const r=await fetch(baseUrl(c)+path,{method,headers:{
@@ -111,7 +131,12 @@ async function reconcile(client:any,c:ReturnType<typeof conf>,payment:any){
 Deno.serve(async(req:Request)=>{
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:headers(req)});
   const c=conf(),active=!!(c.clientId&&c.clientSecret&&dbUrl&&dbKey&&c.enabled&&Deno.env.get("TURNSTILE_SECRET_KEY"));
-  if(req.method==="GET")return respond(req,{provider:"paypal",enabled:active,mode:c.mode,currency:"USD",fx_source:"ExchangeRate-API",webhook_configured:!!Deno.env.get("PAYPAL_WEBHOOK_ID")});
+  if(req.method==="GET"){
+    const credentials_valid=active?await credentialsHealthy(c):false;
+    return respond(req,{provider:"paypal",enabled:active&&credentials_valid,
+      configured:active,credentials_valid,mode:c.mode,currency:"USD",
+      fx_source:"ExchangeRate-API",webhook_configured:!!Deno.env.get("PAYPAL_WEBHOOK_ID")});
+  }
   if(req.method!=="POST")return respond(req,{error:"Metode tidak diizinkan"},405);
   if(!originList.has(req.headers.get("origin")??""))return respond(req,{error:"Origin tidak diizinkan"},403);
   if(Number(req.headers.get("content-length")??"0")>12000)return respond(req,{error:"Data terlalu besar"},413);
@@ -159,6 +184,9 @@ Deno.serve(async(req:Request)=>{
   const fp=await hash(ip+"|"+c.clientSecret);
   let reserved=false,mayExist=false;
   try{
+    // Authenticate before reserving stock or writing an order. Invalid Live credentials
+    // must not create failed orders, stock holds or misleading payment sessions.
+    const token=await accessToken(c);
     // FX is confirmed before reserving stock. No hard-coded USD conversion in the browser.
     const fx=await fxRate();
     const {data:reservation,error:reservationError}=await client.rpc("gn_payment_reserve_v2",{
@@ -175,7 +203,6 @@ Deno.serve(async(req:Request)=>{
       fx_date:fx.date,mode:c.mode,status:"creating"
     });
     if(saveError)throw Error("Unable to save PayPal checkout");
-    const token=await accessToken(c);
     const link="https://gooninks.co.id/payment-status.html?order_id="+encodeURIComponent(id);
     const body={
       intent:"CAPTURE",
@@ -208,6 +235,8 @@ Deno.serve(async(req:Request)=>{
       try{await client.rpc("gn_payment_update_v1",{p_order_id:id,p_status:"failed",p_midtrans_status:"paypal_checkout_error"})}catch{}
     }
     console.error("PayPal checkout setup failed",id,e instanceof Error?e.message:"unknown");
-    return respond(req,{error:mayExist?"Sesi PayPal mungkin sudah dibuat. Hubungi admin menggunakan nomor pesanan "+id+" sebelum mencoba lagi.":"Gagal membuat pembayaran PayPal. Silakan coba lagi."},502);
+    const reason=e instanceof Error?e.message:"";
+    return respond(req,{error:mayExist?"Sesi PayPal mungkin sudah dibuat. Hubungi admin menggunakan nomor pesanan "+id+" sebelum mencoba lagi.":
+      reason.startsWith("PayPal Live/Sandbox menolak")?reason:"Gagal membuat pembayaran PayPal. Silakan coba lagi."},502);
   }
 });
