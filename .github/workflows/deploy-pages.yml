@@ -12,6 +12,7 @@ on:
       - special-price.html
       - pages.css
       - 'assets/gooninks-photo2-part-*.b64'
+      - assets/gn-footer-payment-methods.png
       - assets/gooninks-story-photo2.webp
       - assets/gooninks-kain-batik-asli-20261025.jpeg
       - assets/gooninks-kain-tenun-asli-20261025.jpeg
@@ -35,6 +36,9 @@ on:
       - gn-config.js
       - gn-public.js
       - gn-public.css
+      - gn-footer-payments.css
+      - gn-payment-doku.svg
+      - gn-payment-paypal.svg
       - storefront-plus.css
       - article.html
       - CNAME
@@ -58,23 +62,66 @@ jobs:
     steps:
       - name: Checkout website
         uses: actions/checkout@v4
-      - name: Cache optimized homepage video
+      # Cache the new Google Drive source when available. Restore the last known-good
+      # homepage video if Drive temporarily blocks downloads.
+      - name: Restore optimized homepage video
         id: hero-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: .hero-media
-          key: gooninks-hero-1MUhnX5UymowW1RTOWFBwDP5jwNwUNd75-v1
-      - name: Prepare optimized homepage video
+          key: gooninks-hero-1zFkZOrUPkFgNnokTdZQfRZua7Bc-sLwr-v1
+          restore-keys: |
+            gooninks-hero-1MUhnX5UymowW1RTOWFBwDP5jwNwUNd75-v1
+      - name: Prepare homepage video from latest Drive source
         if: steps.hero-cache.outputs.cache-hit != 'true'
+        id: rebuild-video
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p .hero-media
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
-          mkdir -p .hero-media
-          curl --fail --location --retry 3 --max-time 300 'https://drive.usercontent.google.com/download?id=1MUhnX5UymowW1RTOWFBwDP5jwNwUNd75&export=download&confirm=t' -o /tmp/gooninks-original.mp4
-          ffmpeg -hide_banner -loglevel error -i /tmp/gooninks-original.mp4 -an -vf 'scale=1280:-2,fps=24' -c:v libx264 -preset veryfast -crf 29 -movflags +faststart .hero-media/gooninks-home-background.mp4
-          ffmpeg -hide_banner -loglevel error -ss 5 -i /tmp/gooninks-original.mp4 -frames:v 1 -vf scale=1280:-2 .hero-media/gooninks-home-poster.jpg
+          VIDEO_ID='1zFkZOrUPkFgNnokTdZQfRZua7Bc-sLwr'
+          SOURCE=/tmp/gooninks-new-source.mp4
+          VALID=0
+          if curl --fail --location --retry 2 --max-time 300 \
+            "https://drive.usercontent.google.com/download?id=${VIDEO_ID}&export=download&confirm=t" \
+            -o "$SOURCE" && ffprobe -v error "$SOURCE" >/dev/null 2>&1; then
+            VALID=1
+          else
+            echo "::warning::Direct Google Drive media download failed; attempting shared-link download."
+            rm -f "$SOURCE"
+            python -m pip install --quiet gdown
+            if python -m gdown "https://drive.google.com/uc?id=${VIDEO_ID}" -O "$SOURCE" \
+               && ffprobe -v error "$SOURCE" >/dev/null 2>&1; then
+              VALID=1
+            fi
+          fi
+          if [ "$VALID" = 1 ]; then
+            echo 'New Google Drive source is a valid video. Optimizing for web.'
+            if ffmpeg -hide_banner -loglevel error -y -i "$SOURCE" -an \
+              -vf 'scale=1280:-2,fps=24' -c:v libx264 -preset veryfast -crf 29 \
+              -movflags +faststart /tmp/gooninks-optimized.mp4 \
+              && ffmpeg -hide_banner -loglevel error -y -ss 2 -i "$SOURCE" \
+              -frames:v 1 -vf scale=1280:-2 /tmp/gooninks-optimized.jpg; then
+              mv /tmp/gooninks-optimized.mp4 .hero-media/gooninks-home-background.mp4
+              mv /tmp/gooninks-optimized.jpg .hero-media/gooninks-home-poster.jpg
+              echo "fresh=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          if [ ! -s .hero-media/gooninks-home-background.mp4 ] || \
+             [ ! -s .hero-media/gooninks-home-poster.jpg ]; then
+            echo "::error::Video unavailable in Drive and no backup cache was found."
+            exit 1
+          fi
+          ffprobe -v error .hero-media/gooninks-home-background.mp4 >/dev/null
+          echo 'Optimized homepage video ready for deployment.'
+      - name: Save successfully optimized new video
+        if: steps.rebuild-video.outputs.fresh == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .hero-media
+          key: gooninks-hero-1zFkZOrUPkFgNnokTdZQfRZua7Bc-sLwr-v1
       - name: Validate storefront JavaScript
         shell: bash
         run: |
@@ -92,9 +139,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css gn-footer-payments.css gn-payment-doku.svg gn-payment-paypal.svg storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cp .hero-media/gooninks-home-background.mp4 .hero-media/gooninks-home-poster.jpg _site/assets/
+          cp assets/gn-footer-payment-methods.png _site/assets/
           cp assets/gooninks-story-photo2.webp _site/assets/
           cp assets/gooninks-kain-batik-asli-20261025.jpeg assets/gooninks-kain-tenun-asli-20261025.jpeg assets/gooninks-kain-lurik-asli-20261025.jpeg _site/assets/
           echo '61f552bc3345b736a6c786487ce409f75f295ae7b5e82bc9c1e84f15cfee5bb7  _site/assets/gooninks-kain-batik-asli-20261025.jpeg' | sha256sum --check
