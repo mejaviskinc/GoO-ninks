@@ -106,7 +106,8 @@
    const card=put(box,'article','gn-special-offer');
    const percentage=Number(p.discount_percent);
    const validDiscount=Number.isInteger(percentage)&&percentage>0&&percentage<=100;
-   put(card,'div','gn-special-offer-discount'+(validDiscount?'':' gn-special-symbol'),validDiscount?'-'+percentage+'%':'✳');
+   if(validDiscount)put(card,'div','gn-special-offer-discount','-'+percentage+'%');
+    else card.classList.add('gn-special-offer--no-discount');
    const body=put(card,'div','gn-special-offer-body');
    put(body,'h3','',p.title);
    if(p.description)put(body,'p','',p.description);
