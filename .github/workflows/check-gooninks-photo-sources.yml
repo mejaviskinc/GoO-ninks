@@ -1,0 +1,26 @@
+name: Verify GoO Ninks Drive photo sources
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/check-gooninks-photo-sources.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-photo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check public photo source access
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet "gdown>=5,<6"
+          gdown --id "1v82Akh7NyTN2nwrm-mvpkt8EqE0BAW-U" -O /tmp/gn-photo-check.jpg
+          file /tmp/gn-photo-check.jpg
+          python - <<'PY'
+          from PIL import Image
+          with Image.open("/tmp/gn-photo-check.jpg") as im:
+              im.verify()
+          print("Accessible verified JPEG")
+          PY
