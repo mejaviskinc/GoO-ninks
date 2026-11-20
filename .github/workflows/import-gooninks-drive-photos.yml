@@ -52,4 +52,17 @@ jobs:
             exit 0
           fi
           git commit -m "Publish all 322 optimized GoO Ninks studio photos"
-          git push origin HEAD:main
+          # The storefront may have received new commits while photos downloaded.
+          # Rebase the independent generated-image commit instead of force pushing.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo 'All optimized photos committed to the live repository'
+              exit 0
+            fi
+            echo "Repository updated during push, retry $attempt"
+            sleep 3
+          done
+          echo 'Could not publish optimized photos after three safe retries'
+          exit 1
