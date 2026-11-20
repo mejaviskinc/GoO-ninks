@@ -167,6 +167,13 @@ jobs:
           test "$(cat _site/CNAME)" = "gooninks.co.id"
           test -s _site/gn-product-gallery.css
           test -s _site/index.html
+          # Retired studio gallery must not return as part of a fresh deploy.
+          test ! -e _site/lookbook.html
+          test ! -e _site/lookbook.js
+          test ! -e _site/gn-studio-teaser.js
+          test ! -e _site/assets/gooninks-lookbook/manifest.json
+          ! grep -q 'lookbook.html' _site/index.html
+          ! grep -q 'lookbook.html' _site/collection.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
