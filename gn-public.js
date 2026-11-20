@@ -12,43 +12,131 @@
  ko:['특별 프로모션','스토리 & 기사','문의 보내기','문의 관련 연락에 동의합니다.','문의가 접수되었습니다.','이름','이메일 / WhatsApp','문의 사항']};
  let t=langTexts[loc()]||langTexts.id;
  let products=[];
+ const mediaLabels={
+  id:{previous:'Foto sebelumnya',next:'Foto berikutnya',photo:'Foto',video:'Video',gallery:'Galeri produk'},
+  en:{previous:'Previous photo',next:'Next photo',photo:'Photo',video:'Video',gallery:'Product gallery'},
+  nl:{previous:'Vorige foto',next:'Volgende foto',photo:'Foto',video:'Video',gallery:'Productgalerij'},
+  ko:{previous:'이전 사진',next:'다음 사진',photo:'사진',video:'동영상',gallery:'제품 갤러리'}
+ };
+ const labels=()=>mediaLabels[loc()]||mediaLabels.id;
+ const isVideoUrl=url=>/\.(mp4|webm)(?:[?#]|$)/i.test(url);
+ const productMedia=(row,imagesOnly=false)=>{
+  const raw=[row.image_url,...String(row.gallery_media||'').split(/\r?\n/)];
+  const urls=[...new Set(raw.map(x=>validUrl(String(x).trim())).filter(Boolean))];
+  return imagesOnly?urls.filter(url=>!isVideoUrl(url)):urls;
+ };
+ const swipe=(target,onMove)=>{
+  let startX=null,startY=null,swipedAt=0;
+  target.addEventListener('touchstart',e=>{
+   if(e.touches.length!==1)return;
+   startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+  },{passive:true});
+  target.addEventListener('touchend',e=>{
+   if(startX===null)return;
+   const dx=(e.changedTouches[0]?.clientX??startX)-startX;
+   const dy=(e.changedTouches[0]?.clientY??startY)-startY;
+   startX=null;startY=null;
+   if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)*1.2)return;
+   swipedAt=Date.now();onMove(dx<0?1:-1);
+  },{passive:true});
+  target.addEventListener('click',e=>{
+   if(Date.now()-swipedAt<550){e.preventDefault();e.stopPropagation()}
+  },true);
+ };
  function photos(){
-  document.querySelectorAll('#productGrid [data-open]').forEach(btn=>{
+  document.querySelectorAll('#productGrid .product').forEach(card=>{
+   const btn=card.querySelector('[data-open]');if(!btn)return;
    const row=products.find(x=>x.sku===btn.dataset.open);if(!row)return;
    const visual=btn.closest('.product-visual');if(!visual)return;
    const quick=visual.querySelector('[data-add]');if(quick)quick.hidden=!!row.preorder;
-   const url=validUrl(row.image_url);
-   if(url&&!visual.querySelector('.gn-photo')){const img=el('img','gn-photo');img.src=url;img.alt=row.product_name;img.loading='lazy';visual.prepend(img)}
-   if(!visual.querySelector('.gn-product-category')){
-    const badge=el('span','gn-product-category',row.preorder?'PREORDER · '+(row.category||'WASTRA'):(row.category||'WASTRA'));
-    visual.append(badge);
+   const category=visual.querySelector('.gn-product-category');
+   const categoryText=row.preorder?'PREORDER · '+(row.category||'WASTRA'):(row.category||'WASTRA');
+   if(category)category.textContent=categoryText;
+   else visual.append(el('span','gn-product-category',categoryText));
+   if(visual.querySelector('.gn-product-gallery'))return;
+   const urls=productMedia(row,true);
+   if(!urls.length)return;
+   visual.classList.add('gn-has-gallery');
+   const gallery=put(visual,'div','gn-product-gallery');
+   gallery.setAttribute('aria-label',labels().gallery+' '+row.product_name);
+   const img=put(gallery,'img','gn-photo');
+   img.loading='lazy';img.decoding='async';img.alt=row.product_name;
+   let active=0;
+   const counter=urls.length>1?put(gallery,'span','gn-product-counter'):null;
+   const render=()=>{
+    img.src=urls[active];img.alt=row.product_name+' — '+labels().photo+' '+(active+1);
+    if(counter)counter.textContent=(active+1)+' / '+urls.length;
+   };
+   if(urls.length>1){
+    const previous=put(gallery,'button','gn-product-arrow gn-product-arrow-prev','‹');
+    previous.type='button';previous.setAttribute('aria-label',labels().previous);
+    const next=put(gallery,'button','gn-product-arrow gn-product-arrow-next','›');
+    next.type='button';next.setAttribute('aria-label',labels().next);
+    const go=direction=>{active=(active+direction+urls.length)%urls.length;render()};
+    previous.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(-1)});
+    next.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(1)});
+    swipe(visual,go);
    }
+   render();
   });
  }
  function detailMedia(item){
   const visual=document.querySelector('#detailImage');if(!visual||!item)return;
-  const links=[item.image_url,...String(item.gallery_media||'').split(/\r?\n/)].map(validUrl).filter(Boolean);
-  const unique=[...new Set(links)];
-  let active=0;
-  const repaint=()=>{
-   visual.replaceChildren();const url=unique[active];
-   const isVideo=/\.(mp4|webm)(?:[?#]|$)/i.test(url);
-   const media=el(isVideo?'video':'img',isVideo?'gn-detail-video':'gn-detail-photo');
-   if(isVideo){media.src=url;media.controls=true;media.playsInline=true;media.preload='metadata';}
-   else{media.src=url;media.alt=item.product_name+' foto '+(active+1);media.loading='eager';}
-   visual.append(media);
-   if(unique.length>1){
-    const controls=el('div','gn-media-controls');
-    const prev=put(controls,'button','', '‹');prev.type='button';prev.setAttribute('aria-label','Media sebelumnya');
-    const count=put(controls,'span','',(active+1)+' / '+unique.length);
-    const next=put(controls,'button','','›');next.type='button';next.setAttribute('aria-label','Media berikutnya');
-    prev.addEventListener('click',()=>{active=(active-1+unique.length)%unique.length;repaint()});
-    next.addEventListener('click',()=>{active=(active+1)%unique.length;repaint()});
-    visual.append(controls);
+  const urls=productMedia(item);
+  if(urls.length){
+   visual.replaceChildren();
+   visual.classList.add('gn-detail-gallery-active');
+   const gallery=put(visual,'div','gn-detail-gallery');
+   gallery.setAttribute('role','region');
+   gallery.setAttribute('aria-label',labels().gallery+' '+item.product_name);
+   const stage=put(gallery,'div','gn-detail-stage');
+   const counter=urls.length>1?put(stage,'span','gn-detail-count'):null;
+   const thumbs=urls.length>1?put(gallery,'div','gn-detail-thumbnails'):null;
+   let active=0;
+   const thumbButtons=[];
+   const render=()=>{
+    stage.querySelector('.gn-detail-photo,.gn-detail-video')?.remove();
+    const url=urls[active],video=isVideoUrl(url);
+    const media=el(video?'video':'img',video?'gn-detail-video':'gn-detail-photo');
+    if(video){media.src=url;media.controls=true;media.playsInline=true;media.preload='metadata'}
+    else{media.src=url;media.alt=item.product_name+' — '+labels().photo+' '+(active+1);media.loading='eager';media.decoding='async'}
+    stage.prepend(media);
+    if(counter)counter.textContent=(active+1)+' / '+urls.length;
+    thumbButtons.forEach((b,i)=>{
+     b.classList.toggle('is-active',i===active);
+     b.setAttribute('aria-current',i===active?'true':'false');
+     b.setAttribute('aria-pressed',i===active?'true':'false');
+    });
+   };
+   const go=index=>{active=(index+urls.length)%urls.length;render()};
+   if(urls.length>1){
+    const previous=put(stage,'button','gn-detail-arrow gn-detail-arrow-prev','‹');
+    previous.type='button';previous.setAttribute('aria-label',labels().previous);
+    const next=put(stage,'button','gn-detail-arrow gn-detail-arrow-next','›');
+    next.type='button';next.setAttribute('aria-label',labels().next);
+    previous.addEventListener('click',()=>go(active-1));
+    next.addEventListener('click',()=>go(active+1));
+    urls.forEach((url,i)=>{
+     const b=put(thumbs,'button','gn-detail-thumb');
+     b.type='button';
+     b.setAttribute('aria-label',(isVideoUrl(url)?labels().video:labels().photo)+' '+(i+1));
+     if(isVideoUrl(url))put(b,'span','gn-detail-thumb-video','▶');
+     else{const image=put(b,'img');image.src=url;image.alt='';image.loading='lazy';image.decoding='async'}
+     b.addEventListener('click',()=>go(i));
+     thumbButtons.push(b);
+    });
+    swipe(stage,delta=>go(active+delta));
+    gallery.tabIndex=0;
+    gallery.addEventListener('keydown',e=>{
+     if(e.target.tagName==='VIDEO')return;
+     if(e.key==='ArrowRight'){e.preventDefault();go(active+1)}
+     if(e.key==='ArrowLeft'){e.preventDefault();go(active-1)}
+    });
    }
-  };
-  if(unique.length)repaint();
-  const content=document.querySelector('#detailModal .detail-content');
+   render();
+  }else{
+   visual.classList.remove('gn-detail-gallery-active');
+  }
   const buy=document.getElementById('addToCartBtn');
   let preorder=document.getElementById('gnPreorderInquiry');
   if(!preorder){preorder=el('a','primary-btn gn-preorder-inquiry','Tanyakan Preorder via WhatsApp ↗');preorder.id='gnPreorderInquiry';preorder.target='_blank';preorder.rel='noopener noreferrer';buy?.insertAdjacentElement('afterend',preorder)}
