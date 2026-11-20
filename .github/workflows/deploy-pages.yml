@@ -36,6 +36,7 @@ on:
       - gn-config.js
       - gn-public.js
       - gn-public.css
+      - gn-product-gallery.css
       - gn-footer-payments.css
       - gn-payment-doku.svg
       - gn-payment-paypal.svg
@@ -139,7 +140,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css gn-footer-payments.css gn-payment-doku.svg gn-payment-paypal.svg storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css gn-product-gallery.css gn-footer-payments.css gn-payment-doku.svg gn-payment-paypal.svg storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
           cp .hero-media/gooninks-home-background.mp4 .hero-media/gooninks-home-poster.jpg _site/assets/
           cp assets/gn-footer-payment-methods.png _site/assets/
@@ -156,6 +157,7 @@ jobs:
           test -s _site/assets/gooninks-hero-editorial-1086.webp
           touch _site/.nojekyll
           test "$(cat _site/CNAME)" = "gooninks.co.id"
+          test -s _site/gn-product-gallery.css
           test -s _site/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
