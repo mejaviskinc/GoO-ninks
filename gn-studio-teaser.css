@@ -1,0 +1,18 @@
+/* Authentic GoO Ninks studio imagery surfaced directly on the storefront. */
+.gn-studio-showcase{margin:42px 0 50px;padding:0;min-width:0}
+.gn-studio-showcase-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:15px;margin:0 0 20px}
+.gn-studio-showcase-label{font-size:10px;letter-spacing:.18em;color:#717b67;font-weight:700;margin:0 0 8px}
+.gn-studio-showcase-title{font:400 clamp(29px,3.8vw,45px)/1.13 'Playfair Display',Georgia,serif;letter-spacing:-.025em;margin:0}
+.gn-studio-showcase-title em{color:#777b65;font-weight:400}
+.gn-studio-showcase-more{font-size:11px;font-weight:600;white-space:nowrap;padding-bottom:4px;border-bottom:1px solid #303a31}
+.gn-studio-cover-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(8px,1vw,16px)}
+.gn-studio-cover{display:block;min-width:0;text-decoration:none;color:inherit}
+.gn-studio-cover-frame{display:block;overflow:hidden;aspect-ratio:3/4;background:#eae8e2;position:relative}
+.gn-studio-cover-frame img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+.gn-studio-cover:hover img,.gn-studio-cover:focus-visible img{transform:scale(1.045)}
+.gn-studio-cover-name{display:block;font:400 clamp(15px,1.5vw,19px)/1.22 'Playfair Display',Georgia,serif;margin:10px 0 2px}
+.gn-studio-cover-count{display:block;font-size:10px;color:#827d73;letter-spacing:.03em}
+.gn-studio-cover-index{position:absolute;top:9px;left:9px;font-size:9px;letter-spacing:.1em;color:#343a2f;background:#faf9f0e6;padding:4px 7px}
+@media(max-width:1000px){.gn-studio-cover-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 12px}}
+@media(max-width:600px){.gn-studio-showcase{margin:32px 0 36px}.gn-studio-cover-list{display:flex;gap:11px;overflow-x:auto;scrollbar-width:thin;scroll-snap-type:x proximity;padding-bottom:10px}.gn-studio-cover{width:38%;min-width:38%;scroll-snap-align:start}.gn-studio-cover-name{font-size:16px}.gn-studio-showcase-title{font-size:30px}.gn-studio-showcase-more{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.gn-studio-cover-frame img{transition:none}.gn-studio-cover:hover img{transform:none}}
