@@ -13,6 +13,7 @@ import re
 import sys
 import tempfile
 import time
+import requests
 from pathlib import Path
 
 import gdown
@@ -23,7 +24,7 @@ SOURCE = ROOT / "scripts" / "gooninks-drive-photo-manifest.json"
 OUTPUT = ROOT / "assets" / "gooninks-lookbook"
 SIZE = (1050, 1420)
 WEBP_QUALITY = 76
-WORKERS = 4
+WORKERS = 2
 
 
 def target_name(filename):
@@ -41,13 +42,32 @@ def process(entry):
         return (group_id, index, name, final, "cached")
     final.parent.mkdir(parents=True, exist_ok=True)
     error_message = "Unknown download error"
-    for attempt in range(1, 4):
+    for attempt in range(1, 6):
         with tempfile.TemporaryDirectory(prefix="gn-drive-") as scratch:
             original = Path(scratch) / "source.jpg"
             try:
                 # The shared Drive links have been tested in GitHub Actions.
-                result = gdown.download(id=file_id, output=str(original), quiet=True)
+                result = None
+                try:
+                    result = gdown.download(id=file_id, output=str(original), quiet=True)
+                except Exception as exc:
+                    print(f"gdown exception for {name}: {str(exc)[:100]}", flush=True)
                 if not result or not original.is_file():
+                    # Google sometimes rate-limits its older Drive link resolver.
+                    # Use the official direct download host as a fallback.
+                    direct = "https://drive.usercontent.google.com/download"
+                    with requests.get(direct, params={
+                        "id": file_id, "export": "download", "confirm": "t"
+                    }, timeout=80, stream=True) as response:
+                        response.raise_for_status()
+                        content_type = response.headers.get("content-type", "")
+                        if "text/html" in content_type:
+                            raise RuntimeError("Drive returned an HTML permission/quota page")
+                        with open(original, "wb") as out:
+                            for chunk in response.iter_content(1024 * 256):
+                                if chunk:
+                                    out.write(chunk)
+                if not original.is_file():
                     raise RuntimeError("Public Drive download returned no file")
                 with Image.open(original) as source:
                     image = ImageOps.exif_transpose(source)
@@ -65,8 +85,8 @@ def process(entry):
                     final.with_suffix(".tmp").unlink(missing_ok=True)
                 except OSError:
                     pass
-                if attempt < 3:
-                    time.sleep(attempt * 2)
+                if attempt < 5:
+                    time.sleep((attempt ** 2) * 3)
     raise RuntimeError(f"Session {group_id}, {name} ({file_id}): {error_message}")
 
 
