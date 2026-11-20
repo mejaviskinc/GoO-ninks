@@ -5,12 +5,6 @@ on:
     paths:
       - index.html
       - collection.html
-      - lookbook.html
-      - lookbook.js
-      - lookbook.css
-      - gn-studio-teaser.css
-      - gn-studio-teaser.js
-      - 'assets/gooninks-lookbook/**'
       - story.html
       - wastra.html
       - journal.html
@@ -135,8 +129,6 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check gn-public.js
-          node --check lookbook.js
-          node --check gn-studio-teaser.js
           node --check gn-midtrans.js
           node --check gn-tracking.js
           test -s tracking.html
@@ -148,19 +140,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp index.html collection.html lookbook.html lookbook.js lookbook.css gn-studio-teaser.css gn-studio-teaser.js story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css gn-product-gallery.css gn-footer-payments.css gn-payment-doku.svg gn-payment-paypal.svg storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
+          cp index.html collection.html story.html wastra.html journal.html contact.html special-price.html pages.css styles.css app.js gn-midtrans.js gn-payment-status.js payment-status.html tracking.html gn-tracking.js article.html gn-public.js gn-public.css gn-product-gallery.css gn-footer-payments.css gn-payment-doku.svg gn-payment-paypal.svg storefront-plus.css gn-config.js brand-loader.css brand-loader.js logo-gooninks.svg gooninks-horizontal-logo.svg favicon.svg CNAME robots.txt sitemap.xml _site/
           mkdir -p _site/assets
-          if [ -f assets/gooninks-lookbook/manifest.json ]; then
-            mkdir -p _site/assets/gooninks-lookbook
-            cp -r assets/gooninks-lookbook/. _site/assets/gooninks-lookbook/
-            python - <<'PY'
-          import json
-          from pathlib import Path
-          data=json.loads(Path('_site/assets/gooninks-lookbook/manifest.json').read_text())
-          assert data['total_photos']==322
-          assert all(Path('_site'+photo['src']).is_file() for group in data['groups'] for photo in group['images'])
-          print('322 photo lookbook assets verified in GitHub Pages artifact')
-          PY
+          # Preserve direct product image URLs but do not publish the retired
+          # lookbook's gallery page, metadata or UI assets.
+          if [ -d assets/gooninks-lookbook ]; then
+            find assets/gooninks-lookbook -type f -name '*.webp' -print0 | while IFS= read -r -d '' file; do
+              mkdir -p "_site/$(dirname "$file")"
+              cp "$file" "_site/$file"
+            done
           fi
           cp .hero-media/gooninks-home-background.mp4 .hero-media/gooninks-home-poster.jpg _site/assets/
           cp assets/gn-footer-payment-methods.png _site/assets/
@@ -178,11 +166,6 @@ jobs:
           touch _site/.nojekyll
           test "$(cat _site/CNAME)" = "gooninks.co.id"
           test -s _site/gn-product-gallery.css
-          test -s _site/lookbook.html
-          test -s _site/lookbook.js
-          test -s _site/lookbook.css
-          test -s _site/gn-studio-teaser.css
-          test -s _site/gn-studio-teaser.js
           test -s _site/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
