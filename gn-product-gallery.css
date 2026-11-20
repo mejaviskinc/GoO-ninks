@@ -1,0 +1,52 @@
+/* GoO Ninks product photography & gallery. Supports Supabase image_url/gallery_media. */
+.product-visual.gn-has-gallery {background:#eae6df}
+.product-visual.gn-has-gallery .look-shape,
+.product-visual.gn-has-gallery .look-watermark {display:none}
+.gn-product-gallery{position:absolute;inset:0;z-index:2;pointer-events:none}
+.gn-product-gallery>.gn-photo{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;pointer-events:none;transition:filter .25s ease,transform .4s ease}
+.product:hover .gn-product-gallery>.gn-photo{transform:scale(1.025)}
+.gn-product-arrow{position:absolute;z-index:3;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:35px;height:39px;border:1px solid #ffffff70;border-radius:999px;background:#faf8f2de;color:#262820;font:400 27px/1 Arial,sans-serif;box-shadow:0 3px 15px #0000001a;cursor:pointer;pointer-events:auto;opacity:0;transition:opacity .2s ease,background .2s ease}
+.gn-product-arrow:hover,.gn-product-arrow:focus-visible{background:#fff;opacity:1}
+.gn-product-arrow-prev{left:9px}
+.gn-product-arrow-next{right:9px}
+.product:hover .gn-product-arrow,.product:focus-within .gn-product-arrow{opacity:1}
+.gn-product-counter{position:absolute;bottom:14px;left:12px;z-index:2;padding:5px 9px;border-radius:99px;background:#181b17b8;color:#fff;font:600 10px/1.4 'DM Sans',sans-serif;letter-spacing:.09em;pointer-events:none}
+.product-visual.gn-has-gallery .product-label{z-index:3}
+.product-visual.gn-has-gallery .gn-product-category{z-index:3}
+.product-visual.gn-has-gallery .quick-btn{z-index:4}
+.detail-image.gn-detail-gallery-active{min-height:0;max-height:none;overflow:visible;background:#f1ede7}
+.gn-detail-gallery{display:flex;flex-direction:column;width:100%;min-width:0}
+.gn-detail-stage{position:relative;height:min(66vh,590px);min-height:340px;background:#f0ece5;overflow:hidden;touch-action:pan-y}
+.gn-detail-stage>.gn-detail-photo,.gn-detail-stage>.gn-detail-video{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#f0ece5}
+.gn-detail-stage>.gn-detail-video{background:#141414}
+.gn-detail-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;display:grid;place-items:center;width:43px;height:43px;border:1px solid #ffffff80;border-radius:50%;background:#faf8f2e6;color:#282a25;font:400 30px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 4px 20px #00000017}
+.gn-detail-arrow-prev{left:12px}
+.gn-detail-arrow-next{right:12px}
+.gn-detail-arrow:hover,.gn-detail-arrow:focus-visible{background:#fff;outline-offset:2px}
+.gn-detail-count{position:absolute;z-index:3;right:13px;top:12px;background:#141714b8;color:#fff;padding:7px 11px;border-radius:99px;font:600 11px/1.2 'DM Sans',sans-serif;letter-spacing:.08em}
+.gn-detail-thumbnails{display:flex;gap:9px;padding:13px 12px 15px;overflow-x:auto;scrollbar-width:thin;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;background:#fbf9f4}
+.gn-detail-thumb{width:59px;height:72px;min-width:59px;padding:0;border:2px solid transparent;background:#e6e2da;border-radius:4px;overflow:hidden;scroll-snap-align:start;cursor:pointer;opacity:.7;transition:opacity .2s,border-color .2s}
+.gn-detail-thumb img{width:100%;height:100%;object-fit:cover}
+.gn-detail-thumb.is-active,.gn-detail-thumb:hover,.gn-detail-thumb:focus-visible{opacity:1;border-color:#75674a}
+.gn-detail-thumb-video{display:grid;height:100%;place-items:center;color:#2e332a;font-size:23px}
+@media(hover:none){
+ .gn-product-arrow{opacity:.95;width:30px;height:34px;font-size:24px}
+}
+@media(max-width:800px){
+ .product-visual.gn-has-gallery .product-label{max-width:65%}
+ .gn-product-counter{bottom:10px;left:8px;padding:4px 7px;font-size:9px}
+ .gn-product-arrow{width:28px;height:34px;font-size:23px}
+ .gn-product-arrow-prev{left:5px}
+ .gn-product-arrow-next{right:5px}
+ .detail-image.gn-detail-gallery-active{max-height:none;min-height:0}
+ .gn-detail-stage{height:min(57vh,465px);min-height:275px}
+ .gn-detail-arrow{width:37px;height:37px;font-size:26px}
+ .gn-detail-arrow-prev{left:9px}
+ .gn-detail-arrow-next{right:9px}
+ .gn-detail-thumbnails{gap:7px;padding:10px}
+ .gn-detail-thumb{width:53px;min-width:53px;height:64px}
+}
+@media(prefers-reduced-motion:reduce){
+ .gn-product-gallery>.gn-photo,.gn-product-arrow,.gn-detail-thumb{transition:none}
+ .product:hover .gn-product-gallery>.gn-photo{transform:none}
+}
