@@ -50,3 +50,13 @@
  .gn-product-gallery>.gn-photo,.gn-product-arrow,.gn-detail-thumb{transition:none}
  .product:hover .gn-product-gallery>.gn-photo{transform:none}
 }
+
+/* Render the saved main product image immediately after inventory refresh.
+   The multi-image slider from gn-public.js takes precedence when available. */
+.product-visual.gn-photo-inline{background:#ece9e3}
+.product-visual.gn-photo-inline .look-shape,
+.product-visual.gn-photo-inline .look-watermark{display:none}
+.product-visual .gn-product-main{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block;object-fit:cover;object-position:center;background:#ece9e3}
+.product-visual.gn-photo-inline .product-label,
+.product-visual.gn-photo-inline .product-open,
+.product-visual.gn-photo-inline .quick-btn{z-index:4}
