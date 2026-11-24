@@ -50,9 +50,10 @@
    const visual=btn.closest('.product-visual');if(!visual)return;
    const quick=visual.querySelector('[data-add]');if(quick)quick.hidden=!!row.preorder;
    const category=visual.querySelector('.gn-product-category');
-   const categoryText=row.preorder?'PREORDER · '+(row.category||'WASTRA'):(row.category||'WASTRA');
-   if(category)category.textContent=categoryText;
-   else visual.append(el('span','gn-product-category',categoryText));
+   if(row.preorder){
+    if(category)category.textContent='PREORDER';
+    else visual.append(el('span','gn-product-category','PREORDER'));
+   }else if(category)category.remove();
    if(visual.querySelector('.gn-product-gallery'))return;
    const urls=productMedia(row,true);
    if(!urls.length)return;
