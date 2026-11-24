@@ -43,17 +43,18 @@
    if(Date.now()-swipedAt<550){e.preventDefault();e.stopPropagation()}
   },true);
  };
+ const cardSlides=new WeakMap();
+ const autoMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
  function photos(){
   document.querySelectorAll('#productGrid .product').forEach(card=>{
    const btn=card.querySelector('[data-open]');if(!btn)return;
    const row=products.find(x=>x.sku===btn.dataset.open);if(!row)return;
    const visual=btn.closest('.product-visual');if(!visual)return;
-   const quick=visual.querySelector('[data-add]');if(quick)quick.hidden=!!row.preorder;
-   const category=visual.querySelector('.gn-product-category');
-   if(row.preorder){
-    if(category)category.textContent='PREORDER';
-    else visual.append(el('span','gn-product-category','PREORDER'));
-   }else if(category)category.remove();
+   const quick=card.querySelector('[data-add]');if(quick)quick.hidden=!!row.preorder;
+   visual.querySelectorAll('.product-label,.gn-product-category').forEach(node=>node.remove());
+   let preorder=card.querySelector('.gn-card-preorder');
+   if(row.preorder&&!preorder){preorder=el('span','gn-card-preorder','PREORDER');card.querySelector('.gn-clean-meta')?.append(preorder)}
+   if(preorder)preorder.hidden=!row.preorder;
    if(visual.querySelector('.gn-product-gallery'))return;
    const urls=productMedia(row,true);
    if(!urls.length)return;
@@ -62,25 +63,39 @@
    gallery.setAttribute('aria-label',labels().gallery+' '+row.product_name);
    const img=put(gallery,'img','gn-photo');
    img.loading='lazy';img.decoding='async';img.alt=row.product_name;
-   let active=0;
-   const counter=urls.length>1?put(gallery,'span','gn-product-counter'):null;
+   let active=0,lastChange=Date.now(),loading=false;
    const render=()=>{
     img.src=urls[active];img.alt=row.product_name+' — '+labels().photo+' '+(active+1);
-    if(counter)counter.textContent=(active+1)+' / '+urls.length;
+   };
+   const go=direction=>{
+    if(loading)return;
+    lastChange=Date.now();
+    const index=(active+direction+urls.length)%urls.length;
+    const next=new Image();loading=true;
+    next.onload=()=>{loading=false;if(!gallery.isConnected)return;active=index;render()};
+    next.onerror=()=>{loading=false;active=index};
+    next.src=urls[index];
    };
    if(urls.length>1){
-    const previous=put(gallery,'button','gn-product-arrow gn-product-arrow-prev','‹');
-    previous.type='button';previous.setAttribute('aria-label',labels().previous);
-    const next=put(gallery,'button','gn-product-arrow gn-product-arrow-next','›');
-    next.type='button';next.setAttribute('aria-label',labels().next);
-    const go=direction=>{active=(active+direction+urls.length)%urls.length;render()};
-    previous.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(-1)});
-    next.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(1)});
     swipe(visual,go);
+    btn.addEventListener('keydown',e=>{
+     if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?1:-1)}
+    });
+    cardSlides.set(gallery,now=>{if(now-lastChange>=2000)go(1)});
    }
    render();
   });
  }
+ // A single timer is shared by all visible cards; removed cards never retain timers.
+ window.setInterval(()=>{
+  if(document.hidden||autoMotion.matches||document.querySelector('#detailModal.open'))return;
+  const now=Date.now();
+  document.querySelectorAll('#productGrid .gn-product-gallery').forEach(gallery=>{
+   if(gallery.closest('.product')?.hidden)return;
+   const rect=gallery.getBoundingClientRect();
+   if(rect.width&&rect.height&&rect.bottom>0&&rect.top<window.innerHeight)cardSlides.get(gallery)?.(now);
+  });
+ },200);
  function detailMedia(item){
   const visual=document.querySelector('#detailImage');if(!visual||!item)return;
   const urls=productMedia(item);

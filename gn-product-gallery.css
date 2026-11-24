@@ -60,3 +60,13 @@
 .product-visual.gn-photo-inline .product-label,
 .product-visual.gn-photo-inline .product-open,
 .product-visual.gn-photo-inline .quick-btn{z-index:4}
+
+/* Clean product cards: no labels, controls or hover effects cover real photos. */
+#productGrid .product-visual :is(.product-label,.gn-product-category,.gn-product-arrow,.gn-product-counter,.quick-btn){display:none!important}
+#productGrid .product-visual:is(.gn-has-gallery,.gn-photo-inline) :is(.look-shape,.look-watermark){display:none!important}
+#productGrid .product-visual:is(.gn-has-gallery,.gn-photo-inline) .product-open{z-index:5;background:transparent!important;box-shadow:none;border:0;font-size:0;color:transparent}
+#productGrid .product-visual :is(.gn-photo,.gn-product-main){transform:none!important;filter:none!important}
+#productGrid .gn-clean-meta{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;min-height:38px}
+#productGrid .gn-clean-buy{position:static;inset:auto;z-index:auto;width:34px;height:34px;flex:0 0 34px;box-shadow:none;border:1px solid #ded9ce;background:#faf9f5;color:#262820;font-size:20px}
+#productGrid .gn-clean-buy[hidden],#productGrid .gn-card-preorder[hidden]{display:none!important}
+#productGrid .gn-card-preorder{font-size:10px;letter-spacing:.07em;color:#75674a}
