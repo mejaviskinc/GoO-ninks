@@ -180,30 +180,61 @@ jobs:
         with:
           enablement: true
       - name: Upload site artifact
+        id: pages_artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           path: _site
-      - name: Verify Pages artifact is visible
+      - name: Deploy public site by exact artifact ID
+        id: deployment
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          ARTIFACT_ID: ${{ steps.pages_artifact.outputs.artifact_id }}
         run: |
           set -euo pipefail
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          # Confirm the artifact belongs to this exact workflow and revision.
           for attempt in $(seq 1 12); do
-            if count=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=$ARTIFACT_NAME" --jq '.total_count'); then
-              if [ "$count" = 1 ]; then
-                echo 'Unique Pages artifact is available.'
-                exit 0
-              fi
+            if metadata=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" 2>/dev/null) &&
+              jq -e --arg run "$GITHUB_RUN_ID" --arg sha "$GITHUB_SHA" '
+                (.workflow_run.id | tostring) == $run and
+                .workflow_run.head_sha == $sha and .expired == false
+              ' <<<"$metadata" >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 12 ]; then
+              echo '::error::Uploaded artifact could not be verified.'
+              exit 1
             fi
             sleep 5
           done
-          echo '::error::Pages artifact did not become uniquely visible.'
+          # Use the same GitHub Pages REST endpoint and OIDC authentication
+          # as deploy-pages, bypassing only its unreliable name-based lookup.
+          oidc=$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -er '.value')
+          echo "::add-mask::$oidc"
+          response=$(jq -n --argjson artifact "$ARTIFACT_ID" \
+            --arg sha "$GITHUB_SHA" --arg token "$oidc" \
+            '{artifact_id:$artifact,pages_build_version:$sha,oidc_token:$token}' |
+            gh api --method POST "repos/$GITHUB_REPOSITORY/pages/deployments" --input -)
+          unset oidc
+          deployment_id=$(jq -er '(.id // (.status_url | split("/") | last)) | tostring' <<<"$response")
+          page_url=$(jq -r '.page_url // "https://gooninks.co.id/"' <<<"$response")
+          echo "page_url=$page_url" >> "$GITHUB_OUTPUT"
+          echo "Created Pages deployment $deployment_id for artifact $ARTIFACT_ID"
+          for attempt in $(seq 1 120); do
+            if status=$(gh api "repos/$GITHUB_REPOSITORY/pages/deployments/$deployment_id" --jq '.status'); then
+              echo "Pages status: $status"
+              case "$status" in
+                succeed) echo "status=succeed" >> "$GITHUB_OUTPUT"; exit 0 ;;
+                deployment_failed|deployment_perms_error|deployment_content_failed|deployment_cancelled|deployment_lost)
+                  echo "::error::Pages deployment failed: $status"; exit 1 ;;
+              esac
+            fi
+            sleep 5
+          done
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/deployments/$deployment_id/cancel" >/dev/null || true
+          echo '::error::Pages deployment timed out.'
           exit 1
-      - name: Deploy public site
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
