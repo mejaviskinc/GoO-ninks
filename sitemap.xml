@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 <url><loc>https://gooninks.co.id/</loc></url>
 <url><loc>https://gooninks.co.id/collection.html</loc></url>
 <url><loc>https://gooninks.co.id/special-price.html</loc></url>
-<url><loc>https://gooninks.co.id/story.html</loc></url>
+<url><loc>https://gooninks.co.id/story.html</loc><lastmod>2026-11-26</lastmod><image:image><image:loc>https://gooninks.co.id/assets/gooninks-story-photo2.webp</image:loc></image:image><image:image><image:loc>https://gooninks.co.id/assets/gooninks-lookbook/01/dsc09317.webp</image:loc></image:image><image:image><image:loc>https://gooninks.co.id/assets/gooninks-lookbook/01/dsc09319.webp</image:loc></image:image><image:image><image:loc>https://gooninks.co.id/assets/gooninks-lookbook/01/dsc09320.webp</image:loc></image:image><image:image><image:loc>https://gooninks.co.id/assets/gooninks-lookbook/01/dsc09322.webp</image:loc></image:image></url>
 <url><loc>https://gooninks.co.id/wastra.html</loc></url>
 <url><loc>https://gooninks.co.id/journal.html</loc></url>
 <url><loc>https://gooninks.co.id/contact.html</loc></url>
