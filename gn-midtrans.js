@@ -40,8 +40,16 @@ const CHOICE_LABELS={
 };
 const updatePaymentChoice=()=>{
  const t=CHOICE_LABELS[local()]||CHOICE_LABELS.id;
- const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:paypalReady?(paypalMode==='live'?'Available':'Sandbox'):(paypalAuthIssue?'API Error':t.soon)};
+ const values={gnPaymentChoiceTitle:t.title,gnPaymentChoiceSubtitle:t.subtitle,gnPaymentLocalTitle:t.local,gnPaymentLocalDesc:t.localDesc.replace('{provider}',providerName()),gnPaymentIntlTitle:t.international,gnPaymentIntlDesc:t.internationalDesc,gnPaymentIntlSoon:paypalReady?(paypalMode==='live'?'›':'Sandbox'):(paypalAuthIssue?'API Error':t.soon)};
  for(const [id,val] of Object.entries(values)){const el=document.getElementById(id);if(el)el.textContent=val;}
+ const livePaypal=paypalReady&&paypalMode==='live';
+ const intlStatus=document.getElementById('gnPaymentIntlSoon');
+ if(intlStatus){
+   intlStatus.classList.toggle('gn-choice-arrow',livePaypal);
+   intlStatus.classList.toggle('gn-choice-coming',!livePaypal);
+   if(livePaypal)intlStatus.setAttribute('aria-hidden','true');else intlStatus.removeAttribute('aria-hidden');
+ }
+ document.getElementById('gnPaymentIntl')?.setAttribute('aria-describedby',livePaypal?'gnPaymentIntlDesc':'gnPaymentIntlDesc gnPaymentIntlSoon');
  document.getElementById('gnPaymentChoiceClose')?.setAttribute('aria-label',t.close);
  if(paymentChoiceNotice&&!paymentChoiceNotice.hidden)paymentChoiceNotice.textContent=t.notice;
 };
